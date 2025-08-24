@@ -54,11 +54,32 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, type Ref, watch } from 'vue'
-import * as THREE from 'three'
-import gsap from 'gsap'
-// import { useRouter } from 'vue-router' // Uncomment if you use vue-router
+// 精准导入 THREE 的类
+import {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  Mesh,
+  MeshStandardMaterial,
+  MeshBasicMaterial,
+  DodecahedronGeometry,
+  Object3D,
+  Vector3,
+  DirectionalLight,
+  AmbientLight,
+  BufferGeometry,
+  BufferAttribute,
+  Points,
+  PointsMaterial,
+  TorusGeometry,
+  Color,
+  SphereGeometry
+} from 'three'
+// 精准导入 gsap
+import { gsap } from 'gsap'
+// import { useRouter } from 'vue-router' // 如果使用路由
 
-// const router = useRouter() // Uncomment if you use vue-router
+// const router = useRouter() // 如果使用路由
 
 interface ContentItem {
   title: string
@@ -73,13 +94,12 @@ const mainContainerRef: Ref<HTMLDivElement | null> = ref(null)
 const canvasRef: Ref<HTMLCanvasElement | null> = ref(null)
 const textContainerRef: Ref<HTMLDivElement | null> = ref(null)
 
-// --- 内容数据 ---
 const contentData = ref<ContentItem[]>([
   {
     title: 'Map',
     description: 'this is a description for map',
     targetRotationY: 0,
-    color: '#1e293b', // slate-800
+    color: '#1e293b',
     buttonText: 'Explore Map',
     path: '/p1',
   },
@@ -87,7 +107,7 @@ const contentData = ref<ContentItem[]>([
     title: 'Job',
     description: 'this is a description for job',
     targetRotationY: (2 * Math.PI) / 3,
-    color: '#312e81', // indigo-900
+    color: '#312e81',
     buttonText: 'Find Jobs',
     path: '/p2',
   },
@@ -95,7 +115,7 @@ const contentData = ref<ContentItem[]>([
     title: 'AI',
     description: 'this is a description for AI',
     targetRotationY: (4 * Math.PI) / 3,
-    color: '#064e3b', // emerald-900
+    color: '#064e3b',
     buttonText: 'Try AI',
     path: '/p3',
   },
@@ -104,17 +124,16 @@ const contentData = ref<ContentItem[]>([
 const currentIndex = ref(0)
 const currentBgColor = ref(contentData.value[0].color)
 
-let scene: THREE.Scene
-let camera: THREE.PerspectiveCamera
-let renderer: THREE.WebGLRenderer
-let mainShape: THREE.Mesh
-let textAnchor: THREE.Object3D
-let satellitePivot: THREE.Object3D
+let scene: Scene
+let camera: PerspectiveCamera
+let renderer: WebGLRenderer
+let mainShape: Mesh
+let textAnchor: Object3D
+let satellitePivot: Object3D
 let animationFrameId: number
 let isAnimating = false
-const anchorPositionVector = new THREE.Vector3()
+const anchorPositionVector = new Vector3()
 
-// --- 更新文字锚点位置 ---
 const updateTextPosition = () => {
   if (!textContainerRef.value || !mainContainerRef.value) return
   textAnchor.getWorldPosition(anchorPositionVector)
@@ -132,88 +151,81 @@ onMounted(() => {
   if (!canvasRef.value || !mainContainerRef.value) return
   const { clientWidth, clientHeight } = mainContainerRef.value
 
-  scene = new THREE.Scene()
-  camera = new THREE.PerspectiveCamera(75, clientWidth / clientHeight, 0.1, 1000)
+  scene = new Scene()
+  camera = new PerspectiveCamera(75, clientWidth / clientHeight, 0.1, 1000)
   camera.position.z = 4
-  renderer = new THREE.WebGLRenderer({ canvas: canvasRef.value, antialias: true, alpha: true })
+  renderer = new WebGLRenderer({ canvas: canvasRef.value, antialias: true, alpha: true })
   renderer.setSize(clientWidth, clientHeight)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-  // --- 主模型 ---
-  const geometry = new THREE.DodecahedronGeometry(1.4, 0)
-  const material = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(contentData.value[currentIndex.value].color),
+  // 主模型
+  const geometry = new DodecahedronGeometry(1.4, 0)
+  const material = new MeshStandardMaterial({
+    color: new Color(contentData.value[currentIndex.value].color),
     metalness: 0.2,
     roughness: 0.6,
   })
-  mainShape = new THREE.Mesh(geometry, material)
+  mainShape = new Mesh(geometry, material)
   scene.add(mainShape)
 
-  // --- 线框 ---
-  const wireframeGeometry = new THREE.DodecahedronGeometry(1.41, 0)
-  const wireframeMaterial = new THREE.MeshBasicMaterial({
+  // 线框
+  const wireframeGeometry = new DodecahedronGeometry(1.41, 0)
+  const wireframeMaterial = new MeshBasicMaterial({
     color: 0xffffff,
     wireframe: true,
     opacity: 0.1,
     transparent: true,
   })
-  const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial)
+  const wireframe = new Mesh(wireframeGeometry, wireframeMaterial)
   mainShape.add(wireframe)
 
-  // --- 轨道系统 ---
+  // 轨道系统
   const orbitPathRadius = 2.0
-
-  // 1. Master group for the entire orbit system. This group will be tilted.
-  const orbitGroup = new THREE.Object3D()
+  const orbitGroup = new Object3D()
   orbitGroup.rotation.z = Math.PI / 16
   orbitGroup.rotation.x = Math.PI / 32
-  mainShape.add(orbitGroup) // MODIFIED: Added to mainShape to rotate together
+  mainShape.add(orbitGroup)
 
-  // 2. The visual orbit path (the ring).
-  const orbitPathThickness = 0.01
-  const orbitGeometry = new THREE.TorusGeometry(orbitPathRadius, orbitPathThickness, 16, 100)
-  const orbitMaterial = new THREE.MeshBasicMaterial({
+  const orbitGeometry = new TorusGeometry(orbitPathRadius, 0.01, 16, 100)
+  const orbitMaterial = new MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
     opacity: 0.3,
   })
-  const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial)
+  const orbit = new Mesh(orbitGeometry, orbitMaterial)
   orbit.rotation.x = Math.PI / 2
   orbitGroup.add(orbit)
 
-  // 3. The pivot for the satellite's animation.
-  satellitePivot = new THREE.Object3D()
+  satellitePivot = new Object3D()
   orbitGroup.add(satellitePivot)
 
-  // 4. The satellite mesh itself.
-  const orbiterGeometry = new THREE.SphereGeometry(0.08, 16, 16)
-  const orbiterMaterial = new THREE.MeshStandardMaterial({ color: 0x708090, roughness: 0.2 })
-  const orbiter = new THREE.Mesh(orbiterGeometry, orbiterMaterial)
+  const orbiterGeometry = new SphereGeometry(0.08, 16, 16)
+  const orbiterMaterial = new MeshStandardMaterial({ color: 0x708090, roughness: 0.2 })
+  const orbiter = new Mesh(orbiterGeometry, orbiterMaterial)
   orbiter.position.x = orbitPathRadius
   satellitePivot.add(orbiter)
 
-  // --- 锚点 ---
-  textAnchor = new THREE.Object3D()
+  // 锚点
+  textAnchor = new Object3D()
   textAnchor.position.set(2.3, 0.3, 0)
   mainShape.add(textAnchor)
 
-  // --- 光照 ---
-  const light = new THREE.DirectionalLight(0xffffff, 3.0)
+  // 光照
+  const light = new DirectionalLight(0xffffff, 3.0)
   light.position.set(2, 2, 5)
   scene.add(light)
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5))
+  scene.add(new AmbientLight(0xffffff, 0.5))
 
-  // --- 星空背景 ---
-  const starGeometry = new THREE.BufferGeometry()
+  // 星空背景
+  const starGeometry = new BufferGeometry()
   const starCount = 500
   const positions = new Float32Array(starCount * 3)
   for (let i = 0; i < starCount * 3; i++) positions[i] = (Math.random() - 0.5) * 20
-  starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 })
-  const stars = new THREE.Points(starGeometry, starMaterial)
+  starGeometry.setAttribute('position', new BufferAttribute(positions, 3))
+  const starMaterial = new PointsMaterial({ color: 0xffffff, size: 0.05 })
+  const stars = new Points(starGeometry, starMaterial)
   scene.add(stars)
 
-  // 初始渲染
   mainShape.rotation.y = contentData.value[currentIndex.value].targetRotationY
   mainShape.updateMatrixWorld(true)
   camera.updateProjectionMatrix()
@@ -221,9 +233,7 @@ onMounted(() => {
   updateTextPosition()
 
   const animate = () => {
-    // speed
     satellitePivot.rotation.y += 0.002
-
     renderer.render(scene, camera)
     animationFrameId = requestAnimationFrame(animate)
   }
@@ -241,41 +251,34 @@ onUnmounted(() => {
   scene.clear()
 })
 
-// --- 交互 ---
 const handleMouseWheel = (event: WheelEvent) => {
   if (isAnimating) return
   if (event.deltaY > 0) next()
   else prev()
 }
+
 const next = () => {
   if (isAnimating) return
   currentIndex.value = (currentIndex.value + 1) % contentData.value.length
 }
+
 const prev = () => {
   if (isAnimating) return
   currentIndex.value =
     (currentIndex.value - 1 + contentData.value.length) % contentData.value.length
 }
 
-// --- 动画切换 ---
 watch(currentIndex, (newIndex) => {
   isAnimating = true
   const targetItem = contentData.value[newIndex]
   const targetRotationY = targetItem.targetRotationY
   const currentRotation = mainShape.rotation.y
 
-  // --- 旋转动画 ---
   let diff = targetRotationY - currentRotation
   if (Math.abs(diff) > Math.PI) diff -= Math.sign(diff) * 2 * Math.PI
 
-  // --- 使用 GSAP Timeline 同步所有动画 ---
-  const tl = gsap.timeline({
-    onComplete: () => {
-      isAnimating = false
-    },
-  })
-
-  const targetColor = new THREE.Color(targetItem.color)
+  const tl = gsap.timeline({ onComplete: () => { isAnimating = false } })
+  const targetColor = new Color(targetItem.color)
 
   tl.to(
     currentBgColor,
@@ -291,7 +294,7 @@ watch(currentIndex, (newIndex) => {
     0,
   )
     .to(
-      mainShape.material.color,
+      (mainShape.material as MeshStandardMaterial).color,
       {
         r: targetColor.r,
         g: targetColor.g,
@@ -331,7 +334,6 @@ const handleButtonClick = () => {
 </script>
 
 <style>
-/* Fade transition for the text */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
