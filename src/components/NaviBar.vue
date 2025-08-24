@@ -8,14 +8,11 @@ const isActive = (path: string) => route.path === path
 
 <template>
   <div
-    class="flex justify-between items-center border-solid border-4 border-white rounded-3xl text-white m-4"
+    class="flex justify-between items-center border-solid border-4 border-white rounded-3xl text-white"
   >
-    <RouterLink
-      to="/"
-      class="font-poppins hover flex items-center px-4 py-2 rounded-lg"
-    >
-      <img src="@/assets/logo-white.png" alt="Logo" class="size-8 inline-block mr-2" />
-      <span class="font-poppins text-4xl font-bold">COSCHECK</span>
+    <RouterLink to="/" class="font-poppins hover flex items-center px-4 py-2 rounded-lg">
+      <img src="@/assets/citacita-w.png" alt="Logo" class="h-8 inline-block mr-2" />
+      <!--      <span class="font-poppins text-4xl font-bold">Cita-Cita</span>-->
     </RouterLink>
 
     <div class="flex-1"></div>

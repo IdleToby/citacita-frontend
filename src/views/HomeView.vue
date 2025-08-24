@@ -1,76 +1,344 @@
+<template>
+  <div
+    ref="mainContainerRef"
+    class="w-full h-full fixed top-0 left-0 overflow-hidden transition-colors duration-1000 ease-in-out"
+    :style="{ backgroundColor: currentBgColor }"
+  >
+    <canvas ref="canvasRef" class="absolute top-0 left-0 w-full h-full"></canvas>
+
+    <!-- 文本容器 -->
+    <div class="absolute top-0 left-0 z-10 w-full h-full pointer-events-none">
+      <div
+        ref="textContainerRef"
+        class="absolute p-6 rounded-lg bg-black/30 backdrop-blur-md pointer-events-auto shadow-xl"
+        style="will-change: transform; top: 0; left: 0"
+      >
+        <transition name="fade" mode="out-in">
+          <div :key="currentIndex" class="text-white w-64 md:w-80">
+            <h1 class="text-2xl md:text-3xl font-bold mb-3 drop-shadow-lg">
+              {{ contentData[currentIndex].title }}
+            </h1>
+            <p class="text-sm md:text-base text-gray-200">
+              {{ contentData[currentIndex].description }}
+            </p>
+          </div>
+        </transition>
+      </div>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20">
+      <button
+        class="px-8 py-3 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-white/40 transition-colors shadow-md"
+        @click="handleButtonClick"
+      >
+        {{ contentData[currentIndex].buttonText }}
+      </button>
+    </div>
+
+    <!-- 切换按钮 -->
+    <button
+      @click="prev"
+      class="absolute left-5 md:left-10 top-1/2 -translate-y-1/2 z-20 text-white text-4xl p-2 rounded-full hover:bg-white/10 transition-colors"
+    >
+      ❮
+    </button>
+    <button
+      @click="next"
+      class="absolute right-5 md:right-10 top-1/2 -translate-y-1/2 z-20 text-white text-4xl p-2 rounded-full hover:bg-white/10 transition-colors"
+    >
+      ❯
+    </button>
+  </div>
+</template>
+
 <script setup lang="ts">
-import { Search } from 'lucide-vue-next'
-import { Input } from '@/components/ui/input'
-import { ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { onMounted, onUnmounted, ref, type Ref, watch } from 'vue'
+import * as THREE from 'three'
+import gsap from 'gsap'
+// import { useRouter } from 'vue-router' // Uncomment if you use vue-router
 
-const router = useRouter()
+// const router = useRouter() // Uncomment if you use vue-router
 
-const searchQuery = ref('')
-const handleSearch = () => {
-  //Route to products page with search query
-  router.push({ path: '/products', query: { search: searchQuery.value.trim() } })
+interface ContentItem {
+  title: string
+  description: string
+  targetRotationY: number
+  color: string
+  path: string
+  buttonText: string
 }
 
-// randomly return one the four values: "Mercury", "Hydroquinone", "Tretinoin", "Steroid"
-const unsafeIngredients = ['Mercury', 'Hydroquinone', 'Tretinoin', 'Steroid']
-const timestamp = Date.now()
-const randomIngredient = unsafeIngredients[timestamp % unsafeIngredients.length]
-const handleSuggestionClick = () => {
-  router.push({
-    name: 'IngredientsDetailView',
-    params: { ingredientName: encodeURIComponent(randomIngredient) },
+const mainContainerRef: Ref<HTMLDivElement | null> = ref(null)
+const canvasRef: Ref<HTMLCanvasElement | null> = ref(null)
+const textContainerRef: Ref<HTMLDivElement | null> = ref(null)
+
+// --- 内容数据 ---
+const contentData = ref<ContentItem[]>([
+  {
+    title: 'Map',
+    description: 'this is a description for map',
+    targetRotationY: 0,
+    color: '#1e293b', // slate-800
+    buttonText: 'Explore Map',
+    path: '/p1',
+  },
+  {
+    title: 'Job',
+    description: 'this is a description for job',
+    targetRotationY: (2 * Math.PI) / 3,
+    color: '#312e81', // indigo-900
+    buttonText: 'Find Jobs',
+    path: '/p2',
+  },
+  {
+    title: 'AI',
+    description: 'this is a description for AI',
+    targetRotationY: (4 * Math.PI) / 3,
+    color: '#064e3b', // emerald-900
+    buttonText: 'Try AI',
+    path: '/p3',
+  },
+])
+
+const currentIndex = ref(0)
+const currentBgColor = ref(contentData.value[0].color)
+
+let scene: THREE.Scene
+let camera: THREE.PerspectiveCamera
+let renderer: THREE.WebGLRenderer
+let mainShape: THREE.Mesh
+let textAnchor: THREE.Object3D
+let satellitePivot: THREE.Object3D
+let animationFrameId: number
+let isAnimating = false
+const anchorPositionVector = new THREE.Vector3()
+
+// --- 更新文字锚点位置 ---
+const updateTextPosition = () => {
+  if (!textContainerRef.value || !mainContainerRef.value) return
+  textAnchor.getWorldPosition(anchorPositionVector)
+  anchorPositionVector.project(camera)
+  const { clientWidth: width, clientHeight: height } = mainContainerRef.value
+  const { offsetWidth: boxWidth, offsetHeight: boxHeight } = textContainerRef.value
+  const x = (anchorPositionVector.x * 0.7 + 0.5) * width
+  const y = (-anchorPositionVector.y * 0.5 + 0.5) * height
+  const clampedX = Math.max(boxWidth / 2, Math.min(x, width - boxWidth / 2))
+  const clampedY = Math.max(boxHeight / 2, Math.min(y, height - boxHeight / 2))
+  textContainerRef.value.style.transform = `translate(-50%, -50%) translate(${clampedX}px, ${clampedY}px)`
+}
+
+onMounted(() => {
+  if (!canvasRef.value || !mainContainerRef.value) return
+  const { clientWidth, clientHeight } = mainContainerRef.value
+
+  scene = new THREE.Scene()
+  camera = new THREE.PerspectiveCamera(75, clientWidth / clientHeight, 0.1, 1000)
+  camera.position.z = 4
+  renderer = new THREE.WebGLRenderer({ canvas: canvasRef.value, antialias: true, alpha: true })
+  renderer.setSize(clientWidth, clientHeight)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+  // --- 主模型 ---
+  const geometry = new THREE.DodecahedronGeometry(1.4, 0)
+  const material = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(contentData.value[currentIndex.value].color),
+    metalness: 0.2,
+    roughness: 0.6,
   })
+  mainShape = new THREE.Mesh(geometry, material)
+  scene.add(mainShape)
+
+  // --- 线框 ---
+  const wireframeGeometry = new THREE.DodecahedronGeometry(1.41, 0)
+  const wireframeMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    wireframe: true,
+    opacity: 0.1,
+    transparent: true,
+  })
+  const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial)
+  mainShape.add(wireframe)
+
+  // --- 轨道系统 ---
+  const orbitPathRadius = 2.0
+
+  // 1. Master group for the entire orbit system. This group will be tilted.
+  const orbitGroup = new THREE.Object3D()
+  orbitGroup.rotation.z = Math.PI / 16
+  orbitGroup.rotation.x = Math.PI / 32
+  mainShape.add(orbitGroup) // MODIFIED: Added to mainShape to rotate together
+
+  // 2. The visual orbit path (the ring).
+  const orbitPathThickness = 0.01
+  const orbitGeometry = new THREE.TorusGeometry(orbitPathRadius, orbitPathThickness, 16, 100)
+  const orbitMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.3,
+  })
+  const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial)
+  orbit.rotation.x = Math.PI / 2
+  orbitGroup.add(orbit)
+
+  // 3. The pivot for the satellite's animation.
+  satellitePivot = new THREE.Object3D()
+  orbitGroup.add(satellitePivot)
+
+  // 4. The satellite mesh itself.
+  const orbiterGeometry = new THREE.SphereGeometry(0.08, 16, 16)
+  const orbiterMaterial = new THREE.MeshStandardMaterial({ color: 0x708090, roughness: 0.2 })
+  const orbiter = new THREE.Mesh(orbiterGeometry, orbiterMaterial)
+  orbiter.position.x = orbitPathRadius
+  satellitePivot.add(orbiter)
+
+  // --- 锚点 ---
+  textAnchor = new THREE.Object3D()
+  textAnchor.position.set(2.3, 0.3, 0)
+  mainShape.add(textAnchor)
+
+  // --- 光照 ---
+  const light = new THREE.DirectionalLight(0xffffff, 3.0)
+  light.position.set(2, 2, 5)
+  scene.add(light)
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5))
+
+  // --- 星空背景 ---
+  const starGeometry = new THREE.BufferGeometry()
+  const starCount = 500
+  const positions = new Float32Array(starCount * 3)
+  for (let i = 0; i < starCount * 3; i++) positions[i] = (Math.random() - 0.5) * 20
+  starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 })
+  const stars = new THREE.Points(starGeometry, starMaterial)
+  scene.add(stars)
+
+  // 初始渲染
+  mainShape.rotation.y = contentData.value[currentIndex.value].targetRotationY
+  mainShape.updateMatrixWorld(true)
+  camera.updateProjectionMatrix()
+  renderer.render(scene, camera)
+  updateTextPosition()
+
+  const animate = () => {
+    // speed
+    satellitePivot.rotation.y += 0.002
+
+    renderer.render(scene, camera)
+    animationFrameId = requestAnimationFrame(animate)
+  }
+  animate()
+
+  window.addEventListener('wheel', handleMouseWheel)
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  cancelAnimationFrame(animationFrameId)
+  window.removeEventListener('wheel', handleMouseWheel)
+  window.removeEventListener('resize', handleResize)
+  renderer.dispose()
+  scene.clear()
+})
+
+// --- 交互 ---
+const handleMouseWheel = (event: WheelEvent) => {
+  if (isAnimating) return
+  if (event.deltaY > 0) next()
+  else prev()
+}
+const next = () => {
+  if (isAnimating) return
+  currentIndex.value = (currentIndex.value + 1) % contentData.value.length
+}
+const prev = () => {
+  if (isAnimating) return
+  currentIndex.value =
+    (currentIndex.value - 1 + contentData.value.length) % contentData.value.length
+}
+
+// --- 动画切换 ---
+watch(currentIndex, (newIndex) => {
+  isAnimating = true
+  const targetItem = contentData.value[newIndex]
+  const targetRotationY = targetItem.targetRotationY
+  const currentRotation = mainShape.rotation.y
+
+  // --- 旋转动画 ---
+  let diff = targetRotationY - currentRotation
+  if (Math.abs(diff) > Math.PI) diff -= Math.sign(diff) * 2 * Math.PI
+
+  // --- 使用 GSAP Timeline 同步所有动画 ---
+  const tl = gsap.timeline({
+    onComplete: () => {
+      isAnimating = false
+    },
+  })
+
+  const targetColor = new THREE.Color(targetItem.color)
+
+  tl.to(
+    currentBgColor,
+    {
+      value: targetItem.color,
+      duration: 1.2,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        currentBgColor.value =
+          (gsap.getProperty(currentBgColor, 'value') as string) || targetItem.color
+      },
+    },
+    0,
+  )
+    .to(
+      mainShape.material.color,
+      {
+        r: targetColor.r,
+        g: targetColor.g,
+        b: targetColor.b,
+        duration: 1.2,
+        ease: 'power2.inOut',
+      },
+      0,
+    )
+    .to(
+      mainShape.rotation,
+      {
+        y: currentRotation + diff,
+        duration: 1.2,
+        ease: 'power2.inOut',
+        onUpdate: updateTextPosition,
+      },
+      0,
+    )
+})
+
+const handleResize = () => {
+  if (!mainContainerRef.value || !renderer) return
+  const { clientWidth, clientHeight } = mainContainerRef.value
+  camera.aspect = clientWidth / clientHeight
+  camera.updateProjectionMatrix()
+  renderer.setSize(clientWidth, clientHeight)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  updateTextPosition()
+}
+
+const handleButtonClick = () => {
+  const targetPath = contentData.value[currentIndex.value].path
+  alert('Navigate to: ' + targetPath)
+  // router.push(targetPath)
 }
 </script>
 
-<template>
-  <div class="flex flex-col justify-center items-center h-full shadow-lg">
-    <p class="font-poppins text-[3rem] text-white">Are Your Products</p>
-    <p
-      class="font-poppins text-[10rem] text-[#C20000] font-[1000] tracking-wider text-shadow-lg/25"
-    >
-      SAFE?
-    </p>
-    <div class="relative w-[40rem] items-center bg-white rounded-3xl">
-      <Input
-        v-model="searchQuery"
-        id="search"
-        type="text"
-        placeholder="Ex. Notification Number, Product Name, Company Name"
-        class="px-10 h-20 rounded-3xl text-4xl"
-        @keyup.enter="handleSearch"
-      />
-      <span
-        class="absolute end-0 inset-y-0 flex items-center justify-center px-4 cursor-pointer"
-        @click="handleSearch"
-      >
-        <Search class="size-8 text-muted-black" />
-      </span>
-    </div>
-  </div>
-  <hr class="h-2 bg-gradient-to-b from-gray-400 to-white border-none" />
-  <div class="h-1/2 bg-white flex flex-col justify-center items-center gap-10">
-    <p class="font-poppins text-4xl">Do you use this Popular Unsafe Ingredient?</p>
-    <p
-      class="font-poppins text-6xl text-[#C20000] font-bold cursor-pointer hover:underline"
-      @click="handleSuggestionClick"
-    >
-      {{ randomIngredient }}
-    </p>
-    <RouterLink class="flex justify-center items-center gap-4 cursor-pointer" to="/ingredients">
-      <div class="size-6 rounded-full bg-black"></div>
-      <p class="font-poppins text-2xl font-bold underline">CHECK OUT MORE UNSAFE INGREDIENTS</p>
-    </RouterLink>
-  </div>
-  <img
-    src="@/assets/left-compressed.png"
-    alt="Left background"
-    class="fixed bottom-0 -left-10 w-1/4 h- z-0 scale-x-[-1]"
-  />
-  <img
-    src="@/assets/right-compressed.png"
-    alt="Right background"
-    class="fixed bottom-0 -right-20 w-1/3 z-0"
-  />
-</template>
+<style>
+/* Fade transition for the text */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
