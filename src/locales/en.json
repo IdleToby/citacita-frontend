@@ -1,0 +1,11 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "jobs": "Jobs for Me",
+    "assistance": "Financial Assistance",
+    "aiTools": "AI Tools",
+    "map": "Map",
+    "faq": "FAQ"
+  }
+}

@@ -37,9 +37,8 @@ onMounted(async () => {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  //make background picture dark
-  background-color: rgba(0, 0, 0, 0.2);
-  background-blend-mode: darken;
+  //background-color: rgba(0, 0, 0, 0.2);
+  //background-blend-mode: darken;
 }
 
 .fixed-header {
@@ -47,7 +46,6 @@ onMounted(async () => {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
   background: transparent;
 }
 
