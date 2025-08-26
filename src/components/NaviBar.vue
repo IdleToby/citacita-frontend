@@ -30,11 +30,11 @@ const isActive = (path: string) => route.path === path
       {{ t('nav.jobs') }}
     </RouterLink>
     <RouterLink
-      to="/grants"
+      to="/map"
       class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
-      :class="isActive('/grants') ? ' text-[#FFB076]' : ''"
+      :class="isActive('/map') ? ' text-[#FFB076]' : ''"
     >
-      {{ t('nav.grants') }}
+      {{ t('nav.map') }}
     </RouterLink>
     <RouterLink
       to="/ai"
@@ -44,11 +44,11 @@ const isActive = (path: string) => route.path === path
       {{ t('nav.aiTools') }}
     </RouterLink>
     <RouterLink
-      to="/map"
+      to="/grants"
       class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
-      :class="isActive('/map') ? ' text-[#FFB076]' : ''"
+      :class="isActive('/grants') ? ' text-[#FFB076]' : ''"
     >
-      {{ t('nav.map') }}
+      {{ t('nav.grants') }}
     </RouterLink>
     <RouterLink
       to="/faq"
