@@ -30,11 +30,11 @@ const isActive = (path: string) => route.path === path
       {{ t('nav.jobs') }}
     </RouterLink>
     <RouterLink
-      to="/assistance"
+      to="/grants"
       class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
-      :class="isActive('/assistance') ? ' text-[#FFB076]' : ''"
+      :class="isActive('/grants') ? ' text-[#FFB076]' : ''"
     >
-      {{ t('nav.assistance') }}
+      {{ t('nav.grants') }}
     </RouterLink>
     <RouterLink
       to="/ai"
