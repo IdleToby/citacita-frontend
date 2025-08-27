@@ -17,7 +17,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="app-layout">
+  <div class="app-layout font-noto">
     <header ref="headerRef" class="fixed-header p-4">
       <NaviBar />
     </header>

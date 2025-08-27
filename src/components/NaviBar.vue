@@ -15,7 +15,7 @@ const isActive = (path: string) => route.path === path
   >
     <RouterLink
       to="/"
-      class="font-paytone text-shadow-lg hover flex items-center px-4 py-2 rounded-lg"
+      class=" text-shadow-lg hover flex items-center px-4 py-2 rounded-lg"
     >
       <img src="@/assets/citacita-w.png" alt="Logo" class="h-10 inline-block mx-4" />
     </RouterLink>
@@ -24,35 +24,35 @@ const isActive = (path: string) => route.path === path
 
     <RouterLink
       to="/jobs"
-      class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
+      class=" text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
       :class="isActive('/jobs') ? ' text-[#FFB076]' : ''"
     >
       {{ t('nav.jobs') }}
     </RouterLink>
     <RouterLink
       to="/map"
-      class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
+      class=" text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
       :class="isActive('/map') ? ' text-[#FFB076]' : ''"
     >
       {{ t('nav.map') }}
     </RouterLink>
     <RouterLink
       to="/ai"
-      class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
+      class=" text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
       :class="isActive('/ai') ? ' text-[#FFB076]' : ''"
     >
       {{ t('nav.aiTools') }}
     </RouterLink>
     <RouterLink
       to="/grants"
-      class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
+      class=" text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
       :class="isActive('/grants') ? ' text-[#FFB076]' : ''"
     >
       {{ t('nav.grants') }}
     </RouterLink>
     <RouterLink
       to="/faq"
-      class="font-paytone text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
+      class=" text-shadow-lg text-3xl hover:underline mx-6 py-1 rounded-4xl"
       :class="isActive('/faq') ? ' text-[#FFB076]' : ''"
     >
       {{ t('nav.faq') }}
