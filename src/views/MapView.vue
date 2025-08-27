@@ -28,6 +28,13 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from '@/components/ui/combobox'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 
 // --- TypeScript Interfaces for Type Safety ---
 interface GeoapifyProperties {
@@ -93,9 +100,13 @@ const isLoading = ref(true)
 const errorMsg = ref<string | null>(null)
 
 // Combobox/Autocomplete State for Location
-const locationInputQuery = ref('') // NEW: State for the raw text input
+const locationInputQuery = ref('')
 const autocompleteSuggestions = ref<AutocompleteFeature[]>([])
 const selectedLocation = ref<AutocompleteFeature | null>(null)
+
+// NEW: State for the details sheet
+const selectedPlaceForSheet = ref<PlaceFeature | null>(null)
+const isSheetOpen = ref(false)
 
 // --- Map State ---
 let map: L.Map | null = null
@@ -117,7 +128,6 @@ const currentFilterLabel = computed(() => {
 const showLocationCombobox = computed(() => searchFilter.value === 'location')
 
 // --- API Call Logic ---
-// Debounce function to limit API calls
 const debounce = (func: Function, delay: number) => {
   let timeoutId: ReturnType<typeof setTimeout>
   return (...args: any[]) => {
@@ -128,13 +138,11 @@ const debounce = (func: Function, delay: number) => {
   }
 }
 
-// Autocomplete function remains debounced
 const fetchAutocompleteSuggestions = debounce(async (query: string) => {
   if (query.length < 2) {
     autocompleteSuggestions.value = []
     return
   }
-  // Added type=locality to refine search for cities/towns
   const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&type=locality&filter=countrycode:my&format=json&apiKey=${GEOAPIFY_API_KEY}`
   try {
     const response = await fetch(url)
@@ -144,12 +152,9 @@ const fetchAutocompleteSuggestions = debounce(async (query: string) => {
   } catch (err) {
     console.error('Autocomplete fetch error:', err)
   }
-}, 300) // 300ms delay
+}, 300)
 
-// NEW: Watch for changes in the text input and call the debounced fetch function
 watch(locationInputQuery, (newQuery) => {
-  // If the user has just selected an item, the input will be set to its display value.
-  // We don't want to trigger another search in that case.
   if (selectedLocation.value && newQuery === selectedLocation.value.address_line1) {
     return
   }
@@ -189,7 +194,7 @@ const searchPlaces = async (params: URLSearchParams) => {
 const handleSearch = () => {
   const params = new URLSearchParams({
     categories: CHILDCARE_CATEGORIES,
-    limit: '500',
+    limit: '200',
     apiKey: GEOAPIFY_API_KEY,
   })
 
@@ -217,9 +222,8 @@ const handleSearch = () => {
   }
 }
 
-// MODIFICATION 1: This function now sets the search filter to 'radius'
 const fetchPlacesByCircle = async (lat: number, lon: number, radius: number) => {
-  searchFilter.value = 'radius' // <-- CHANGE ADDED HERE
+  searchFilter.value = 'radius'
   facilityNameQuery.value = ''
   selectedLocation.value = null
   radiusInMeters.value = radius
@@ -240,6 +244,12 @@ const fetchPlacesByCircle = async (lat: number, lon: number, radius: number) => 
   if (map) map.setView([lat, lon], 15)
 }
 
+// NEW: Function to open the details sheet
+const openPlaceDetails = (place: PlaceFeature) => {
+  selectedPlaceForSheet.value = place
+  isSheetOpen.value = true
+}
+
 // --- Map Functions ---
 const initializeMap = () => {
   map = L.map('map-container').setView(defaultCenter, 13)
@@ -248,10 +258,9 @@ const initializeMap = () => {
   }).addTo(map)
   markerLayer = L.layerGroup().addTo(map)
 
-  // MODIFICATION 2: The map click now uses the reactive radiusInMeters value
   map.on('click', (e: L.LeafletMouseEvent) =>
     fetchPlacesByCircle(e.latlng.lat, e.latlng.lng, radiusInMeters.value),
-  ) // <-- CHANGE MADE HERE
+  )
 }
 
 const updateMapMarkers = () => {
@@ -316,8 +325,8 @@ watch(searchFilter, () => {
 </script>
 
 <template>
-  <div class="bg-black/70 h-full flex flex-col">
-    <div class="text-center text-white text-6xl">Childcare Facilities Near Me</div>
+  <div class="bg-black/70 h-full flex flex-col space-y-8 pt-8">
+    <div class="text-center text-white text-6xl font-bold">Childcare Facilities Near Me</div>
     <div class="text-center text-white text-4xl">
       Find childcare facilities near your office or home in Malaysia.
     </div>
@@ -337,14 +346,14 @@ watch(searchFilter, () => {
             />
           </div>
 
-          <div class="flex items-center bg-white text-black">
+          <div class="bg-white text-black w-fit">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <Button
                   variant="ghost"
-                  class="flex items-center gap-1 text-black text-xl px-3 hover:bg-black/10 focus-visible:ring-0"
+                  class="flex items-center justify-between px-3 text-black hover:bg-black/10 focus-visible:ring-0"
                 >
-                  {{ currentFilterLabel }}
+                  <span>{{ currentFilterLabel }}</span>
                   <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
@@ -362,7 +371,9 @@ watch(searchFilter, () => {
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
 
+          <div class="flex items-center bg-white text-black">
             <div class="flex-1">
               <Combobox
                 v-if="showLocationCombobox"
@@ -373,8 +384,8 @@ watch(searchFilter, () => {
                 <ComboboxAnchor class="w-full">
                   <div class="relative w-full items-center">
                     <ComboboxInput
-                      class="pl-3 pr-10 h-full text-xl w-full focus-visible:ring-0 border-none"
-                      placeholder="Select location..."
+                      class="pr-10 h-full w-full focus-visible:ring-0 border-none"
+                      placeholder="eg. Kuala Lumpur"
                       :display-value="(loc: any) => loc?.address_line1"
                       @update:model-value="(query) => (locationInputQuery = query)"
                     />
@@ -408,36 +419,39 @@ watch(searchFilter, () => {
                   v-model="radiusInMeters"
                   type="number"
                   placeholder="Radius"
-                  class="h-full text-xl w-full focus-visible:ring-0 border-none"
+                  class="h-full text-lg w-full focus-visible:ring-0 border-none"
+                  @keyup.enter="handleSearch"
                 />
-                <span class="text-xl text-gray-500 pr-3">meters</span>
+                <span class="text-lg text-gray-500 pr-3">meters</span>
               </div>
             </div>
 
-            <span
-              class="flex items-center justify-center px-4 cursor-pointer"
+            <Button
+              variant="ghost"
+              class="flex items-center justify-center p-3 cursor-pointer hover:bg-black/10 rounded-none"
               @click="handleSearch"
             >
-              <Search class="size-8 text-black" />
-            </span>
+              <Search class="size-6 text-black" />
+            </Button>
           </div>
         </div>
 
         <ScrollArea class="h-full pe-3">
-          <div v-if="isLoading" class="text-center text-2xl mt-10">Loading...</div>
-          <div v-else-if="errorMsg" class="text-center text-red-400 text-2xl mt-10">
+          <div v-if="isLoading" class="text-center text-xl mt-10">Loading...</div>
+          <div v-else-if="errorMsg" class="text-center text-red-400 text-xl mt-10">
             {{ errorMsg }}
           </div>
-          <div v-else-if="places.length === 0" class="text-center text-2xl mt-10">
+          <div v-else-if="places.length === 0" class="text-center text-xl mt-10">
             No facilities found.
           </div>
           <div v-else class="space-y-2">
             <div
               v-for="place in places"
               :key="place.properties.place_id"
-              class="p-4 bg-white text-black text-xl font-semibold rounded-lg"
+              class="p-4 bg-white text-black text-lg font-semibold rounded-lg cursor-pointer transition-colors hover:bg-gray-200"
+              @click="openPlaceDetails(place)"
             >
-              <p class="text-2xl font-bold truncate">
+              <p class="text-xl font-bold truncate">
                 {{ place.properties.name ?? 'Unnamed Facility' }}
               </p>
               <p class="font-sans text-lg text-gray-600 truncate">
@@ -451,7 +465,45 @@ watch(searchFilter, () => {
         </ScrollArea>
       </div>
 
-      <div id="map-container" class="w-3/4 h-full"></div>
+      <div id="map-container" class="w-3/4 h-full z-10"></div>
     </div>
+
+    <Sheet v-model:open="isSheetOpen" class="z-50">
+      <SheetContent side="left" class="w-full sm:max-w-lg bg-white text-black overflow-y-auto">
+        <SheetHeader class="mb-4">
+          <SheetTitle class="text-3xl font-bold break-words">
+            {{ selectedPlaceForSheet?.properties.name ?? 'Unnamed Facility' }}
+          </SheetTitle>
+          <SheetDescription class="text-base">
+            Detailed information
+          </SheetDescription>
+        </SheetHeader>
+        <div v-if="selectedPlaceForSheet" class="space-y-3 mx-4 text-lg">
+          <div>
+            <p class="font-semibold text-gray-500">Address</p>
+            <p>{{ selectedPlaceForSheet.properties.address_line1 }}</p>
+            <p>{{ selectedPlaceForSheet.properties.address_line2 }}</p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-500">City</p>
+            <p>{{ selectedPlaceForSheet.properties.city }}</p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-500">State</p>
+            <p>{{ selectedPlaceForSheet.properties.state }}</p>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-500">Postcode</p>
+            <p>{{ selectedPlaceForSheet.properties.postcode }}</p>
+          </div>
+          <div v-if="selectedPlaceForSheet.properties.distance">
+            <p class="font-semibold text-gray-500">Distance</p>
+            <p class="text-blue-700 font-bold">
+              {{ (selectedPlaceForSheet.properties.distance / 1000).toFixed(2) }} km away
+            </p>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   </div>
 </template>
