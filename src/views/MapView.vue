@@ -3,19 +3,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import L, { type LatLngExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useI18n } from 'vue-i18n'
-
-
-delete (L.Icon.Default.prototype as any)._getIconUrl; // A small hack to make Leaflet re-evaluate icon paths
-
-L.Icon.Default.mergeOptions({
-  iconUrl: '/images/marker-icon.png',       // Path relative to the public folder
-  iconRetinaUrl: '/images/marker-icon-2x.png', // Path relative to the public folder
-  shadowUrl: '/images/marker-shadow.png',     // Path relative to the public folder
-});
-// --- END FIX 1 ---
-
-// --- FIX 2: Complete Shadcn / Lucide Component Imports ---
-// Ensure ALL components used in the <template> are imported here to prevent "Failed to resolve component" errors.
 import { Input } from '@/components/ui/input'
 import { Check, ChevronsUpDown, Search } from 'lucide-vue-next'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -47,12 +34,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-// --- END FIX 2 ---
 
-// --- i18n Setup ---
+delete (L.Icon.Default.prototype as any)._getIconUrl // A small hack to make Leaflet re-evaluate icon paths
+
+L.Icon.Default.mergeOptions({
+  iconUrl: '/images/marker-icon.png', // Path relative to the public folder
+  iconRetinaUrl: '/images/marker-icon-2x.png', // Path relative to the public folder
+  shadowUrl: '/images/marker-shadow.png', // Path relative to the public folder
+})
+
 const { t, locale } = useI18n()
 
-// --- TypeScript Interfaces for Type Safety ---
 interface GeoapifyProperties {
   name?: string
   address_line1: string
@@ -101,7 +93,8 @@ const getLanguageForAPI = (): 'en' | 'zh' | 'ms' => {
   }
 
   // Map localStorage value to API value
-  if (userLocale.startsWith('zh')) { // Handles 'zh-CN', 'zh-TW', etc.
+  if (userLocale.startsWith('zh')) {
+    // Handles 'zh-CN', 'zh-TW', etc.
     return 'zh'
   }
   if (userLocale === 'ms') {
@@ -161,7 +154,10 @@ const filterOptions = computed(() => [
 
 // --- Computed Properties ---
 const currentFilterLabel = computed(() => {
-  return filterOptions.value.find((option) => option.value === searchFilter.value)?.label ?? t('mapPage.filterBy')
+  return (
+    filterOptions.value.find((option) => option.value === searchFilter.value)?.label ??
+    t('mapPage.filterBy')
+  )
 })
 const showLocationCombobox = computed(() => searchFilter.value === 'location')
 
@@ -299,24 +295,23 @@ const initializeMap = () => {
   map = L.map('map-container', {
     // Optional: You can also disable it during initialization
     // attributionControl: false
-  }).setView(defaultCenter, 13);
+  }).setView(defaultCenter, 13)
 
-  // --- FIX: Remove "Leaflet" Prefix from Attribution ---
   // This is the cleanest way to remove the "Leaflet" link while keeping layer attributions.
   if (map.attributionControl) {
-    map.attributionControl.setPrefix(false);
+    map.attributionControl.setPrefix(false)
   }
-  // --- END FIX ---
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: 'Cita-Cita | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
+    attribution:
+      'Cita-Cita | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  }).addTo(map)
 
-  markerLayer = L.layerGroup().addTo(map);
+  markerLayer = L.layerGroup().addTo(map)
 
   map.on('click', (e: L.LeafletMouseEvent) =>
     fetchPlacesByCircle(e.latlng.lat, e.latlng.lng, radiusInMeters.value),
-  );
+  )
 }
 
 const updateMapMarkers = () => {
@@ -463,9 +458,9 @@ watch(locale, (newLocale, oldLocale) => {
                 </ComboboxAnchor>
 
                 <ComboboxList class="bg-white text-black p-0">
-                  <ComboboxEmpty class="p-4 text-center text-lg">{{
-                      t('mapPage.noLocationFound')
-                    }}</ComboboxEmpty>
+                  <ComboboxEmpty class="p-4 text-center text-lg"
+                    >{{ t('mapPage.noLocationFound') }}
+                  </ComboboxEmpty>
                   <ComboboxGroup>
                     <ComboboxItem
                       v-for="suggestion in autocompleteSuggestions"
