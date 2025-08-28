@@ -4,7 +4,18 @@ import L, { type LatLngExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useI18n } from 'vue-i18n'
 
-// Shadcn / Lucide Imports
+
+delete (L.Icon.Default.prototype as any)._getIconUrl; // A small hack to make Leaflet re-evaluate icon paths
+
+L.Icon.Default.mergeOptions({
+  iconUrl: '/images/marker-icon.png',       // Path relative to the public folder
+  iconRetinaUrl: '/images/marker-icon-2x.png', // Path relative to the public folder
+  shadowUrl: '/images/marker-shadow.png',     // Path relative to the public folder
+});
+// --- END FIX 1 ---
+
+// --- FIX 2: Complete Shadcn / Lucide Component Imports ---
+// Ensure ALL components used in the <template> are imported here to prevent "Failed to resolve component" errors.
 import { Input } from '@/components/ui/input'
 import { Check, ChevronsUpDown, Search } from 'lucide-vue-next'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -36,9 +47,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+// --- END FIX 2 ---
 
 // --- i18n Setup ---
-const { t, locale } = useI18n() // 修改：增加了 locale
+const { t, locale } = useI18n()
 
 // --- TypeScript Interfaces for Type Safety ---
 interface GeoapifyProperties {
@@ -284,15 +296,27 @@ const openPlaceDetails = (place: PlaceFeature) => {
 
 // --- Map Functions ---
 const initializeMap = () => {
-  map = L.map('map-container').setView(defaultCenter, 13)
+  map = L.map('map-container', {
+    // Optional: You can also disable it during initialization
+    // attributionControl: false
+  }).setView(defaultCenter, 13);
+
+  // --- FIX: Remove "Leaflet" Prefix from Attribution ---
+  // This is the cleanest way to remove the "Leaflet" link while keeping layer attributions.
+  if (map.attributionControl) {
+    map.attributionControl.setPrefix(false);
+  }
+  // --- END FIX ---
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors',
-  }).addTo(map)
-  markerLayer = L.layerGroup().addTo(map)
+    attribution: 'Cita-Cita | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  }).addTo(map);
+
+  markerLayer = L.layerGroup().addTo(map);
 
   map.on('click', (e: L.LeafletMouseEvent) =>
     fetchPlacesByCircle(e.latlng.lat, e.latlng.lng, radiusInMeters.value),
-  )
+  );
 }
 
 const updateMapMarkers = () => {
