@@ -7,5 +7,35 @@
     "aiTools": "Alat AI",
     "map": "Peta",
     "faq": "Soalan Lazim"
+  },
+  "mapPage": {
+    "title": "Kemudahan Penjagaan Kanak-Kanak Berdekatan Saya",
+    "subtitle": "Cari kemudahan penjagaan kanak-kanak berhampiran pejabat atau rumah anda di Malaysia.",
+    "searchTitle": "Cari Di Sini:",
+    "facilityNamePlaceholder": "Masukkan nama kemudahan (pilihan)",
+    "filterBy": "Tapis Mengikut",
+    "filterOptions": {
+      "radius": "Mengikut Jejari",
+      "location": "Mengikut Lokasi"
+    },
+    "locationPlaceholder": "cth. Kuala Lumpur",
+    "noLocationFound": "Tiada lokasi ditemui.",
+    "radiusUnit": "meter",
+    "loading": "Memuatkan...",
+    "noFacilitiesFound": "Tiada kemudahan ditemui.",
+    "unnamedFacility": "Kemudahan Tanpa Nama",
+    "distanceAway": "km jauhnya",
+    "details": {
+      "title": "Maklumat terperinci",
+      "address": "Alamat",
+      "city": "Bandar",
+      "state": "Negeri",
+      "postcode": "Poskod",
+      "distance": "Jarak"
+    },
+    "errors": {
+      "couldNotFind": "Tidak dapat mencari kemudahan.",
+      "selectLocation": "Sila pilih lokasi daripada senarai."
+    }
   }
 }

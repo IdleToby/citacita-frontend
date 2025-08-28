@@ -7,5 +7,35 @@
     "aiTools": "AI Tools",
     "map": "Map",
     "faq": "FAQ"
+  },
+  "mapPage": {
+    "title": "Childcare Facilities Near Me",
+    "subtitle": "Find childcare facilities near your office or home in Malaysia.",
+    "searchTitle": "Search Here:",
+    "facilityNamePlaceholder": "Enter facility name (optional)",
+    "filterBy": "Filter By",
+    "filterOptions": {
+      "radius": "By Radius",
+      "location": "By Location"
+    },
+    "locationPlaceholder": "eg. Kuala Lumpur",
+    "noLocationFound": "No location found.",
+    "radiusUnit": "meters",
+    "loading": "Loading...",
+    "noFacilitiesFound": "No facilities found.",
+    "unnamedFacility": "Unnamed Facility",
+    "distanceAway": "km away",
+    "details": {
+      "title": "Detailed information",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "postcode": "Postcode",
+      "distance": "Distance"
+    },
+    "errors": {
+      "couldNotFind": "Could not find facilities.",
+      "selectLocation": "Please select a location from the list."
+    }
   }
 }

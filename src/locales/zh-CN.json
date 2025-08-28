@@ -7,5 +7,35 @@
     "aiTools": "AI 工具",
     "map": "地图",
     "faq": "常见问题"
+  },
+  "mapPage": {
+    "title": "我附近的托儿设施",
+    "subtitle": "轻松找到马来西亚各地，靠近您公司或住所的托儿中心。",
+    "searchTitle": "在此搜索：",
+    "facilityNamePlaceholder": "输入设施名称（可选）",
+    "filterBy": "筛选方式",
+    "filterOptions": {
+      "radius": "按半径",
+      "location": "按地点"
+    },
+    "locationPlaceholder": "例如：吉隆坡",
+    "noLocationFound": "未找到位置。",
+    "radiusUnit": "米",
+    "loading": "加载中...",
+    "noFacilitiesFound": "未找到任何设施。",
+    "unnamedFacility": "未命名设施",
+    "distanceAway": "公里外",
+    "details": {
+      "title": "详细信息",
+      "address": "地址",
+      "city": "城市",
+      "state": "州",
+      "postcode": "邮政编码",
+      "distance": "距离"
+    },
+    "errors": {
+      "couldNotFind": "找不到设施。",
+      "selectLocation": "请从列表中选择一个位置。"
+    }
   }
 }

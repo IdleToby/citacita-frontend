@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import L, { type LatLngExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useI18n } from 'vue-i18n'
 
 // Shadcn / Lucide Imports
 import { Input } from '@/components/ui/input'
@@ -35,6 +36,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+
+// --- i18n Setup ---
+const { t, locale } = useI18n() // 修改：增加了 locale
 
 // --- TypeScript Interfaces for Type Safety ---
 interface GeoapifyProperties {
@@ -75,6 +79,27 @@ interface AutocompleteFeature {
 
 // --- API and Constants ---
 const GEOAPIFY_API_KEY = 'dae1066da9ad4cb6a067f90f593e9f58'
+
+// Helper function to get the language code for the API
+const getLanguageForAPI = (): 'en' | 'zh' | 'ms' => {
+  const userLocale = localStorage.getItem('user-locale')
+
+  if (!userLocale) {
+    return 'en' // Default to English if not set
+  }
+
+  // Map localStorage value to API value
+  if (userLocale.startsWith('zh')) { // Handles 'zh-CN', 'zh-TW', etc.
+    return 'zh'
+  }
+  if (userLocale === 'ms') {
+    return 'ms'
+  }
+
+  // Fallback to 'en' for 'en' or any other unexpected values
+  return 'en'
+}
+
 const CHILDCARE_CATEGORIES = [
   'childcare',
   'childcare.kindergarten',
@@ -91,10 +116,11 @@ const CHILDCARE_CATEGORIES = [
   'leisure.picnic.picnic_site',
   'leisure.picnic.picnic_table',
 ].join(',')
+
 // --- Reactive State ---
 const facilityNameQuery = ref('')
 const searchFilter = ref('radius')
-const radiusInMeters = ref(5000) // Default radius: 5000m
+const radiusInMeters = ref(500)
 const places = ref<PlaceFeature[]>([])
 const isLoading = ref(true)
 const errorMsg = ref<string | null>(null)
@@ -104,7 +130,7 @@ const locationInputQuery = ref('')
 const autocompleteSuggestions = ref<AutocompleteFeature[]>([])
 const selectedLocation = ref<AutocompleteFeature | null>(null)
 
-// NEW: State for the details sheet
+// State for the details sheet
 const selectedPlaceForSheet = ref<PlaceFeature | null>(null)
 const isSheetOpen = ref(false)
 
@@ -112,22 +138,23 @@ const isSheetOpen = ref(false)
 let map: L.Map | null = null
 const defaultCenter: LatLngExpression = [3.139, 101.6869]
 let circleLayer: L.Circle | null = null
-let boundaryLayer: L.GeoJSON | null = null
+let boundaryLayer: L.Rectangle | null = null
 let markerLayer: L.LayerGroup | null = null
 
-// --- Filter Options ---
-const filterOptions = [
-  { value: 'radius', label: 'By Radius' },
-  { value: 'location', label: 'By Location' },
-]
+// --- Filter Options (now computed for i18n) ---
+const filterOptions = computed(() => [
+  { value: 'radius', label: t('mapPage.filterOptions.radius') },
+  { value: 'location', label: t('mapPage.filterOptions.location') },
+])
 
 // --- Computed Properties ---
 const currentFilterLabel = computed(() => {
-  return filterOptions.find((option) => option.value === searchFilter.value)?.label ?? 'Filter'
+  return filterOptions.value.find((option) => option.value === searchFilter.value)?.label ?? t('mapPage.filterBy')
 })
 const showLocationCombobox = computed(() => searchFilter.value === 'location')
 
 // --- API Call Logic ---
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 const debounce = (func: Function, delay: number) => {
   let timeoutId: ReturnType<typeof setTimeout>
   return (...args: any[]) => {
@@ -143,7 +170,8 @@ const fetchAutocompleteSuggestions = debounce(async (query: string) => {
     autocompleteSuggestions.value = []
     return
   }
-  const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&type=locality&filter=countrycode:my&format=json&apiKey=${GEOAPIFY_API_KEY}`
+  const lang = getLanguageForAPI()
+  const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&type=locality&filter=countrycode:my&format=json&apiKey=${GEOAPIFY_API_KEY}&lang=${lang}`
   try {
     const response = await fetch(url)
     if (!response.ok) throw new Error('Network response was not ok')
@@ -183,7 +211,7 @@ const searchPlaces = async (params: URLSearchParams) => {
     )
     updateMapMarkers()
   } catch (err) {
-    errorMsg.value = `Could not find facilities.`
+    errorMsg.value = t('mapPage.errors.couldNotFind') // Translated error
     console.error(err)
   } finally {
     isLoading.value = false
@@ -192,10 +220,12 @@ const searchPlaces = async (params: URLSearchParams) => {
 
 // --- Event Handlers ---
 const handleSearch = () => {
+  const lang = getLanguageForAPI()
   const params = new URLSearchParams({
     categories: CHILDCARE_CATEGORIES,
     limit: '200',
     apiKey: GEOAPIFY_API_KEY,
+    lang,
   })
 
   if (facilityNameQuery.value.trim()) {
@@ -212,7 +242,7 @@ const handleSearch = () => {
     searchPlaces(params)
   } else if (searchFilter.value === 'location') {
     if (!selectedLocation.value) {
-      errorMsg.value = 'Please select a location from the list.'
+      errorMsg.value = t('mapPage.errors.selectLocation') // Translated error
       return
     }
     const placeId = selectedLocation.value.place_id
@@ -232,19 +262,21 @@ const fetchPlacesByCircle = async (lat: number, lon: number, radius: number) => 
   errorMsg.value = null
   if (boundaryLayer && map) map.removeLayer(boundaryLayer)
 
+  const lang = getLanguageForAPI()
   const params = new URLSearchParams({
     categories: CHILDCARE_CATEGORIES,
     filter: `circle:${lon},${lat},${radius}`,
-    limit: '100',
+    limit: '200',
     apiKey: GEOAPIFY_API_KEY,
+    lang,
   })
 
-  searchPlaces(params)
+  await searchPlaces(params)
   updateCircle(lat, lon, radius)
   if (map) map.setView([lat, lon], 15)
 }
 
-// NEW: Function to open the details sheet
+// Function to open the details sheet
 const openPlaceDetails = (place: PlaceFeature) => {
   selectedPlaceForSheet.value = place
   isSheetOpen.value = true
@@ -266,11 +298,12 @@ const initializeMap = () => {
 const updateMapMarkers = () => {
   if (!map || !markerLayer) return
   markerLayer.clearLayers()
+  const unnamed = t('mapPage.unnamedFacility') // Get translation
   places.value.forEach((place) => {
     const { lat, lon, name, address_line2 } = place.properties
     L.marker([lat, lon])
       .addTo(markerLayer!)
-      .bindPopup(`<b>${name ?? 'Unnamed Facility'}</b><br>${address_line2}`)
+      .bindPopup(`<b>${name ?? unnamed}</b><br>${address_line2}`) // Use translation
   })
 }
 
@@ -306,7 +339,7 @@ const updateBoundary = (bbox: AutocompleteFeature['bbox']) => {
   map.fitBounds(boundaryLayer.getBounds())
 }
 
-// --- Lifecycle ---
+// --- Lifecycle & Watchers ---
 onMounted(() => {
   initializeMap()
   if (navigator.geolocation) {
@@ -322,25 +355,33 @@ onMounted(() => {
 watch(searchFilter, () => {
   selectedLocation.value = null
 })
+
+// 监听语言变化并重新触发搜索
+watch(locale, (newLocale, oldLocale) => {
+  if (newLocale && oldLocale && newLocale !== oldLocale) {
+    handleSearch()
+    autocompleteSuggestions.value = []
+  }
+})
 </script>
 
 <template>
-  <div class="bg-black/70 h-full flex flex-col space-y-8 pt-8">
-    <div class="text-center text-white text-6xl font-bold">Childcare Facilities Near Me</div>
+  <div class="bg-black/70 h-full flex flex-col space-y-8 pt-8 pb-2">
+    <div class="text-center text-white text-6xl font-bold">{{ t('mapPage.title') }}</div>
     <div class="text-center text-white text-4xl">
-      Find childcare facilities near your office or home in Malaysia.
+      {{ t('mapPage.subtitle') }}
     </div>
 
     <div class="w-full flex-1 flex text-white gap-2 overflow-hidden">
       <div class="w-1/4 bg-[#243845] p-4 flex flex-col gap-4">
-        <div class="text-4xl">Search Here:</div>
+        <div class="text-4xl">{{ t('mapPage.searchTitle') }}</div>
 
         <div class="flex flex-col gap-3">
           <div class="bg-white text-black">
             <Input
               v-model="facilityNameQuery"
               type="text"
-              placeholder="Enter facility name (optional)"
+              :placeholder="t('mapPage.facilityNamePlaceholder')"
               class="h-full text-4xl w-full focus-visible:ring-0 border-none"
               @keyup.enter="handleSearch"
             />
@@ -358,7 +399,7 @@ watch(searchFilter, () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent class="w-56">
-                <DropdownMenuLabel>Filter By</DropdownMenuLabel>
+                <DropdownMenuLabel>{{ t('mapPage.filterBy') }}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup v-model="searchFilter">
                   <DropdownMenuRadioItem
@@ -385,7 +426,7 @@ watch(searchFilter, () => {
                   <div class="relative w-full items-center">
                     <ComboboxInput
                       class="pr-10 h-full w-full focus-visible:ring-0 border-none"
-                      placeholder="eg. Kuala Lumpur"
+                      :placeholder="t('mapPage.locationPlaceholder')"
                       :display-value="(loc: any) => loc?.address_line1"
                       @update:model-value="(query) => (locationInputQuery = query)"
                     />
@@ -398,7 +439,9 @@ watch(searchFilter, () => {
                 </ComboboxAnchor>
 
                 <ComboboxList class="bg-white text-black p-0">
-                  <ComboboxEmpty class="p-4 text-center text-lg">No location found.</ComboboxEmpty>
+                  <ComboboxEmpty class="p-4 text-center text-lg">{{
+                      t('mapPage.noLocationFound')
+                    }}</ComboboxEmpty>
                   <ComboboxGroup>
                     <ComboboxItem
                       v-for="suggestion in autocompleteSuggestions"
@@ -422,7 +465,7 @@ watch(searchFilter, () => {
                   class="h-full text-lg w-full focus-visible:ring-0 border-none"
                   @keyup.enter="handleSearch"
                 />
-                <span class="text-lg text-gray-500 pr-3">meters</span>
+                <span class="text-lg text-gray-500 pr-3">{{ t('mapPage.radiusUnit') }}</span>
               </div>
             </div>
 
@@ -436,13 +479,13 @@ watch(searchFilter, () => {
           </div>
         </div>
 
-        <ScrollArea class="h-full pe-3">
-          <div v-if="isLoading" class="text-center text-xl mt-10">Loading...</div>
+        <ScrollArea class="flex-1 min-h-0 pe-3">
+          <div v-if="isLoading" class="text-center text-xl mt-10">{{ t('mapPage.loading') }}</div>
           <div v-else-if="errorMsg" class="text-center text-red-400 text-xl mt-10">
             {{ errorMsg }}
           </div>
           <div v-else-if="places.length === 0" class="text-center text-xl mt-10">
-            No facilities found.
+            {{ t('mapPage.noFacilitiesFound') }}
           </div>
           <div v-else class="space-y-2">
             <div
@@ -452,13 +495,13 @@ watch(searchFilter, () => {
               @click="openPlaceDetails(place)"
             >
               <p class="text-xl font-bold truncate">
-                {{ place.properties.name ?? 'Unnamed Facility' }}
+                {{ place.properties.name ?? t('mapPage.unnamedFacility') }}
               </p>
               <p class="font-sans text-lg text-gray-600 truncate">
                 {{ place.properties.address_line2 }}
               </p>
               <p v-if="place.properties.distance" class="font-sans text-base text-blue-700">
-                {{ (place.properties.distance / 1000).toFixed(2) }} km away
+                {{ (place.properties.distance / 1000).toFixed(2) }} {{ t('mapPage.distanceAway') }}
               </p>
             </div>
           </div>
@@ -472,34 +515,35 @@ watch(searchFilter, () => {
       <SheetContent side="left" class="w-full sm:max-w-lg bg-white text-black overflow-y-auto">
         <SheetHeader class="mb-4">
           <SheetTitle class="text-3xl font-bold break-words">
-            {{ selectedPlaceForSheet?.properties.name ?? 'Unnamed Facility' }}
+            {{ selectedPlaceForSheet?.properties.name ?? t('mapPage.unnamedFacility') }}
           </SheetTitle>
           <SheetDescription class="text-base">
-            Detailed information
+            {{ t('mapPage.details.title') }}
           </SheetDescription>
         </SheetHeader>
         <div v-if="selectedPlaceForSheet" class="space-y-3 mx-4 text-lg">
           <div>
-            <p class="font-semibold text-gray-500">Address</p>
+            <p class="font-semibold text-gray-500">{{ t('mapPage.details.address') }}</p>
             <p>{{ selectedPlaceForSheet.properties.address_line1 }}</p>
             <p>{{ selectedPlaceForSheet.properties.address_line2 }}</p>
           </div>
           <div>
-            <p class="font-semibold text-gray-500">City</p>
+            <p class="font-semibold text-gray-500">{{ t('mapPage.details.city') }}</p>
             <p>{{ selectedPlaceForSheet.properties.city }}</p>
           </div>
           <div>
-            <p class="font-semibold text-gray-500">State</p>
+            <p class="font-semibold text-gray-500">{{ t('mapPage.details.state') }}</p>
             <p>{{ selectedPlaceForSheet.properties.state }}</p>
           </div>
           <div>
-            <p class="font-semibold text-gray-500">Postcode</p>
+            <p class="font-semibold text-gray-500">{{ t('mapPage.details.postcode') }}</p>
             <p>{{ selectedPlaceForSheet.properties.postcode }}</p>
           </div>
           <div v-if="selectedPlaceForSheet.properties.distance">
-            <p class="font-semibold text-gray-500">Distance</p>
+            <p class="font-semibold text-gray-500">{{ t('mapPage.details.distance') }}</p>
             <p class="text-blue-700 font-bold">
-              {{ (selectedPlaceForSheet.properties.distance / 1000).toFixed(2) }} km away
+              {{ (selectedPlaceForSheet.properties.distance / 1000).toFixed(2) }}
+              {{ t('mapPage.distanceAway') }}
             </p>
           </div>
         </div>
