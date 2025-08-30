@@ -3,6 +3,7 @@ import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { getJobListByLangAndMajorGroupCode } from '@/api'
+import TestQuiz from '@/views/testquiz.vue'
 
 type Job = {
   id: string
@@ -20,6 +21,16 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
 const error = ref('')
+
+const showQuizModal = ref(false)
+
+function goToQuiz() {
+  showQuizModal.value = true 
+}
+
+function closeQuizModal() {
+  showQuizModal.value = false
+}
 
 // derive industry from slug and get majorGroupCode from query
 const industrySlug = computed(() => String(route.params.industry || 'industry'))
@@ -147,7 +158,7 @@ onMounted(() => {
         <button
           type="button"
           class="font-bold underline underline-offset-2"
-          @click="onJobQuizClick"
+          @click="goToQuiz"
         >
           here
         </button>
@@ -194,10 +205,34 @@ onMounted(() => {
       class="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#C65A0F] text-white shadow-lg flex items-center justify-center text-sm md:text-base font-bold"
       aria-label="Job quiz"
       title="Job quiz"
-      @click="onJobQuizClick"
+      @click="goToQuiz"
     >
       Job Quiz
     </button>
+  </div>
+  <!-- Modal弹窗 -->
+  <div 
+    v-if="showQuizModal" 
+    class="fixed backdrop-blur-sm bg-white/20 flex justify-center p-4"
+    style="top: 90px; left: 0; right: 0; bottom: 0;"
+    @click.self="closeQuizModal"
+  >
+    <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-end items-center p-6 border-b">
+        <button 
+          @click="closeQuizModal"
+          class="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+      
+      <!-- 问卷组件 -->
+      <div class="p-6">
+        <TestQuiz @quiz-completed="closeQuizModal" />
+      </div>
+    </div>
   </div>
 </template>
 

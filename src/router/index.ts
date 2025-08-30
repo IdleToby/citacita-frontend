@@ -9,6 +9,7 @@ import AIView from '@/views/AIView.vue'
 import MapView from '@/views/MapView.vue'
 import FAQView from '@/views/FAQView.vue'
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -56,6 +57,7 @@ const router = createRouter({
       name: 'faq',
       component: FAQView,
     }
+
   ],
 })
 
