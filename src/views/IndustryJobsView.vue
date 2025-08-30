@@ -1,19 +1,29 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Input } from '@/components/ui/input'
+import { getJobListByLangAndMajorGroupCode } from '@/api'
 
 type Job = {
-  id: number
+  id: string
   title: string
-  location?: string
+  majorGroupCode?: string
+  majorGroupTitle?: string
+  subMajorGroupCode?: string
+  subMajorGroupTitle?: string
+  minorGroupCode?: string
+  minorGroupTitle?: string
+  unitGroupCode?: string
 }
 
 const route = useRoute()
 const router = useRouter()
+const loading = ref(false)
+const error = ref('')
 
-// derive industry from slug
+// derive industry from slug and get majorGroupCode from query
 const industrySlug = computed(() => String(route.params.industry || 'industry'))
+const majorGroupCode = computed(() => String(route.query.majorGroupCode || ''))
 const industryName = computed(() =>
   industrySlug.value
     .split('-')
@@ -21,22 +31,43 @@ const industryName = computed(() =>
     .join(' ')
 )
 
-// placeholder 10 job titles (for job search/autocomplete)
-const jobTitlePool = [
-  'Farmer',
-  'Accountant',
-  'Software Engineer',
-  'Teacher',
-  'Nurse',
-  'Sales Associate',
-  'Mechanic',
-  'Construction Worker',
-  'Machine Operator',
-  'Security Guard',
-]
-const jobs = ref<Job[]>(jobTitlePool.map((title, i) => ({ id: i + 1, title })))
-
+// Jobs fetched from API
+const jobs = ref<Job[]>([])
 const jobQuery = ref('')
+
+// Fetch jobs for the selected industry
+async function fetchJobs() {
+  if (!majorGroupCode.value) {
+    error.value = 'No industry selected'
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+  try {
+    const response = await getJobListByLangAndMajorGroupCode('en', majorGroupCode.value)
+    if (response.data.code === 200) {
+      jobs.value = response.data.data.map((item: any) => ({
+        id: item.unitGroupCode,
+        title: item.unitGroupTitle,
+        majorGroupCode: item.majorGroupCode,
+        majorGroupTitle: item.majorGroupTitle,
+        subMajorGroupCode: item.subMajorGroupCode,
+        subMajorGroupTitle: item.subMajorGroupTitle,
+        minorGroupCode: item.minorGroupCode,
+        minorGroupTitle: item.minorGroupTitle,
+        unitGroupCode: item.unitGroupCode
+      }))
+    } else {
+      error.value = 'Failed to fetch jobs'
+    }
+  } catch (err) {
+    console.error('Error fetching jobs:', err)
+    error.value = 'Error connecting to server'
+  } finally {
+    loading.value = false
+  }
+}
 
 const filteredJobs = computed(() => {
   const q = jobQuery.value.trim().toLowerCase()
@@ -47,20 +78,40 @@ const filteredJobs = computed(() => {
 const suggestions = computed(() => {
   const q = jobQuery.value.trim().toLowerCase()
   if (!q) return [] as string[]
-  return jobTitlePool.filter((t) => t.toLowerCase().startsWith(q)).slice(0, 5)
+  return jobs.value
+    .filter((j) => j.title.toLowerCase().startsWith(q))
+    .map(j => j.title)
+    .slice(0, 5)
 })
 
 function chooseSuggestion(t: string) {
   jobQuery.value = t
 }
 
-function goToJob(jobId: number) {
-  router.push({ name: 'job-description', params: { industry: industrySlug.value, jobId } })
+function goToJob(jobId: string) {
+  router.push({
+    name: 'job-description',
+    params: { industry: industrySlug.value, jobId },
+    query: { unitGroupCode: jobId }
+  })
 }
 
 function onJobQuizClick() {
   // Placeholder – same behavior as the floating bubble for now
 }
+
+// Watch for route changes to refetch jobs
+watch(majorGroupCode, () => {
+  if (majorGroupCode.value) {
+    fetchJobs()
+  }
+})
+
+onMounted(() => {
+  if (majorGroupCode.value) {
+    fetchJobs()
+  }
+})
 </script>
 
 <template>
@@ -103,7 +154,24 @@ function onJobQuizClick() {
         to take our job quiz!
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <!-- Loading state -->
+      <div v-if="loading" class="text-center py-8">
+        <p>Loading jobs...</p>
+      </div>
+
+      <!-- Error state -->
+      <div v-else-if="error" class="text-center py-8 text-red-600">
+        <p>{{ error }}</p>
+        <button
+          @click="fetchJobs"
+          class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+
+      <!-- Jobs grid -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <button
           v-for="job in filteredJobs"
           :key="job.id"

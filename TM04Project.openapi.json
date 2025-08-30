@@ -1,0 +1,453 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "TM04Project",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/api/skill/getSkillLevelByLang": {
+      "get": {
+        "summary": "getSkillLevelByLang",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "zh-CN",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "majorGroupCode": {
+                            "type": "string"
+                          },
+                          "majorGroupTitle": {
+                            "type": "string"
+                          },
+                          "educationLevel": {
+                            "type": "string"
+                          },
+                          "skillLevel": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "majorGroupCode",
+                          "majorGroupTitle",
+                          "educationLevel",
+                          "skillLevel"
+                        ]
+                      }
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/skill/getSkillLevelByLangAndId": {
+      "get": {
+        "summary": "getSkillLevelByLangAndMajorGroupCode",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "zh-CN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "majorGroupCode",
+            "in": "query",
+            "description": "ID",
+            "required": true,
+            "example": "3",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "majorGroupCode": {
+                          "type": "string"
+                        },
+                        "majorGroupTitle": {
+                          "type": "string"
+                        },
+                        "educationLevel": {
+                          "type": "string"
+                        },
+                        "skillLevel": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "majorGroupCode",
+                        "majorGroupTitle",
+                        "educationLevel",
+                        "skillLevel"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/job/getJobListByLangAndMajorGroupCode": {
+      "get": {
+        "summary": "getJobListByLangAndMajorGroup",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "zh-CN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "majorGroupCode",
+            "in": "query",
+            "description": "ID",
+            "required": true,
+            "example": "3",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "unitGroupCode": {
+                            "type": "string"
+                          },
+                          "majorGroupCode": {
+                            "type": "string"
+                          },
+                          "majorGroupTitle": {
+                            "type": "string"
+                          },
+                          "subMajorGroupCode": {
+                            "type": "string"
+                          },
+                          "subMajorGroupTitle": {
+                            "type": "string"
+                          },
+                          "minorGroupCode": {
+                            "type": "string"
+                          },
+                          "minorGroupTitle": {
+                            "type": "string"
+                          },
+                          "unitGroupTitle": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "unitGroupCode",
+                          "majorGroupCode",
+                          "majorGroupTitle",
+                          "subMajorGroupCode",
+                          "subMajorGroupTitle",
+                          "minorGroupCode",
+                          "minorGroupTitle",
+                          "unitGroupTitle"
+                        ]
+                      }
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/job/getDetailJobByLangAndUnitGroupCode": {
+      "get": {
+        "summary": "getDetailJobByLangAndUnitGroupCode",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "zh-CN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitGroupCode",
+            "in": "query",
+            "description": "ID",
+            "required": true,
+            "example": "3",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "unitGroupCode": {
+                          "type": "string"
+                        },
+                        "majorGroupCode": {
+                          "type": "string"
+                        },
+                        "majorGroupTitle": {
+                          "type": "string"
+                        },
+                        "subMajorGroupCode": {
+                          "type": "string"
+                        },
+                        "subMajorGroupTitle": {
+                          "type": "string"
+                        },
+                        "minorGroupCode": {
+                          "type": "string"
+                        },
+                        "minorGroupTitle": {
+                          "type": "string"
+                        },
+                        "unitGroupTitle": {
+                          "type": "string"
+                        },
+                        "unitGroupDescription": {
+                          "type": "string"
+                        },
+                        "tasksInclude": {
+                          "type": "string"
+                        },
+                        "skillLevel": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "unitGroupCode",
+                        "majorGroupCode",
+                        "majorGroupTitle",
+                        "subMajorGroupCode",
+                        "subMajorGroupTitle",
+                        "minorGroupCode",
+                        "minorGroupTitle",
+                        "unitGroupTitle",
+                        "unitGroupDescription",
+                        "tasksInclude",
+                        "examples",
+                        "skillLevel"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/job/autoCompleteJobByLangAndUnitGroupTitle": {
+      "get": {
+        "summary": "autoCompleteJobByLangAndUnitGroupTitle",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "zh-CN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unitGroupTitle",
+            "in": "query",
+            "description": "ID",
+            "required": true,
+            "example": "3",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "unitGroupCode": {
+                            "type": "string"
+                          },
+                          "unitGroupTitle": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "unitGroupCode",
+                          "unitGroupTitle"
+                        ]
+                      }
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "securitySchemes": {}
+  },
+  "servers": [],
+  "security": []
+}
