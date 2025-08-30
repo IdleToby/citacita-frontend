@@ -16,8 +16,8 @@
           <span class="option-text">
             {{ typeof option === 'object' ? option.value : option }}
           </span>
-          <span 
-            v-if="typeof option === 'object' && option.description" 
+          <span
+            v-if="typeof option === 'object' && option.description"
             class="info-icon"
             :title="option.description"
           >
@@ -29,8 +29,8 @@
       <div class="buttons">
         <button @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
         <!-- 最后一个问题显示Submit -->
-        <button 
-          @click="nextQuestion" 
+        <button
+          @click="nextQuestion"
           :disabled="!answers[currentQuestion]"
           :class="{ 'submit-button': isLastQuestion }"
         >
@@ -41,41 +41,49 @@
 
     <!-- 结果显示 -->
     <div v-else>
-    <h3>Recommended Unit Groups</h3>
-    
-    <div v-if="recommendedUnits[0]?.unit_group_code === 'No matching results'">
+      <h3>Recommended Unit Groups</h3>
+
+      <div v-if="recommendedUnits[0]?.unit_group_code === 'No matching results'">
         <p>No matching careers found. Please try different options.</p>
-    </div>
-    
-    <div v-else>
+      </div>
+
+      <div v-else>
         <p>Based on your answers, we recommend these careers:</p>
         <ul class="recommendation-list">
 
-        <li v-for="(unit, index) in recommendedUnits" :key="unit.unit_group_code" class="recommendation-item" >
+          <li v-for="(unit, index) in recommendedUnits" :key="unit.unit_group_code"
+              class="recommendation-item">
             <div class="rank-title">
-            <strong class="clickable-title" @click="goToJob(unit)">#{{ index + 1 }}: {{ unit.unit_group_code }} - {{ unit.unit_group_title }}</strong>
+              <strong class="clickable-title" @click="goToJob(unit)">#{{ index + 1 }}:
+                {{ unit.unit_group_code }} - {{ unit.unit_group_title }}</strong>
             </div>
             <div class="match-info">
-            <span class="match-score">Matching Percentage: {{ unit.score }}%</span>
+              <span class="match-score">Matching Percentage: {{ unit.score }}%</span>
             </div>
             <div class="match-reason">
-            <span>Matching reason: {{ unit.matchReason }}</span>
+              <span>Matching reason: {{ unit.matchReason }}</span>
             </div>
-        </li>
+          </li>
         </ul>
-    </div>
-    <div class="result-buttons">
-      <button @click="restart">Restart Questionnaire</button>
-      <button @click="finishQuiz" class="close-button">
-        Close Quiz
-      </button>
-    </div>
+      </div>
+      <div class="result-buttons">
+        <button @click="restart">Restart Questionnaire</button>
+        <button @click="finishQuiz" class="close-button">
+          Close Quiz
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { reactive, ref, computed, watch } from "vue";
+<script setup lang="ts">
+import {computed, reactive, ref, watch} from "vue";
+// ----------------------
+// 5. 模拟数据
+// ----------------------
+import unitData from "@/data/unit_group_data.json";
+import majorGroupKeywords from "@/data/major_group_keywords.json";
+import {useRouter} from 'vue-router'
 
 const emit = defineEmits(['quiz-completed'])
 
@@ -98,7 +106,7 @@ const baseQuestions = [
         description: "Plan, lead, and coordinate the policies and activities of organizations, departments, or enterprises."
       },
       {
-        value: "Professionals", 
+        value: "Professionals",
         description: "Apply scientific or artistic knowledge, conduct research, or teach specialized subjects."
       },
       {
@@ -110,7 +118,7 @@ const baseQuestions = [
         description: "Manage records, organize information, and handle administrative and clerical tasks."
       },
       {
-        value: "Service and Sales Workers", 
+        value: "Service and Sales Workers",
         description: "Provide personal services, protection, or sell goods in shops, markets, or similar settings."
       },
       {
@@ -122,7 +130,7 @@ const baseQuestions = [
         description: "Construct, repair, and produce goods using tools, machinery, and specialized techniques."
       },
       {
-        value: "Plant and Machine Operators and Assemblers", 
+        value: "Plant and Machine Operators and Assemblers",
         description: "Operate and monitor machinery, vehicles, or industrial equipment; assemble products."
       },
       {
@@ -145,74 +153,224 @@ const baseQuestions = [
 // ----------------------
 const majorGroupQuestions = {
   "1": [
-    {"question": "Which activity appeals to you most in a managerial context?", "options": ["planning / tasks", "managing / related", "monitoring / directing", "operations / workers"]},
-    {"question": "Which managerial task would you like to perform?", "options": ["managers / services", "performing / organisation", "policies / scheduling", "activities / procedures"]},
-    {"question": "Which of these management responsibilities do you prefer?", "options": ["overseeing / plan", "ensuring / controlling", "directing / operations", "workers / services"]},
-    {"question": "Which management activity interests you the most?", "options": ["activities / scheduling", "tasks / monitoring", "planning / directing", "organisation / policies"]},
-    {"question": "Which aspect of managerial work is appealing?", "options": ["performing / tasks", "managing / operations", "workers / ensuring", "services / monitoring"]}
+    {
+      "question": "Which activity appeals to you most in a managerial context?",
+      "options": ["planning / tasks", "managing / related", "monitoring / directing", "operations / workers"]
+    },
+    {
+      "question": "Which managerial task would you like to perform?",
+      "options": ["managers / services", "performing / organisation", "policies / scheduling", "activities / procedures"]
+    },
+    {
+      "question": "Which of these management responsibilities do you prefer?",
+      "options": ["overseeing / plan", "ensuring / controlling", "directing / operations", "workers / services"]
+    },
+    {
+      "question": "Which management activity interests you the most?",
+      "options": ["activities / scheduling", "tasks / monitoring", "planning / directing", "organisation / policies"]
+    },
+    {
+      "question": "Which aspect of managerial work is appealing?",
+      "options": ["performing / tasks", "managing / operations", "workers / ensuring", "services / monitoring"]
+    }
   ],
   "2": [
-    {"question": "Which professional activity interests you?", "options": ["work / related", "performing / knowledge", "coordinating / performance", "tasks / preparing"]},
-    {"question": "Which professional task appeals to you?", "options": ["enhancing / research", "systems / development", "conducting / planning", "advising / health"]},
-    {"question": "Which of these professional responsibilities do you prefer?", "options": ["reports / information", "developing / methods", "planning / knowledge", "tasks / coordinating"]},
-    {"question": "Which professional activity would you like to perform?", "options": ["preparing / development", "research / systems", "advising / performance", "enhancing / work"]},
-    {"question": "Which professional task is most appealing?", "options": ["work / tasks", "knowledge / development", "coordination / planning", "information / conducting"]}
+    {
+      "question": "Which professional activity interests you?",
+      "options": ["work / related", "performing / knowledge", "coordinating / performance", "tasks / preparing"]
+    },
+    {
+      "question": "Which professional task appeals to you?",
+      "options": ["enhancing / research", "systems / development", "conducting / planning", "advising / health"]
+    },
+    {
+      "question": "Which of these professional responsibilities do you prefer?",
+      "options": ["reports / information", "developing / methods", "planning / knowledge", "tasks / coordinating"]
+    },
+    {
+      "question": "Which professional activity would you like to perform?",
+      "options": ["preparing / development", "research / systems", "advising / performance", "enhancing / work"]
+    },
+    {
+      "question": "Which professional task is most appealing?",
+      "options": ["work / tasks", "knowledge / development", "coordination / planning", "information / conducting"]
+    }
   ],
   "3": [
-    {"question": "Which technician task interests you?", "options": ["tasks / monitoring", "related / performing", "equipment / workers", "supervising / scheduling"]},
-    {"question": "Which technical activity do you prefer?", "options": ["work / assisting", "technical / preparing", "medical / materials", "operating / health"]},
-    {"question": "Which technician responsibility appeals to you?", "options": ["preparing / systems", "scheduling / technical", "monitoring / equipment", "assisting / performing"]},
-    {"question": "Which technical task is most interesting?", "options": ["workers / operating", "tasks / materials", "technical / research", "health / systems"]},
-    {"question": "Which aspect of technical work do you like?", "options": ["supervising / preparing", "assisting / tasks", "equipment / monitoring", "operating / technical"]}
+    {
+      "question": "Which technician task interests you?",
+      "options": ["tasks / monitoring", "related / performing", "equipment / workers", "supervising / scheduling"]
+    },
+    {
+      "question": "Which technical activity do you prefer?",
+      "options": ["work / assisting", "technical / preparing", "medical / materials", "operating / health"]
+    },
+    {
+      "question": "Which technician responsibility appeals to you?",
+      "options": ["preparing / systems", "scheduling / technical", "monitoring / equipment", "assisting / performing"]
+    },
+    {
+      "question": "Which technical task is most interesting?",
+      "options": ["workers / operating", "tasks / materials", "technical / research", "health / systems"]
+    },
+    {
+      "question": "Which aspect of technical work do you like?",
+      "options": ["supervising / preparing", "assisting / tasks", "equipment / monitoring", "operating / technical"]
+    }
   ],
   "4": [
-    {"question": "Which clerical task appeals to you?", "options": ["tasks / related", "information / workers", "performing / supervising", "scheduling / records"]},
-    {"question": "Which clerical activity would you prefer?", "options": ["monitoring / clients", "preparing / clerks", "documents / telephone", "data / services"]},
-    {"question": "Which aspect of clerical work interests you?", "options": ["receiving / recording", "reports / mail", "supervising / tasks", "workers / information"]},
-    {"question": "Which clerical task would you choose?", "options": ["preparing / documents", "monitoring / records", "clients / data", "scheduling / services"]},
-    {"question": "Which clerical responsibility appeals to you most?", "options": ["tasks / clerks", "information / monitoring", "performing / records", "data / clients"]}
+    {
+      "question": "Which clerical task appeals to you?",
+      "options": ["tasks / related", "information / workers", "performing / supervising", "scheduling / records"]
+    },
+    {
+      "question": "Which clerical activity would you prefer?",
+      "options": ["monitoring / clients", "preparing / clerks", "documents / telephone", "data / services"]
+    },
+    {
+      "question": "Which aspect of clerical work interests you?",
+      "options": ["receiving / recording", "reports / mail", "supervising / tasks", "workers / information"]
+    },
+    {
+      "question": "Which clerical task would you choose?",
+      "options": ["preparing / documents", "monitoring / records", "clients / data", "scheduling / services"]
+    },
+    {
+      "question": "Which clerical responsibility appeals to you most?",
+      "options": ["tasks / clerks", "information / monitoring", "performing / records", "data / clients"]
+    }
   ],
   "5": [
-    {"question": "Which service/sales task interests you?", "options": ["performing / tasks", "related / workers", "goods / supervising", "customers / food"]},
-    {"question": "Which service activity appeals to you?", "options": ["services / care", "taking / cleaning", "preparing / assisting", "sales / items"]},
-    {"question": "Which aspect of service work do you like?", "options": ["ensuring / vehicles", "giving / personal", "tasks / goods", "workers / performing"]},
-    {"question": "Which service/sales task would you choose?", "options": ["performing / tasks", "related / cleaning", "goods / assisting", "customers / services"]},
-    {"question": "Which service activity is most appealing?", "options": ["preparing / workers", "sales / items", "care / services", "taking / tasks"]}
+    {
+      "question": "Which service/sales task interests you?",
+      "options": ["performing / tasks", "related / workers", "goods / supervising", "customers / food"]
+    },
+    {
+      "question": "Which service activity appeals to you?",
+      "options": ["services / care", "taking / cleaning", "preparing / assisting", "sales / items"]
+    },
+    {
+      "question": "Which aspect of service work do you like?",
+      "options": ["ensuring / vehicles", "giving / personal", "tasks / goods", "workers / performing"]
+    },
+    {
+      "question": "Which service/sales task would you choose?",
+      "options": ["performing / tasks", "related / cleaning", "goods / assisting", "customers / services"]
+    },
+    {
+      "question": "Which service activity is most appealing?",
+      "options": ["preparing / workers", "sales / items", "care / services", "taking / tasks"]
+    }
   ],
   "6": [
-    {"question": "Which agricultural task interests you?", "options": ["products / marketing", "performing / livestock", "related / crops", "sale / operations"]},
-    {"question": "Which farming activity appeals to you?", "options": ["tasks / markets", "determining / maintaining", "animals / delivery", "farm / regular"]},
-    {"question": "Which agricultural responsibility do you prefer?", "options": ["organisations / purchasing", "supplies / delivery", "performing / crops", "related / farm"]},
-    {"question": "Which farm-related task interests you?", "options": ["tasks / livestock", "maintaining / products", "marketing / delivery", "operations / crops"]},
-    {"question": "Which aspect of agricultural work appeals to you?", "options": ["farm / animals", "sale / tasks", "determining / supplies", "regular / markets"]}
+    {
+      "question": "Which agricultural task interests you?",
+      "options": ["products / marketing", "performing / livestock", "related / crops", "sale / operations"]
+    },
+    {
+      "question": "Which farming activity appeals to you?",
+      "options": ["tasks / markets", "determining / maintaining", "animals / delivery", "farm / regular"]
+    },
+    {
+      "question": "Which agricultural responsibility do you prefer?",
+      "options": ["organisations / purchasing", "supplies / delivery", "performing / crops", "related / farm"]
+    },
+    {
+      "question": "Which farm-related task interests you?",
+      "options": ["tasks / livestock", "maintaining / products", "marketing / delivery", "operations / crops"]
+    },
+    {
+      "question": "Which aspect of agricultural work appeals to you?",
+      "options": ["farm / animals", "sale / tasks", "determining / supplies", "regular / markets"]
+    }
   ],
   "7": [
-    {"question": "Which craft/trade task interests you?", "options": ["related / performing", "tasks / repairing", "making / equipment", "metal / repair"]},
-    {"question": "Which craft activity appeals to you?", "options": ["materials / using", "buildings / installing", "parts / articles", "cutting / workers"]},
-    {"question": "Which aspect of craft work do you like?", "options": ["machines / structures", "make / related", "performing / tasks", "repair / equipment"]},
-    {"question": "Which craft task would you choose?", "options": ["installing / buildings", "materials / cutting", "articles / workers", "metal / tasks"]},
-    {"question": "Which craft responsibility interests you?", "options": ["making / performing", "repairing / tasks", "equipment / related", "using / structures"]}
+    {
+      "question": "Which craft/trade task interests you?",
+      "options": ["related / performing", "tasks / repairing", "making / equipment", "metal / repair"]
+    },
+    {
+      "question": "Which craft activity appeals to you?",
+      "options": ["materials / using", "buildings / installing", "parts / articles", "cutting / workers"]
+    },
+    {
+      "question": "Which aspect of craft work do you like?",
+      "options": ["machines / structures", "make / related", "performing / tasks", "repair / equipment"]
+    },
+    {
+      "question": "Which craft task would you choose?",
+      "options": ["installing / buildings", "materials / cutting", "articles / workers", "metal / tasks"]
+    },
+    {
+      "question": "Which craft responsibility interests you?",
+      "options": ["making / performing", "repairing / tasks", "equipment / related", "using / structures"]
+    }
   ],
   "8": [
-    {"question": "Which plant/machine operator task appeals to you?", "options": ["operating / machines", "monitoring / equipment", "products / related", "performing / tasks"]},
-    {"question": "Which machine operation activity interests you?", "options": ["operators / operate", "machine / materials", "machinery / paper", "monitor / metal"]},
-    {"question": "Which operator task do you prefer?", "options": ["plant / make", "used / equipment", "tasks / performing", "machines / monitoring"]},
-    {"question": "Which aspect of machinery work appeals to you?", "options": ["products / related", "operators / machine", "materials / operate", "monitor / plant"]},
-    {"question": "Which plant/machine operator task would you choose?", "options": ["machines / performing", "equipment / tasks", "monitoring / operators", "materials / machinery"]}
+    {
+      "question": "Which plant/machine operator task appeals to you?",
+      "options": ["operating / machines", "monitoring / equipment", "products / related", "performing / tasks"]
+    },
+    {
+      "question": "Which machine operation activity interests you?",
+      "options": ["operators / operate", "machine / materials", "machinery / paper", "monitor / metal"]
+    },
+    {
+      "question": "Which operator task do you prefer?",
+      "options": ["plant / make", "used / equipment", "tasks / performing", "machines / monitoring"]
+    },
+    {
+      "question": "Which aspect of machinery work appeals to you?",
+      "options": ["products / related", "operators / machine", "materials / operate", "monitor / plant"]
+    },
+    {
+      "question": "Which plant/machine operator task would you choose?",
+      "options": ["machines / performing", "equipment / tasks", "monitoring / operators", "materials / machinery"]
+    }
   ],
   "9": [
-    {"question": "Which elementary occupation task interests you?", "options": ["tasks / related", "cleaning / performing", "goods / collecting", "various / washing"]},
-    {"question": "Which basic work activity appeals to you?", "options": ["labourers / work", "food / clean", "perform / materials", "simple / items"]},
-    {"question": "Which elementary task would you choose?", "options": ["hand / loading", "unloading / carrying", "tasks / performing", "goods / clean"]},
-    {"question": "Which basic work responsibility interests you?", "options": ["various / labourers", "food / items", "clean / perform", "materials / tasks"]},
-    {"question": "Which elementary activity appeals to you most?", "options": ["tasks / related", "cleaning / goods", "performing / work", "collecting / items"]}
+    {
+      "question": "Which elementary occupation task interests you?",
+      "options": ["tasks / related", "cleaning / performing", "goods / collecting", "various / washing"]
+    },
+    {
+      "question": "Which basic work activity appeals to you?",
+      "options": ["labourers / work", "food / clean", "perform / materials", "simple / items"]
+    },
+    {
+      "question": "Which elementary task would you choose?",
+      "options": ["hand / loading", "unloading / carrying", "tasks / performing", "goods / clean"]
+    },
+    {
+      "question": "Which basic work responsibility interests you?",
+      "options": ["various / labourers", "food / items", "clean / perform", "materials / tasks"]
+    },
+    {
+      "question": "Which elementary activity appeals to you most?",
+      "options": ["tasks / related", "cleaning / goods", "performing / work", "collecting / items"]
+    }
   ],
   "0": [
-    {"question": "Which armed forces task appeals to you?", "options": ["personnel / support", "officers / ensuring", "planning / public", "combat / order"]},
-    {"question": "Which defense activity interests you?", "options": ["training / knowledge", "group / assets", "duty / defence", "threats / deployed"]},
-    {"question": "Which armed forces responsibility would you choose?", "options": ["assisting / helping", "provides / groups", "planning / training", "knowledge / duty"]},
-    {"question": "Which defense task appeals to you most?", "options": ["public / combat", "order / training", "knowledge / group", "assets / deployed"]},
-    {"question": "Which armed forces activity interests you?", "options": ["personnel / support", "planning / order", "officers / duty", "combat / threats"]}
+    {
+      "question": "Which armed forces task appeals to you?",
+      "options": ["personnel / support", "officers / ensuring", "planning / public", "combat / order"]
+    },
+    {
+      "question": "Which defense activity interests you?",
+      "options": ["training / knowledge", "group / assets", "duty / defence", "threats / deployed"]
+    },
+    {
+      "question": "Which armed forces responsibility would you choose?",
+      "options": ["assisting / helping", "provides / groups", "planning / training", "knowledge / duty"]
+    },
+    {
+      "question": "Which defense task appeals to you most?",
+      "options": ["public / combat", "order / training", "knowledge / group", "assets / deployed"]
+    },
+    {
+      "question": "Which armed forces activity interests you?",
+      "options": ["personnel / support", "planning / order", "officers / duty", "combat / threats"]
+    }
   ]
 };
 
@@ -228,22 +386,22 @@ const isLastQuestion = computed(() => {
   if (!answers[1]) {
     return false;
   }
-  
+
   // 找到对应的 major group code
   const selectedMajorTitle = answers[1];
-  const selectedMajorCode = Object.keys(majorGroupQuestions).find(code => 
+  const selectedMajorCode = Object.keys(majorGroupQuestions).find(code =>
     mapMajorGroupCodeToTitle(code) === selectedMajorTitle
   );
-  
+
   // 如果找到了对应的code并且有对应的问题，计算总数
   if (selectedMajorCode && majorGroupQuestions[selectedMajorCode]) {
     const expectedTotal = 2 + majorGroupQuestions[selectedMajorCode].length; // 2个基础 + 5个major group
     const isLast = currentQuestion.value === expectedTotal - 1;
-    
+
     console.log(`Expected total: ${expectedTotal}, Current: ${currentQuestion.value}, Questions length: ${questions.length}, Is last: ${isLast}`);
     return isLast;
   }
-  
+
   return false;
 });
 
@@ -284,12 +442,6 @@ function mapMajorGroupCodeToTitle(code) {
 }
 
 // ----------------------
-// 5. 模拟数据
-// ----------------------
-import unitData from "@/data/unit_group_data.json";
-import majorGroupKeywords from "@/data/major_group_keywords.json";
-
-// ----------------------
 // 6. 分数计算和推荐逻辑
 // ----------------------
 const allScores = ref([]);
@@ -297,7 +449,7 @@ const allScores = ref([]);
 // 新增：提取用户选择的关键词
 function extractUserSelectedKeywords() {
   const selectedKeywords = [];
-  
+
   // 从第3题开始（前2题是基础信息）
   for (let i = 2; i < answers.length; i++) {
     if (answers[i]) {
@@ -306,61 +458,61 @@ function extractUserSelectedKeywords() {
       selectedKeywords.push(...keywords);
     }
   }
-  
+
   return selectedKeywords.map(k => k.trim().toLowerCase());
 }
 
 function computeScores() {
   const scores = [];
-  
+
   const selectedMajorTitle = answers[1];
-  const selectedMajorCode = Object.keys(majorGroupQuestions).find(code => 
+  const selectedMajorCode = Object.keys(majorGroupQuestions).find(code =>
     mapMajorGroupCodeToTitle(code) === selectedMajorTitle
   );
   const selectedSkillLevel = answers[0];
-  
+
   // 获取用户选择的关键词
   const userSelectedKeywords = extractUserSelectedKeywords();
   console.log('User selected keywords:', userSelectedKeywords);
-  
+
   unitData.forEach((unit) => {
     let score = 0;
-    let details = {
+    const details = {
       skillMatch: 0,
       majorMatch: 0,
       keywordMatch: 0,
       userChoiceMatch: 0 // 新增：用户选择匹配
     };
-    
+
     // 1. 教育等级匹配（权重: 20%）
     if (selectedSkillLevel === unit.skill_level) {
       details.skillMatch = 20;
       score += 20;
     }
-    
+
     // 2. Major Group匹配（权重: 25%）
     if (selectedMajorTitle === unit.major_group_title) {
       details.majorMatch = 25;
       score += 25;
     }
-    
+
     // 3. 预定义关键词匹配（权重: 30%）
     const unitKeywords = majorGroupKeywords[selectedMajorCode]?.keywords || [];
     const text = (unit.unit_group_description + " " + unit.tasks_include).toLowerCase();
-    
+
     let keywordMatches = 0;
     unitKeywords.forEach((keyword) => {
       if (text.includes(keyword.toLowerCase())) {
         keywordMatches++;
       }
     });
-    
-    const keywordScore = unitKeywords.length > 0 
+
+    const keywordScore = unitKeywords.length > 0
       ? Math.min((keywordMatches / unitKeywords.length) * 30, 30)
       : 0;
     details.keywordMatch = keywordScore;
     score += keywordScore;
-    
+
     // 4. 新增：用户选择关键词匹配（权重: 25%）
     let userChoiceMatches = 0;
     userSelectedKeywords.forEach((keyword) => {
@@ -368,19 +520,19 @@ function computeScores() {
         userChoiceMatches++;
       }
     });
-    
-    const userChoiceScore = userSelectedKeywords.length > 0 
+
+    const userChoiceScore = userSelectedKeywords.length > 0
       ? Math.min((userChoiceMatches / userSelectedKeywords.length) * 25, 25)
       : 0;
     details.userChoiceMatch = userChoiceScore;
     score += userChoiceScore;
-    
+
     console.log(`Unit ${unit.unit_group_code}:`);
     console.log(`  +${details.skillMatch} for skill match`);
     console.log(`  +${details.majorMatch} for major group match`);
     console.log(`  +${keywordScore.toFixed(1)} for predefined keywords (${keywordMatches}/${unitKeywords.length})`);
     console.log(`  +${userChoiceScore.toFixed(1)} for user choice keywords (${userChoiceMatches}/${userSelectedKeywords.length})`);
-    
+
     scores.push({
       unit_group_code: unit.unit_group_code,
       score: Math.round(score),
@@ -391,42 +543,38 @@ function computeScores() {
       details: details,
     });
   });
-  
+
   // 按分数降序排序
   return scores.sort((a, b) => b.score - a.score);
-}
-
-function getUnitScore(unitCode) {
-  const unit = allScores.value.find(item => item.unit_group_code === unitCode);
-  return unit ? unit.score : 0;
 }
 
 // 新增：生成匹配原因说明
 function generateMatchReason(item) {
   const reasons = [];
   if (item.details?.skillMatch > 15) reasons.push("Educational Matching");
-  if (item.details?.majorMatch > 20) reasons.push("Professional field matching");  
+  if (item.details?.majorMatch > 20) reasons.push("Professional field matching");
   if (item.details?.keywordMatch > 20) reasons.push("Skill keyword matching");
   if (item.details?.userChoiceMatch > 15) reasons.push("Personal choice preference matching");
-  
+
   return reasons.join(" + ") || "Basic Matching";
 }
 
 const recommendedUnits = computed(() => {
   if (currentQuestion.value < questions.length) return [];
-  
+
   // 计算分数并存储
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   allScores.value = computeScores();
-  
+
   if (allScores.value.length === 0) {
-    return [{ 
-      unit_group_code: "No matching careers found", 
+    return [{
+      unit_group_code: "No matching careers found",
       unit_group_title: "No matching careers found",
       score: 0,
       matchReason: ""
     }];
   }
-  
+
   // 返回前5个推荐职业，包含详细信息
   return allScores.value.slice(0, 5).map(item => ({
     unit_group_code: item.unit_group_code,
@@ -437,30 +585,37 @@ const recommendedUnits = computed(() => {
   }));
 });
 
-import { useRouter } from 'vue-router'
-
 // 在 setup 函数中
 const router = useRouter()
 
 function goToJob(unit) {
   const fullUnitInfo = unitData.find(u => u.unit_group_code === unit.unit_group_code);
-  
+
   if (!fullUnitInfo) {
     console.error('在unitData中找不到职业信息:', unit.unit_group_code);
     return;
   }
-  
+
   const industrySlug = fullUnitInfo.major_group_title
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9-]/g, '');
-  
+
   // 使用 window.location 强制整个页面跳转
-  window.location.href = `/jobs/${industrySlug}/${unit.unit_group_code}?unitGroupCode=${unit.unit_group_code}&t=${Date.now()}`;
+  // window.location.href = `/jobs/${industrySlug}/${unit.unit_group_code}?unitGroupCode=${unit.unit_group_code}&t=${Date.now()}`;
+  //改为使用 router.push 进行路由跳转
+  router.push(
+    {
+      name: 'job-description',
+      params: {industry: industrySlug, jobId: unit.unit_group_code},
+      query: {unitGroupCode: unit.unit_group_code}
+    }
+  )
+
+  emit('quiz-completed')
 }
-  
-  
+
 
 // ----------------------
 // 7. 导航函数
@@ -817,22 +972,22 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
   .questionnaire {
     padding: 0 1rem;
   }
-  
+
   .buttons {
     flex-direction: column;
     align-items: center;
     gap: 12px;
   }
-  
+
   button {
     width: 100%;
     max-width: 280px;
   }
-  
+
   .recommendation-item {
     padding: 16px !important;
   }
-  
+
   .questionnaire > div:first-child > div:not(.buttons) {
     gap: 8px;
   }
@@ -842,12 +997,12 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
   .questionnaire h2 {
     margin-bottom: 1.5rem;
   }
-  
+
   .questionnaire p {
     padding: 0.8rem;
     margin-bottom: 1rem;
   }
-  
+
   .buttons {
     padding: 0.8rem 0;
   }
@@ -875,6 +1030,7 @@ input[type="radio"]:focus-visible {
   outline: 2px solid #C65A0F;
   outline-offset: 2px;
 }
+
 /* 在testquiz.vue的<style scoped>中添加 */
 .result-buttons {
   display: flex;
@@ -890,7 +1046,7 @@ input[type="radio"]:focus-visible {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .result-buttons button {
     width: 100%;
     max-width: 280px;
@@ -901,6 +1057,7 @@ input[type="radio"]:focus-visible {
   cursor: pointer;
   color: #007bff;
 }
+
 .clickable-title:hover {
   text-decoration: underline;
 }

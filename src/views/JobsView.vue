@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
 import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode } from '@/api'
 import { Input } from '@/components/ui/input'
-import TestQuiz from '@/views/testquiz.vue'
+import TestQuiz from '@/views/TestQuiz.vue'
 
 type Industry = {
   id: string
@@ -262,15 +262,15 @@ onMounted(() => {
     </button>
   </div>
   <!-- Modal弹窗 -->
-  <div 
-    v-if="showQuizModal" 
+  <div
+    v-if="showQuizModal"
     class="fixed backdrop-blur-sm bg-white/20 flex justify-center p-4"
     style="top: 90px; left: 0; right: 0; bottom: 0;"
     @click.self="closeQuizModal"
   >
     <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-end items-center p-6 border-b">
-        <button 
+        <button
           @click="closeQuizModal"
           class="text-gray-500 hover:text-gray-700 text-3xl font-bold leading-none"
           aria-label="Close modal"
@@ -278,7 +278,7 @@ onMounted(() => {
           ×
         </button>
       </div>
-      
+
       <!-- 问卷组件 -->
       <div class="p-6">
         <TestQuiz @quiz-completed="closeQuizModal" />
