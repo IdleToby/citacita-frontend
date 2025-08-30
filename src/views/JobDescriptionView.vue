@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getDetailJobByLangAndUnitGroupCode } from '@/api'
 
 const route = useRoute()
+const router = useRouter()
 const loading = ref(false)
 const error = ref('')
 
@@ -107,6 +108,16 @@ watch(unitGroupCode, () => {
   }
 })
 
+// Go back to IndustryJobsView
+function goBack() {
+  const majorGroupCode = route.query.majorGroupCode || jobDetails.value.majorGroupCode
+  router.push({
+    name: 'industry-jobs',
+    params: { industry: industrySlug.value },
+    query: { majorGroupCode }
+  })
+}
+
 onMounted(() => {
   if (unitGroupCode.value) {
     fetchJobDetails()
@@ -116,6 +127,36 @@ onMounted(() => {
 
 <template>
   <div class="w-full min-h-full bg-white text-black">
+    <!-- Go Back Button -->
+    <div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-10">
+      <button
+        @click="goBack"
+        class="group flex items-center justify-center w-12 h-12 bg-white border-2 border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-x-1"
+        aria-label="Go back"
+      >
+        <svg
+          class="w-6 h-6 text-black transition-transform duration-300 group-hover:-translate-x-0.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        <!-- Hover tooltip -->
+        <span
+          class="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap"
+        >
+          Go back
+        </span>
+      </button>
+    </div>
+
     <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <!-- Loading state -->
       <div v-if="loading" class="text-center py-8">
