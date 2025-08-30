@@ -170,6 +170,12 @@ onMounted(() => {
         </button>
       </div>
 
+      <!-- No results found message -->
+      <div v-else-if="jobQuery && !filteredJobs.length" class="text-center py-8">
+        <p class="text-lg text-gray-600">No results found for "{{ jobQuery }}"</p>
+        <p class="text-sm text-muted-foreground mt-2">Try searching for a different job title</p>
+      </div>
+
       <!-- Jobs grid -->
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <button

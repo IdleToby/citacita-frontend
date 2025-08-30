@@ -221,6 +221,12 @@ onMounted(() => {
         </div>
       </div>
 
+      <!-- No results found message -->
+      <div v-else-if="searchQuery && !filteredIndustries.length && !allJobs.some((job: Job) => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))" class="text-center py-8">
+        <p class="text-lg text-gray-600">No results found for "{{ searchQuery }}"</p>
+        <p class="text-sm text-muted-foreground mt-2">Try searching for a different industry or job title</p>
+      </div>
+
       <!-- Industries grid -->
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <button
