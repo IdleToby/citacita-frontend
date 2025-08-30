@@ -31,6 +31,7 @@ const jobDetails = ref({
   unitGroupTitle: '',
   unitGroupDescription: '',
   tasksInclude: '',
+  examples: '',
   skillLevel: ''
 })
 
@@ -75,6 +76,27 @@ const jobTasks = computed(() => {
 
   return finalTasks
 })
+
+const jobExamples = computed(() => {
+  if (!jobDetails.value.examples) return ['No examples available']
+
+  // Clean up the examples string similar to tasks
+  const cleanedExamples = jobDetails.value.examples
+    // Remove leading dots and spaces
+    .replace(/^\s*\.\s*/gm, '')
+    // Remove extra indentation (multiple spaces at start of lines)
+    .replace(/^\s{2,}/gm, '')
+    // Split by common delimiters like semicolons, commas, or line breaks
+    .split(/[;,\n]/)
+    .map(example => example.trim())
+    .filter(example => example.length > 0)
+    // Remove any remaining leading dots or periods
+    .map(example => example.replace(/^[\.\s]+/, '').trim())
+    .filter(example => example.length > 0)
+
+  return cleanedExamples
+})
+
 const skillLevel = computed(() => jobDetails.value.skillLevel || 'Unknown')
 
 // Fetch job details from API
@@ -176,9 +198,17 @@ onMounted(() => {
 
       <!-- Job details -->
       <template v-else>
-        <header class="space-y-1">
-          <h1 class="text-3xl md:text-4xl font-bold">{{ jobTitle }}</h1>
-          <p class="text-muted-foreground">Industry: {{ jobDetails.majorGroupTitle || industryName }}</p>
+        <header class="space-y-3">
+          <div class="space-y-1">
+            <h1 class="text-3xl md:text-4xl font-bold">
+              {{ jobTitle }}
+              <span class="text-lg font-normal text-muted-foreground ml-2">({{ jobDetails.unitGroupCode }})</span>
+            </h1>
+            <p class="text-muted-foreground">Industry: {{ jobDetails.majorGroupTitle || industryName }}</p>
+          </div>
+          <div>
+            <p class="text-xl font-semibold">Skill level: {{ skillLevel }}</p>
+          </div>
         </header>
 
         <section class="space-y-2">
@@ -188,14 +218,20 @@ onMounted(() => {
 
         <section class="space-y-2">
           <h2 class="text-xl font-semibold">Tasks</h2>
-          <ul class="list-disc ml-6 space-y-1">
-            <li v-for="(task, idx) in jobTasks" :key="idx">{{ task }}</li>
-          </ul>
+          <div class="border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
+            <ul class="list-disc ml-6 space-y-1">
+              <li v-for="(task, idx) in jobTasks" :key="idx">{{ task }}</li>
+            </ul>
+          </div>
         </section>
 
         <section class="space-y-2">
-          <h2 class="text-xl font-semibold">Skill level</h2>
-          <p>{{ skillLevel }}</p>
+          <h2 class="text-xl font-semibold">Examples</h2>
+          <div class="border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
+            <ul class="list-disc ml-6 space-y-1">
+              <li v-for="(example, idx) in jobExamples" :key="idx">{{ example }}</li>
+            </ul>
+          </div>
         </section>
       </template>
     </div>
