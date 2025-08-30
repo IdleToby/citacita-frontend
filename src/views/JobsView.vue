@@ -205,10 +205,10 @@ onMounted(() => {
       </div>
 
       <!-- Show message if search matches a job -->
-      <div v-else-if="searchQuery && !filteredIndustries.length && allJobs.some(job => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))" class="text-center py-8">
+      <div v-else-if="searchQuery && !filteredIndustries.length && allJobs.some((job: Job) => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))" class="text-center py-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
           <button
-            v-for="job in allJobs.filter(job => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))"
+            v-for="job in allJobs.filter((job: Job) => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))"
             :key="job.id"
             class="group aspect-square rounded-xl border border-input bg-card hover:shadow-md transition p-4 flex items-center justify-center text-center bg-blue-50"
             @click="handleJobNavigation(job.title)"
