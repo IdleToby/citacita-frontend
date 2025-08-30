@@ -41,7 +41,7 @@ onMounted(async () => {
 
 /* ★ 改动：把原本写在 .app-layout 的背景挪到条件类 .app-has-bg */
 .app-has-bg {
-  background-image: url('@/assets/homepage/HomePage_1.png');
+  background-image: url('/images/ai-tools.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -52,7 +52,7 @@ onMounted(async () => {
   top: 0;
   left: 0;
   width: 100%;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.5); /* 半透明背景 */
 }
 
 .main-content {

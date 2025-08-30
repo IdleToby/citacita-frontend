@@ -214,9 +214,9 @@ const searchPlaces = async (params: URLSearchParams) => {
       )
     }
     const placesData = await placesResponse.json()
-    places.value = (placesData.features ?? []).sort(
-      (a: PlaceFeature, b: PlaceFeature) => a.properties.distance - b.properties.distance,
-    )
+    places.value = (placesData.features ?? [])
+      .filter((place: PlaceFeature) => place.properties.name) // REQUIREMENT 1: Filter out places without a name
+      .sort((a: PlaceFeature, b: PlaceFeature) => a.properties.distance - b.properties.distance)
     updateMapMarkers()
   } catch (err) {
     errorMsg.value = t('mapPage.errors.couldNotFind') // Translated error
@@ -288,6 +288,16 @@ const fetchPlacesByCircle = async (lat: number, lon: number, radius: number) => 
 const openPlaceDetails = (place: PlaceFeature) => {
   selectedPlaceForSheet.value = place
   isSheetOpen.value = true
+}
+
+const increaseRadius = () => {
+  radiusInMeters.value += 500
+  handleSearch()
+}
+
+const decreaseRadius = () => {
+  radiusInMeters.value = Math.max(500, radiusInMeters.value - 500) // 不允许小于500
+  handleSearch()
 }
 
 // --- Map Functions ---
@@ -385,9 +395,9 @@ watch(locale, (newLocale, oldLocale) => {
 </script>
 
 <template>
-  <div class="bg-black/70 h-full flex flex-col space-y-8 pt-8 pb-2">
-    <div class="text-center text-white text-6xl font-bold">{{ t('mapPage.title') }}</div>
-    <div class="text-center text-white text-4xl">
+  <div class="bg-black/70 h-full flex flex-col space-y-4 pt-4 pb-2">
+    <div class="text-center text-white text-4xl font-bold">{{ t('mapPage.title') }}</div>
+    <div class="text-center text-white text-2xl">
       {{ t('mapPage.subtitle') }}
     </div>
 
@@ -476,15 +486,44 @@ watch(locale, (newLocale, oldLocale) => {
                   </ComboboxGroup>
                 </ComboboxList>
               </Combobox>
-              <div v-else class="flex items-center">
+              <div v-else class="flex items-center w-full">
+                <Button
+                  variant="ghost"
+                  class="px-3 hover:bg-black/10 rounded-r-none"
+                  @click="decreaseRadius"
+                >
+                  -
+                </Button>
                 <Input
                   v-model="radiusInMeters"
-                  type="number"
+                  inputmode="numeric"
+                  type="text"
                   placeholder="Radius"
-                  class="h-full text-lg w-full focus-visible:ring-0 border-none"
+                  class="h-full text-lg w-full focus-visible:ring-0 border-x-0 border-y-0 rounded-none text-center no-spinner"
                   @keyup.enter="handleSearch"
+                  @input="
+                    (e: any) => {
+                      const val = Number(e.target.value)
+                      radiusInMeters = isNaN(val) || val <= 0 ? 500 : val
+                    }
+                  "
+                  @blur="
+                    () => {
+                      if (!radiusInMeters || radiusInMeters <= 0) {
+                        radiusInMeters = 500
+                      }
+                    }
+                  "
                 />
-                <span class="text-lg text-gray-500 pr-3">{{ t('mapPage.radiusUnit') }}</span>
+
+                <Button
+                  variant="ghost"
+                  class="px-3 hover:bg-black/10 rounded-l-none"
+                  @click="increaseRadius"
+                >
+                  +
+                </Button>
+                <span class="text-lg text-gray-500 pr-3 pl-2">{{ t('mapPage.radiusUnit') }}</span>
               </div>
             </div>
 
@@ -570,3 +609,15 @@ watch(locale, (newLocale, oldLocale) => {
     </Sheet>
   </div>
 </template>
+
+<style scoped>
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner {
+  -moz-appearance: textfield; /* Firefox */
+}
+</style>
