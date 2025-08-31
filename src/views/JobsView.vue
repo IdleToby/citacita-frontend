@@ -176,11 +176,16 @@ function handleJobNavigation(jobTitle: string) {
   )
 
   if (matchingJob) {
-    const slug = matchingJob.majorGroupTitle
+    let slug = matchingJob.majorGroupTitle
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/[^\w\s-]/g, '') // Keep word characters (includes unicode), spaces, and hyphens
       .trim()
       .replace(/\s+/g, '-')
+
+    // If slug is empty or very short (happens with Chinese/special chars), use majorGroupCode as fallback
+    if (!slug || slug.length < 2) {
+      slug = `industry-${matchingJob.majorGroupCode}`
+    }
 
     router.push({
       name: 'job-description',
@@ -193,12 +198,19 @@ function handleJobNavigation(jobTitle: string) {
 }
 
 function goToIndustry(industryName: string, industryId: string) {
-  // slugify industry name for route param
-  const slug = industryName
+  // Create a safe slug that works with all languages by using the majorGroupCode as base
+  // and falling back to a generic slug if needed
+  let slug = industryName
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[^\w\s-]/g, '') // Keep word characters (includes unicode), spaces, and hyphens
     .trim()
     .replace(/\s+/g, '-')
+
+  // If slug is empty or very short (happens with Chinese/special chars), use majorGroupCode as fallback
+  if (!slug || slug.length < 2) {
+    slug = `industry-${industryId}`
+  }
+
   router.push({
     name: 'industry-jobs',
     params: { industry: slug },
