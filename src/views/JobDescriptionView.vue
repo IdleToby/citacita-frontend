@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getDetailJobByLangAndUnitGroupCode } from '@/api'
+import { useI18n } from 'vue-i18n'
+import { getDetailJobByLangAndUnitGroupCode, getSkillLevelByLangAndId } from '@/api'
 import TestQuiz from '@/views/TestQuiz.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { locale } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
@@ -46,7 +48,16 @@ const jobDetails = ref({
   skillLevel: ''
 })
 
+// Skill level details from API
+const skillDetails = ref({
+  majorGroupCode: '',
+  majorGroupTitle: '',
+  educationLevel: '',
+  skillLevel: ''
+})
+
 const jobTitle = computed(() => jobDetails.value.unitGroupTitle || `Job ${jobId.value}`)
+const skillLevel = computed(() => skillDetails.value.skillLevel || jobDetails.value.skillLevel || 'Unknown')
 const jobDescription = computed(() => jobDetails.value.unitGroupDescription || 'No description available.')
 const jobTasks = computed(() => {
   if (!jobDetails.value.tasksInclude) return ['No tasks available']
@@ -108,7 +119,6 @@ const jobExamples = computed(() => {
   return cleanedExamples
 })
 
-const skillLevel = computed(() => jobDetails.value.skillLevel || 'Unknown')
 
 // Fetch job details from API
 async function fetchJobDetails() {
@@ -120,9 +130,11 @@ async function fetchJobDetails() {
   loading.value = true
   error.value = ''
   try {
-    const response = await getDetailJobByLangAndUnitGroupCode('en', unitGroupCode.value)
+    const response = await getDetailJobByLangAndUnitGroupCode(locale.value, unitGroupCode.value)
     if (response.data.code === 200) {
       jobDetails.value = response.data.data
+      // After getting job details, fetch skill level details
+      await fetchSkillDetails()
     } else {
       error.value = 'Failed to fetch job details'
     }
@@ -134,8 +146,33 @@ async function fetchJobDetails() {
   }
 }
 
+// Fetch skill level details from API
+async function fetchSkillDetails() {
+  if (!jobDetails.value.majorGroupCode) {
+    return
+  }
+
+  try {
+    const response = await getSkillLevelByLangAndId(locale.value, jobDetails.value.majorGroupCode)
+    if (response.data.code === 200) {
+      skillDetails.value = response.data.data
+    } else {
+      console.error('Failed to fetch skill details')
+    }
+  } catch (err) {
+    console.error('Error fetching skill details:', err)
+  }
+}
+
 // Watch for route changes to refetch job details
 watch(unitGroupCode, () => {
+  if (unitGroupCode.value) {
+    fetchJobDetails()
+  }
+})
+
+// Watch for locale changes to refetch data
+watch(locale, () => {
   if (unitGroupCode.value) {
     fetchJobDetails()
   }
@@ -215,7 +252,7 @@ onMounted(() => {
               {{ jobTitle }}
               <span class="text-lg font-normal text-muted-foreground ml-2">({{ jobDetails.unitGroupCode }})</span>
             </h1>
-            <p class="text-muted-foreground">Industry: {{ jobDetails.majorGroupTitle || industryName }}</p>
+            <p class="text-muted-foreground">Major group: {{ jobDetails.majorGroupTitle || industryName }}</p>
           </div>
           <div>
             <p class="text-xl font-semibold">Skill level: {{ skillLevel }}</p>

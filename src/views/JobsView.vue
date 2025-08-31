@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode, autoCompleteJobByLangAndUnitGroupTitle } from '@/api'
 import { Input } from '@/components/ui/input'
 import TestQuiz from '@/views/TestQuiz.vue'
@@ -21,6 +22,7 @@ type Job = {
 }
 
 const router = useRouter()
+const { locale } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
@@ -44,7 +46,7 @@ async function fetchIndustries() {
   loading.value = true
   error.value = ''
   try {
-    const response = await getSkillLevelByLang('en')
+    const response = await getSkillLevelByLang(locale.value)
     if (response.data.code === 200) {
       industries.value = response.data.data.map((item: any) => ({
         id: item.majorGroupCode,
@@ -70,7 +72,7 @@ async function fetchAllJobs() {
   try {
     const jobPromises = industries.value.map(async (industry) => {
       try {
-        const response = await getJobListByLangAndMajorGroupCode('en', industry.id)
+        const response = await getJobListByLangAndMajorGroupCode(locale.value, industry.id)
         if (response.data.code === 200) {
           return response.data.data.map((item: any) => ({
             id: item.unitGroupCode,
@@ -114,7 +116,7 @@ async function fetchSuggestions(query: string) {
   }
 
   try {
-    const response = await autoCompleteJobByLangAndUnitGroupTitle('en', query)
+    const response = await autoCompleteJobByLangAndUnitGroupTitle(locale.value, query)
     if (response.data.code === 200) {
       // Filter API results to only show jobs that start with the query
       const queryLower = query.toLowerCase()
@@ -181,6 +183,11 @@ function goToIndustry(industryName: string, industryId: string) {
     query: { majorGroupCode: industryId }
   })
 }
+
+// Watch for locale changes to refetch data
+watch(locale, () => {
+  fetchIndustries()
+})
 
 onMounted(() => {
   fetchIndustries()

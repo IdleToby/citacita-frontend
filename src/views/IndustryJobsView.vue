@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
 import { getJobListByLangAndMajorGroupCode, autoCompleteJobByLangAndUnitGroupTitle } from '@/api'
 import TestQuiz from '@/views/TestQuiz.vue'
@@ -19,6 +20,7 @@ type Job = {
 
 const route = useRoute()
 const router = useRouter()
+const { locale } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
@@ -54,14 +56,14 @@ const jobQuery = ref('')
 // Fetch jobs for the selected industry
 async function fetchJobs() {
   if (!majorGroupCode.value) {
-    error.value = 'No industry selected'
+    error.value = 'No major group selected'
     return
   }
 
   loading.value = true
   error.value = ''
   try {
-    const response = await getJobListByLangAndMajorGroupCode('en', majorGroupCode.value)
+    const response = await getJobListByLangAndMajorGroupCode(locale.value, majorGroupCode.value)
     if (response.data.code === 200) {
       jobs.value = response.data.data.map((item: any) => ({
         id: item.unitGroupCode,
@@ -102,7 +104,7 @@ async function fetchSuggestions(query: string) {
   }
 
   try {
-    const response = await autoCompleteJobByLangAndUnitGroupTitle('en', query)
+    const response = await autoCompleteJobByLangAndUnitGroupTitle(locale.value, query)
     if (response.data.code === 200) {
       // Filter API results to only show jobs that start with the query
       const queryLower = query.toLowerCase()
@@ -143,6 +145,13 @@ function goToJob(jobId: string) {
 
 // Watch for route changes to refetch jobs
 watch(majorGroupCode, () => {
+  if (majorGroupCode.value) {
+    fetchJobs()
+  }
+})
+
+// Watch for locale changes to refetch data
+watch(locale, () => {
   if (majorGroupCode.value) {
     fetchJobs()
   }
@@ -191,7 +200,7 @@ onMounted(() => {
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 class="text-3xl md:text-4xl font-bold">Jobs in Malaysia</h1>
-          <p class="text-muted-foreground">Industry: {{ industryName }}</p>
+          <p class="text-muted-foreground">Major group: {{ industryName }}</p>
         </div>
         <div class="w-full md:w-80 relative">
           <Input
