@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Input } from '@/components/ui/input'
-import { getJobListByLangAndMajorGroupCode } from '@/api'
+import { getJobListByLangAndMajorGroupCode, autoCompleteJobByLangAndUnitGroupTitle } from '@/api'
 import TestQuiz from '@/views/TestQuiz.vue'
 
 type Job = {
@@ -91,17 +91,46 @@ const filteredJobs = computed(() => {
   return jobs.value.filter((j) => j.title.toLowerCase().startsWith(q))
 })
 
-const suggestions = computed(() => {
-  const q = jobQuery.value.trim().toLowerCase()
-  if (!q) return [] as string[]
-  return jobs.value
-    .filter((j) => j.title.toLowerCase().startsWith(q))
-    .map(j => j.title)
-    .slice(0, 5)
-})
+// API-based autocomplete suggestions
+const suggestions = ref<string[]>([])
+
+// Fetch autocomplete suggestions from API
+async function fetchSuggestions(query: string) {
+  if (!query.trim()) {
+    suggestions.value = []
+    return
+  }
+
+  try {
+    const response = await autoCompleteJobByLangAndUnitGroupTitle('en', query)
+    if (response.data.code === 200) {
+      // Filter API results to only show jobs that start with the query
+      const queryLower = query.toLowerCase()
+      suggestions.value = response.data.data
+        .map((item: any) => item.unitGroupTitle)
+        .filter((title: string) => title.toLowerCase().startsWith(queryLower))
+        .slice(0, 5)
+    } else {
+      suggestions.value = []
+    }
+  } catch (err) {
+    console.error('Error fetching autocomplete suggestions:', err)
+    suggestions.value = []
+  }
+}
+
+// Watch search query changes for autocomplete
+let debounceTimer: ReturnType<typeof setTimeout>
+function onSearchInput() {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    fetchSuggestions(jobQuery.value)
+  }, 300) // 300ms debounce
+}
 
 function chooseSuggestion(t: string) {
   jobQuery.value = t
+  suggestions.value = [] // Clear suggestions after selection
 }
 
 function goToJob(jobId: string) {
@@ -165,7 +194,11 @@ onMounted(() => {
           <p class="text-muted-foreground">Industry: {{ industryName }}</p>
         </div>
         <div class="w-full md:w-80 relative">
-          <Input v-model="jobQuery" placeholder="Search jobs..." />
+          <Input
+            v-model="jobQuery"
+            placeholder="Search jobs..."
+            @input="onSearchInput"
+          />
           <ul
             v-if="suggestions.length"
             class="absolute z-10 mt-1 w-full bg-white border border-input rounded-md shadow-md max-h-60 overflow-auto"

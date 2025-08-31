@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
-import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode } from '@/api'
+import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode, autoCompleteJobByLangAndUnitGroupTitle } from '@/api'
 import { Input } from '@/components/ui/input'
 import TestQuiz from '@/views/TestQuiz.vue'
 
@@ -94,41 +94,55 @@ async function fetchAllJobs() {
   }
 }
 
-// Filter industries based on search query (only show if no exact job match)
-const filteredIndustries = computed(() => {
+// Filter jobs based on search query
+const filteredJobs = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return industries.value
-
-  // If there's an exact job match, don't show industries
-  const exactJobMatch = allJobs.value.some(job =>
-    job.title.toLowerCase() === q
-  )
-  if (exactJobMatch) return []
-
-  return industries.value.filter((industry) =>
-    industry.name.toLowerCase().startsWith(q)
+  if (!q) return []
+  return allJobs.value.filter((job) =>
+    job.title.toLowerCase().startsWith(q)
   )
 })
 
-// Combined autocomplete suggestions for both industries and jobs
-const suggestions = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return [] as string[]
+// API-based autocomplete suggestions for jobs only
+const suggestions = ref<string[]>([])
 
-  const industrySuggestions = industries.value
-    .filter((industry) => industry.name.toLowerCase().startsWith(q))
-    .map(industry => industry.name)
+// Fetch autocomplete suggestions from API
+async function fetchSuggestions(query: string) {
+  if (!query.trim()) {
+    suggestions.value = []
+    return
+  }
 
-  const jobSuggestions = allJobs.value
-    .filter((job) => job.title.toLowerCase().startsWith(q))
-    .map(job => job.title)
+  try {
+    const response = await autoCompleteJobByLangAndUnitGroupTitle('en', query)
+    if (response.data.code === 200) {
+      // Filter API results to only show jobs that start with the query
+      const queryLower = query.toLowerCase()
+      suggestions.value = response.data.data
+        .map((item: any) => item.unitGroupTitle)
+        .filter((title: string) => title.toLowerCase().startsWith(queryLower))
+        .slice(0, 5)
+    } else {
+      suggestions.value = []
+    }
+  } catch (err) {
+    console.error('Error fetching autocomplete suggestions:', err)
+    suggestions.value = []
+  }
+}
 
-  // Combine and limit to 5 suggestions, prioritizing exact matches
-  return [...industrySuggestions, ...jobSuggestions].slice(0, 5)
-})
+// Watch search query changes for autocomplete
+let debounceTimer: ReturnType<typeof setTimeout>
+function onSearchInput() {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    fetchSuggestions(searchQuery.value)
+  }, 300) // 300ms debounce
+}
 
 function chooseSuggestion(suggestion: string) {
   searchQuery.value = suggestion
+  suggestions.value = [] // Clear suggestions after selection
 }
 
 // Check if search query matches a job and navigate directly to job description
@@ -182,7 +196,11 @@ onMounted(() => {
           <p class="text-muted-foreground">Click to discover jobs available</p>
         </div>
         <div class="w-full md:w-80 relative">
-          <Input v-model="searchQuery" placeholder="Search industries or jobs..." />
+          <Input
+            v-model="searchQuery"
+            placeholder="Search jobs..."
+            @input="onSearchInput"
+          />
           <ul
             v-if="suggestions.length"
             class="absolute z-10 mt-1 w-full bg-white border border-input rounded-md shadow-md max-h-60 overflow-auto"
@@ -215,11 +233,12 @@ onMounted(() => {
         </button>
       </div>
 
-      <!-- Show message if search matches a job -->
-      <div v-else-if="searchQuery && !filteredIndustries.length && allJobs.some((job: Job) => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))" class="text-center py-8">
+      <!-- Show job search results -->
+      <div v-else-if="searchQuery && filteredJobs.length" class="text-center py-8">
+        <p class="text-lg mb-4">Job search results:</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
           <button
-            v-for="job in allJobs.filter((job: Job) => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))"
+            v-for="job in filteredJobs"
             :key="job.id"
             class="group aspect-square rounded-xl border border-input bg-card hover:shadow-md transition p-4 flex items-center justify-center text-center bg-blue-50"
             @click="handleJobNavigation(job.title)"
@@ -232,16 +251,16 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- No results found message -->
-      <div v-else-if="searchQuery && !filteredIndustries.length && !allJobs.some((job: Job) => job.title.toLowerCase().startsWith(searchQuery.toLowerCase()))" class="text-center py-8">
+      <!-- No job results found message -->
+      <div v-else-if="searchQuery && !filteredJobs.length" class="text-center py-8">
         <p class="text-lg text-gray-600">No results found for "{{ searchQuery }}"</p>
-        <p class="text-sm text-muted-foreground mt-2">Try searching for a different industry or job title</p>
+        <p class="text-sm text-muted-foreground mt-2">Try searching for a different job title</p>
       </div>
 
-      <!-- Industries grid -->
+      <!-- Industries grid (show when no search) -->
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <button
-          v-for="industry in filteredIndustries"
+          v-for="industry in industries"
           :key="industry.id"
           class="group aspect-square rounded-xl border border-input bg-card hover:shadow-md transition p-4 flex items-center justify-center text-center"
           @click="goToIndustry(industry.name, industry.id)"

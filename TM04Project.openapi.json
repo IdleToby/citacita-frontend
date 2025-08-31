@@ -442,6 +442,161 @@
         },
         "security": []
       }
+    },
+    "/api/job/getAllJobs": {
+      "get": {
+        "summary": "getAllJobs",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "unitGroupCode": {
+                            "type": "string"
+                          },
+                          "majorGroupCode": {
+                            "type": "string"
+                          },
+                          "majorGroupTitle": {
+                            "type": "string"
+                          },
+                          "majorGroupTitleMalay": {
+                            "type": "string"
+                          },
+                          "majorGroupTitleChinese": {
+                            "type": "string"
+                          },
+                          "subMajorGroupCode": {
+                            "type": "string"
+                          },
+                          "subMajorGroupTitle": {
+                            "type": "string"
+                          },
+                          "subMajorGroupTitleMalay": {
+                            "type": "string"
+                          },
+                          "subMajorGroupTitleChinese": {
+                            "type": "string"
+                          },
+                          "minorGroupCode": {
+                            "type": "string"
+                          },
+                          "minorGroupTitle": {
+                            "type": "string"
+                          },
+                          "minorGroupTitleMalay": {
+                            "type": "string"
+                          },
+                          "minorGroupTitleChinese": {
+                            "type": "string"
+                          },
+                          "unitGroupTitle": {
+                            "type": "string"
+                          },
+                          "unitGroupTitleMalay": {
+                            "type": "string"
+                          },
+                          "unitGroupTitleChinese": {
+                            "type": "string"
+                          },
+                          "unitGroupDescription": {
+                            "type": "string"
+                          },
+                          "unitGroupDescriptionMalay": {
+                            "type": "string"
+                          },
+                          "unitGroupDescriptionChinese": {
+                            "type": "string"
+                          },
+                          "tasksInclude": {
+                            "type": "string"
+                          },
+                          "tasksIncludeMalay": {
+                            "type": "string"
+                          },
+                          "tasksIncludeChinese": {
+                            "type": "string"
+                          },
+                          "examplesMalay": {
+                            "type": "string"
+                          },
+                          "examplesChinese": {
+                            "type": "string"
+                          },
+                          "skillLevel": {
+                            "type": "string"
+                          },
+                          "skillLevelMalay": {
+                            "type": "string"
+                          },
+                          "skillLevelChinese": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "unitGroupCode",
+                          "majorGroupCode",
+                          "majorGroupTitle",
+                          "majorGroupTitleMalay",
+                          "majorGroupTitleChinese",
+                          "subMajorGroupCode",
+                          "subMajorGroupTitle",
+                          "subMajorGroupTitleMalay",
+                          "subMajorGroupTitleChinese",
+                          "minorGroupCode",
+                          "minorGroupTitle",
+                          "minorGroupTitleMalay",
+                          "minorGroupTitleChinese",
+                          "unitGroupTitle",
+                          "unitGroupTitleMalay",
+                          "unitGroupTitleChinese",
+                          "unitGroupDescription",
+                          "unitGroupDescriptionMalay",
+                          "unitGroupDescriptionChinese",
+                          "tasksInclude",
+                          "tasksIncludeMalay",
+                          "tasksIncludeChinese",
+                          "examples",
+                          "examplesMalay",
+                          "examplesChinese",
+                          "skillLevel",
+                          "skillLevelMalay",
+                          "skillLevelChinese"
+                        ]
+                      }
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
     }
   },
   "components": {
