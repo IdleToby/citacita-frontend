@@ -32,6 +32,11 @@ function closeQuizModal() {
   showQuizModal.value = false
 }
 
+// Go back to JobsView
+function goBack() {
+  router.push({ name: 'jobs' })
+}
+
 // derive industry from slug and get majorGroupCode from query
 const industrySlug = computed(() => String(route.params.industry || 'industry'))
 const majorGroupCode = computed(() => String(route.query.majorGroupCode || ''))
@@ -107,10 +112,6 @@ function goToJob(jobId: string) {
   })
 }
 
-function onJobQuizClick() {
-  // Placeholder – same behavior as the floating bubble for now
-}
-
 // Watch for route changes to refetch jobs
 watch(majorGroupCode, () => {
   if (majorGroupCode.value) {
@@ -127,6 +128,36 @@ onMounted(() => {
 
 <template>
   <div class="w-full min-h-full bg-white text-black">
+    <!-- Go Back Button -->
+    <div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-10">
+      <button
+        @click="goBack"
+        class="group flex items-center justify-center w-12 h-12 bg-white border-2 border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-x-1"
+        aria-label="Go back"
+      >
+        <svg
+          class="w-6 h-6 text-black transition-transform duration-300 group-hover:-translate-x-0.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        <!-- Hover tooltip -->
+        <span
+          class="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap"
+        >
+          Go back
+        </span>
+      </button>
+    </div>
+
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
