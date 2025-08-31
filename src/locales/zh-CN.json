@@ -8,6 +8,32 @@
     "map": "地图",
     "faq": "常见问题"
   },
+  "jobsPage": {
+    "title": "马来西亚的行业",
+    "subtitle": "点击查看可用的工作",
+    "searchPlaceholder": "搜索工作...",
+    "jobQuiz": "职业测验",
+    "noResultsFound": "未找到 \"{query}\" 的结果",
+    "tryDifferentSearch": "请尝试搜索不同的职位标题"
+  },
+  "industryJobsPage": {
+    "title": "马来西亚的工作",
+    "majorGroup": "主要类别",
+    "quizPrompt": "不确定什么工作适合你吗？点击这里参加我们的职业测验！",
+    "here": "这里",
+    "searchPlaceholder": "搜索工作...",
+    "jobQuiz": "职业测验",
+    "noResultsFound": "未找到 \"{query}\" 的结果",
+    "tryDifferentSearch": "请尝试搜索不同的职位标题"
+  },
+  "jobDescriptionPage": {
+    "majorGroup": "主要类别",
+    "skillLevel": "技能水平",
+    "jobDescription": "职位描述",
+    "tasks": "任务",
+    "examples": "示例",
+    "jobQuiz": "职业测验"
+  },
   "mapPage": {
     "title": "我附近的托儿设施",
     "subtitle": "轻松找到马来西亚各地，靠近您公司或住所的托儿中心。",

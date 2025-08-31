@@ -20,7 +20,7 @@ type Job = {
 
 const route = useRoute()
 const router = useRouter()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
@@ -199,13 +199,13 @@ onMounted(() => {
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-3xl md:text-4xl font-bold">Jobs in Malaysia</h1>
-          <p class="text-muted-foreground">Major group: {{ industryName }}</p>
+          <h1 class="text-3xl md:text-4xl font-bold">{{ t('industryJobsPage.title') }}</h1>
+          <p class="text-muted-foreground">{{ t('industryJobsPage.majorGroup') }}: {{ industryName }}</p>
         </div>
         <div class="w-full md:w-80 relative">
           <Input
             v-model="jobQuery"
-            placeholder="Search jobs..."
+            :placeholder="t('industryJobsPage.searchPlaceholder')"
             @input="onSearchInput"
           />
           <ul
@@ -226,17 +226,10 @@ onMounted(() => {
 
       <h2
         class="text-xl md:text-2xl font-semibold bg-[#C65A0F] text-white px-4 py-2 rounded-lg text-center mx-auto max-w-3xl"
+        v-html="t('industryJobsPage.quizPrompt').replace(t('industryJobsPage.here'), `<button type='button' class='font-bold underline underline-offset-2 hover:scale-110 transition-transform duration-200 inline-block' onclick='document.querySelector(\\'[data-quiz-trigger]\\').click()'>${t('industryJobsPage.here')}</button>`)"
       >
-        Not sure what job suits you? Click
-        <button
-          type="button"
-          class="font-bold underline underline-offset-2 hover:scale-110 transition-transform duration-200 inline-block"
-          @click="goToQuiz"
-        >
-          here
-        </button>
-        to take our job quiz!
       </h2>
+      <button data-quiz-trigger @click="goToQuiz" class="hidden"></button>
 
       <!-- Loading state -->
       <div v-if="loading" class="text-center py-8">
@@ -256,8 +249,8 @@ onMounted(() => {
 
       <!-- No results found message -->
       <div v-else-if="jobQuery && !filteredJobs.length" class="text-center py-8">
-        <p class="text-lg text-gray-600">No results found for "{{ jobQuery }}"</p>
-        <p class="text-sm text-muted-foreground mt-2">Try searching for a different job title</p>
+        <p class="text-lg text-gray-600">{{ t('industryJobsPage.noResultsFound', { query: jobQuery }) }}</p>
+        <p class="text-sm text-muted-foreground mt-2">{{ t('industryJobsPage.tryDifferentSearch') }}</p>
       </div>
 
       <!-- Jobs grid -->
@@ -280,7 +273,7 @@ onMounted(() => {
       title="Job quiz"
       @click="goToQuiz"
     >
-      Job Quiz
+      {{ t('industryJobsPage.jobQuiz') }}
     </button>
   </div>
   <!-- Modal弹窗 -->

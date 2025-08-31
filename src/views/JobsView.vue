@@ -22,7 +22,7 @@ type Job = {
 }
 
 const router = useRouter()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
@@ -221,13 +221,13 @@ onMounted(() => {
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-3xl md:text-4xl font-bold">Industries in Malaysia</h1>
-          <p class="text-muted-foreground">Click to discover jobs available</p>
+          <h1 class="text-3xl md:text-4xl font-bold">{{ t('jobsPage.title') }}</h1>
+          <p class="text-muted-foreground">{{ t('jobsPage.subtitle') }}</p>
         </div>
         <div class="w-full md:w-80 relative">
           <Input
             v-model="searchQuery"
-            placeholder="Search jobs..."
+            :placeholder="t('jobsPage.searchPlaceholder')"
             @input="onSearchInput"
           />
           <ul
@@ -282,8 +282,8 @@ onMounted(() => {
 
       <!-- No job results found message -->
       <div v-else-if="searchQuery && !filteredJobs.length" class="text-center py-8">
-        <p class="text-lg text-gray-600">No results found for "{{ searchQuery }}"</p>
-        <p class="text-sm text-muted-foreground mt-2">Try searching for a different job title</p>
+        <p class="text-lg text-gray-600">{{ t('jobsPage.noResultsFound', { query: searchQuery }) }}</p>
+        <p class="text-sm text-muted-foreground mt-2">{{ t('jobsPage.tryDifferentSearch') }}</p>
       </div>
 
       <!-- Industries grid (show when no search) -->
@@ -319,7 +319,7 @@ onMounted(() => {
       title="Job quiz"
       @click="goToQuiz"
     >
-      Job Quiz
+      {{ t('jobsPage.jobQuiz') }}
     </button>
   </div>
   <!-- Modal弹窗 -->

@@ -8,6 +8,32 @@
     "map": "Map",
     "faq": "FAQ"
   },
+  "jobsPage": {
+    "title": "Industries in Malaysia",
+    "subtitle": "Click to discover jobs available",
+    "searchPlaceholder": "Search jobs...",
+    "jobQuiz": "Job Quiz",
+    "noResultsFound": "No results found for \"{query}\"",
+    "tryDifferentSearch": "Try searching for a different job title"
+  },
+  "industryJobsPage": {
+    "title": "Jobs in Malaysia",
+    "majorGroup": "Major group",
+    "quizPrompt": "Not sure what job suits you? Click here to take our job quiz!",
+    "here": "here",
+    "searchPlaceholder": "Search jobs...",
+    "jobQuiz": "Job Quiz",
+    "noResultsFound": "No results found for \"{query}\"",
+    "tryDifferentSearch": "Try searching for a different job title"
+  },
+  "jobDescriptionPage": {
+    "majorGroup": "Major group",
+    "skillLevel": "Skill level",
+    "jobDescription": "Job description",
+    "tasks": "Tasks",
+    "examples": "Examples",
+    "jobQuiz": "Job Quiz"
+  },
   "mapPage": {
     "title": "Childcare Facilities Near Me",
     "subtitle": "Find childcare facilities near your office or home in Malaysia.",

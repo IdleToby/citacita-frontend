@@ -7,7 +7,7 @@ import TestQuiz from '@/views/TestQuiz.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
@@ -252,20 +252,20 @@ onMounted(() => {
               {{ jobTitle }}
               <span class="text-lg font-normal text-muted-foreground ml-2">({{ jobDetails.unitGroupCode }})</span>
             </h1>
-            <p class="text-muted-foreground">Major group: {{ jobDetails.majorGroupTitle || industryName }}</p>
+            <p class="text-muted-foreground">{{ t('jobDescriptionPage.majorGroup') }}: {{ jobDetails.majorGroupTitle || industryName }}</p>
           </div>
           <div>
-            <p class="text-xl font-semibold">Skill level: {{ skillLevel }}</p>
+            <p class="text-xl font-semibold">{{ t('jobDescriptionPage.skillLevel') }}: {{ skillLevel }}</p>
           </div>
         </header>
 
         <section class="space-y-2">
-          <h2 class="text-xl font-semibold">Job description</h2>
+          <h2 class="text-xl font-semibold">{{ t('jobDescriptionPage.jobDescription') }}</h2>
           <p class="text-sm md:text-base">{{ jobDescription }}</p>
         </section>
 
         <section class="space-y-2">
-          <h2 class="text-xl font-semibold">Tasks</h2>
+          <h2 class="text-xl font-semibold">{{ t('jobDescriptionPage.tasks') }}</h2>
           <div class="border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
             <ul class="list-disc ml-6 space-y-1">
               <li v-for="(task, idx) in jobTasks" :key="idx">{{ task }}</li>
@@ -274,7 +274,7 @@ onMounted(() => {
         </section>
 
         <section class="space-y-2">
-          <h2 class="text-xl font-semibold">Examples</h2>
+          <h2 class="text-xl font-semibold">{{ t('jobDescriptionPage.examples') }}</h2>
           <div class="border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
             <ul class="list-disc ml-6 space-y-1">
               <li v-for="(example, idx) in jobExamples" :key="idx">{{ example }}</li>
@@ -291,7 +291,7 @@ onMounted(() => {
       title="Job quiz"
       @click="goToQuiz"
     >
-      Job Quiz
+      {{ t('jobDescriptionPage.jobQuiz') }}
     </button>
   </div>
 

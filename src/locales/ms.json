@@ -8,6 +8,32 @@
     "map": "Peta",
     "faq": "Soalan Lazim"
   },
+  "jobsPage": {
+    "title": "Industri di Malaysia",
+    "subtitle": "Klik untuk meneroka kerja yang tersedia",
+    "searchPlaceholder": "Cari kerja...",
+    "jobQuiz": "Kuiz kerjaya",
+    "noResultsFound": "Tiada hasil ditemui untuk \"{query}\"",
+    "tryDifferentSearch": "Cuba cari tajuk kerja yang berbeza"
+  },
+  "industryJobsPage": {
+    "title": "Kerja di Malaysia",
+    "majorGroup": "Kumpulan utama",
+    "quizPrompt": "Tidak pasti kerja apa yang sesuai dengan anda? Klik di sini untuk mengambil kuiz kerjaya kami!",
+    "here": "di sini",
+    "searchPlaceholder": "Cari kerja...",
+    "jobQuiz": "Kuiz kerjaya",
+    "noResultsFound": "Tiada hasil ditemui untuk \"{query}\"",
+    "tryDifferentSearch": "Cuba cari tajuk kerja yang berbeza"
+  },
+  "jobDescriptionPage": {
+    "majorGroup": "Kumpulan utama",
+    "skillLevel": "Tahap kemahiran",
+    "jobDescription": "Deskripsi kerja",
+    "tasks": "Tugas",
+    "examples": "Contoh",
+    "jobQuiz": "Kuiz kerjaya"
+  },
   "mapPage": {
     "title": "Kemudahan Penjagaan Kanak-Kanak Berdekatan Saya",
     "subtitle": "Cari kemudahan penjagaan kanak-kanak berhampiran pejabat atau rumah anda di Malaysia.",
