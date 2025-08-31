@@ -34,6 +34,18 @@
     "examples": "Contoh",
     "jobQuiz": "Kuiz kerjaya"
   },
+  "industries": {
+    "0": "Angkatan Bersenjata",
+    "1": "Pengurus",
+    "2": "Profesional",
+    "3": "Juruteknik dan Profesional Bersekutu",
+    "4": "Pekerja Sokongan Perkeranian",
+    "5": "Pekerja Perkhidmatan dan Jualan",
+    "6": "Pekerja Mahir Pertanian, Perhutanan dan Perikanan",
+    "7": "Pekerja Kraf dan Berkaitan",
+    "8": "Pengendali Loji dan Mesin serta Pemasang",
+    "9": "Pekerjaan Asas"
+  },
   "mapPage": {
     "title": "Kemudahan Penjagaan Kanak-Kanak Berdekatan Saya",
     "subtitle": "Cari kemudahan penjagaan kanak-kanak berhampiran pejabat atau rumah anda di Malaysia.",

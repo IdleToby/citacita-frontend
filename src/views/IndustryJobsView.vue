@@ -42,12 +42,17 @@ function goBack() {
 // derive industry from slug and get majorGroupCode from query
 const industrySlug = computed(() => String(route.params.industry || 'industry'))
 const majorGroupCode = computed(() => String(route.query.majorGroupCode || ''))
-const industryName = computed(() =>
-  industrySlug.value
+const industryName = computed(() => {
+  // Use localized industry name if majorGroupCode is available
+  if (majorGroupCode.value && t(`industries.${majorGroupCode.value}`)) {
+    return t(`industries.${majorGroupCode.value}`)
+  }
+  // Fallback to slug transformation
+  return industrySlug.value
     .split('-')
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join(' ')
-)
+})
 
 // Jobs fetched from API
 const jobs = ref<Job[]>([])
