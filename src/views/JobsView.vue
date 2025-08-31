@@ -26,6 +26,28 @@ const { locale } = useI18n()
 const loading = ref(false)
 const error = ref('')
 
+// Function to get the image path for each major group
+function getMajorGroupImage(majorGroupCode: string) {
+  return `/major group images/${majorGroupCode}. ${getMajorGroupImageName(majorGroupCode)}.png`
+}
+
+// Function to get the image name based on major group code
+function getMajorGroupImageName(majorGroupCode: string) {
+  const imageNames: Record<string, string> = {
+    '0': 'Armed Forces',
+    '1': 'Managers',
+    '2': 'Professionals',
+    '3': 'Technician and Associate Professionals',
+    '4': 'Clerical Support Workers',
+    '5': 'Service and Sales Workers',
+    '6': 'Skilled Agricultural, Forestry, Livestock and Fishery Workers',
+    '7': 'Craft and Related Trades Workers',
+    '8': 'Plant and Machine Operations and Assembler',
+    '9': 'Elementary Occupations'
+  }
+  return imageNames[majorGroupCode] || 'default'
+}
+
 // Industries and jobs fetched from API
 const industries = ref<Industry[]>([])
 const allJobs = ref<Job[]>([])
@@ -269,10 +291,23 @@ onMounted(() => {
         <button
           v-for="industry in industries"
           :key="industry.id"
-          class="group aspect-square rounded-xl border border-input bg-card hover:shadow-md transition p-4 flex items-center justify-center text-center"
+          class="group aspect-square rounded-xl border border-input bg-white hover:shadow-md transition overflow-hidden relative"
           @click="goToIndustry(industry.name, industry.id)"
         >
-          <span class="text-lg font-medium group-hover:text-primary">{{ industry.name }}</span>
+          <!-- Image covering most of the card -->
+          <div class="absolute inset-0 bottom-20">
+            <img
+              :src="getMajorGroupImage(industry.id)"
+              :alt="industry.name"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              @error="$event.target.style.display='none'"
+            />
+          </div>
+
+          <!-- Text area at the bottom -->
+          <div class="absolute bottom-0 left-0 right-0 h-20 bg-white flex items-center justify-center p-3">
+            <span class="text-sm font-medium group-hover:text-primary leading-tight text-center">{{ industry.name }}</span>
+          </div>
         </button>
       </div>
     </div>
