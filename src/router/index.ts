@@ -28,14 +28,12 @@ const router = createRouter({
       path: '/jobs/:industry',
       name: 'industry-jobs',
       component: IndustryJobsView,
-      props: true,
     },
     // Job description for a given job within an industry
     {
       path: '/jobs/:industry/:jobId',
       name: 'job-description',
       component: JobDescriptionView,
-      props: true,
     },
     {
       path: '/grants',

@@ -398,7 +398,6 @@ const isLastQuestion = computed(() => {
     const expectedTotal = 2 + majorGroupQuestions[selectedMajorCode].length; // 2个基础 + 5个major group
     const isLast = currentQuestion.value === expectedTotal - 1;
 
-    console.log(`Expected total: ${expectedTotal}, Current: ${currentQuestion.value}, Questions length: ${questions.length}, Is last: ${isLast}`);
     return isLast;
   }
 
@@ -473,7 +472,6 @@ function computeScores() {
 
   // 获取用户选择的关键词
   const userSelectedKeywords = extractUserSelectedKeywords();
-  console.log('User selected keywords:', userSelectedKeywords);
 
   unitData.forEach((unit) => {
     let score = 0;
@@ -526,12 +524,6 @@ function computeScores() {
       : 0;
     details.userChoiceMatch = userChoiceScore;
     score += userChoiceScore;
-
-    console.log(`Unit ${unit.unit_group_code}:`);
-    console.log(`  +${details.skillMatch} for skill match`);
-    console.log(`  +${details.majorMatch} for major group match`);
-    console.log(`  +${keywordScore.toFixed(1)} for predefined keywords (${keywordMatches}/${unitKeywords.length})`);
-    console.log(`  +${userChoiceScore.toFixed(1)} for user choice keywords (${userChoiceMatches}/${userSelectedKeywords.length})`);
 
     scores.push({
       unit_group_code: unit.unit_group_code,
