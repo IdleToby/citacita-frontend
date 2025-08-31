@@ -276,7 +276,7 @@ onMounted(() => {
 
       <!-- Show job search results -->
       <div v-else-if="searchQuery && filteredJobs.length" class="text-center py-8">
-        <p class="text-lg mb-4">Job search results:</p>
+        <p class="text-lg mb-4">{{ t('jobsPage.jobSearchResults') }}</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
           <button
             v-for="job in filteredJobs"

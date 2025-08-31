@@ -13,6 +13,7 @@
     "subtitle": "Click to discover jobs available",
     "searchPlaceholder": "Search jobs...",
     "jobQuiz": "Job Quiz",
+    "jobSearchResults": "Job search results:",
     "noResultsFound": "No results found for \"{query}\"",
     "tryDifferentSearch": "Try searching for a different job title"
   },
