@@ -58,10 +58,10 @@
       "location": "按地点"
     },
     "locationPlaceholder": "例如：吉隆坡",
-    "noLocationFound": "未找到位置。",
+    "noLocationFound": "未找到结果",
     "radiusUnit": "米",
     "loading": "加载中...",
-    "noFacilitiesFound": "未找到任何设施。",
+    "noFacilitiesFound": "未找到任何设施,请尝试扩大搜索范围。",
     "unnamedFacility": "未命名设施",
     "distanceAway": "公里外",
     "details": {

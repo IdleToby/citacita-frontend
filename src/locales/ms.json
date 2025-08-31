@@ -58,10 +58,10 @@
       "location": "Mengikut Lokasi"
     },
     "locationPlaceholder": "cth. Kuala Lumpur",
-    "noLocationFound": "Tiada lokasi ditemui.",
+    "noLocationFound": "Tiada hasil ditemui.",
     "radiusUnit": "meter",
     "loading": "Memuatkan...",
-    "noFacilitiesFound": "Tiada kemudahan ditemui.",
+    "noFacilitiesFound": "Kemudahan tidak ditemui, sila cuba tingkatkan jarak.",
     "unnamedFacility": "Kemudahan Tanpa Nama",
     "distanceAway": "km jauhnya",
     "details": {

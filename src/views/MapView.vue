@@ -174,7 +174,7 @@ const debounce = (func: Function, delay: number) => {
 }
 
 const fetchAutocompleteSuggestions = debounce(async (query: string) => {
-  if (query.length < 2) {
+  if (query.length < 1) {
     autocompleteSuggestions.value = []
     return
   }
@@ -187,13 +187,21 @@ const fetchAutocompleteSuggestions = debounce(async (query: string) => {
     autocompleteSuggestions.value = data.results || []
   } catch (err) {
     console.error('Autocomplete fetch error:', err)
+    autocompleteSuggestions.value = []
   }
 }, 300)
 
 watch(locationInputQuery, (newQuery) => {
+  if (!newQuery) {
+    selectedLocation.value = null
+  }
+
+  // This guard prevents re-fetching when a location is selected
   if (selectedLocation.value && newQuery === selectedLocation.value.address_line1) {
+    autocompleteSuggestions.value = [] // Also clear suggestions here
     return
   }
+
   fetchAutocompleteSuggestions(newQuery)
 })
 

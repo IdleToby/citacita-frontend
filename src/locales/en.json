@@ -58,10 +58,10 @@
       "location": "By Location"
     },
     "locationPlaceholder": "eg. Kuala Lumpur",
-    "noLocationFound": "No location found.",
+    "noLocationFound": "No result found.",
     "radiusUnit": "meters",
     "loading": "Loading...",
-    "noFacilitiesFound": "No facilities found.",
+    "noFacilitiesFound": "No facilities found, try expanding the distance.",
     "unnamedFacility": "Unnamed Facility",
     "distanceAway": "km away",
     "details": {
