@@ -314,7 +314,7 @@ onMounted(() => {
 
     <!-- Floating Job quiz bubble -->
     <button
-      class="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#C65A0F] text-white shadow-lg flex items-center justify-center text-sm md:text-base font-bold"
+      class="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#C65A0F] text-white shadow-lg flex items-center justify-center text-sm md:text-base font-bold hover:scale-110 transition-transform duration-200"
       aria-label="Job quiz"
       title="Job quiz"
       @click="goToQuiz"
