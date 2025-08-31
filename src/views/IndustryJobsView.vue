@@ -34,6 +34,11 @@ function closeQuizModal() {
   showQuizModal.value = false
 }
 
+// Make goToQuiz available globally for v-html onclick
+if (typeof window !== 'undefined') {
+  (window as any).openJobQuiz = goToQuiz
+}
+
 // Go back to JobsView
 function goBack() {
   router.push({ name: 'jobs' })
@@ -231,10 +236,9 @@ onMounted(() => {
 
       <h2
         class="text-xl md:text-2xl font-semibold bg-[#C65A0F] text-white px-4 py-2 rounded-lg text-center mx-auto max-w-3xl"
-        v-html="t('industryJobsPage.quizPrompt').replace(t('industryJobsPage.here'), `<button type='button' class='font-bold underline underline-offset-2 hover:scale-110 transition-transform duration-200 inline-block' onclick='document.querySelector(\\'[data-quiz-trigger]\\').click()'>${t('industryJobsPage.here')}</button>`)"
+        v-html="t('industryJobsPage.quizPrompt').replace(t('industryJobsPage.here'), `<button type='button' class='font-bold underline underline-offset-2 hover:scale-110 transition-transform duration-200 inline-block' onclick='window.openJobQuiz()'>${t('industryJobsPage.here')}</button>`)"
       >
       </h2>
-      <button data-quiz-trigger @click="goToQuiz" class="hidden"></button>
 
       <!-- Loading state -->
       <div v-if="loading" class="text-center py-8">
