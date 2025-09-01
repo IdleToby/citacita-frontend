@@ -8,6 +8,9 @@
     "map": "Peta",
     "faq": "Soalan Lazim"
   },
+  "common": {
+    "goBack": "Kembali"
+  },
   "jobsPage": {
     "title": "Industri di Malaysia",
     "subtitle": "Klik untuk meneroka kerja yang tersedia",

@@ -276,7 +276,7 @@ onMounted(() => {
         <span
           class="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap"
         >
-          Go back
+          {{ t('common.goBack') }}
         </span>
       </button>
     </div>

@@ -8,6 +8,9 @@
     "map": "Map",
     "faq": "FAQ"
   },
+  "common": {
+    "goBack": "Go back"
+  },
   "jobsPage": {
     "title": "Industries in Malaysia",
     "subtitle": "Click to discover jobs available",

@@ -8,6 +8,9 @@
     "map": "地图",
     "faq": "常见问题"
   },
+  "common": {
+    "goBack": "返回"
+  },
   "jobsPage": {
     "title": "马来西亚的行业",
     "subtitle": "点击查看可用的工作",
