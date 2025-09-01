@@ -18,17 +18,57 @@
     <div class="absolute top-0 left-0 z-10 w-full h-full pointer-events-none">
       <div
         ref="textContainerRef"
-        class="absolute p-8 rounded-full bg-white/10 backdrop-blur-md pointer-events-auto shadow-xl border border-white/20"
-        style="will-change: transform; top: 0; left: 0; min-width: 280px; min-height: 280px; display: flex; align-items: center; justify-content: center;"
+        class="absolute p-6 rounded-full bg-white/10 backdrop-blur-md pointer-events-auto shadow-xl border border-white/20 transition-transform duration-300 ease-out"
+        style="will-change: transform; top: 0; left: 0; width: 250px; height: 250px; display: flex; align-items: center; justify-content: center;"
       >
         <transition name="fade" mode="out-in">
           <div :key="currentIndex" class="text-white text-center max-w-xs">
             <!-- 框内文本显示 -->
-            <p class="text-base md:text-lg font-medium text-white text-center drop-shadow-lg whitespace-pre-line leading-relaxed">
+            <p class="text-lg md:text-xl font-bold text-white text-center drop-shadow-2xl whitespace-pre-line leading-relaxed tracking-wide" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px rgba(255, 223, 100, 0.8), 0 0 30px rgba(255, 223, 100, 0.4), 0 0 45px rgba(255, 223, 100, 0.2); filter: drop-shadow(0 0 10px rgba(255, 223, 100, 0.6));">
               {{ contentData[currentIndex].description }}
             </p>
           </div>
         </transition>
+      </div>
+    </div>
+
+    <!-- 页面指示器（萤火虫效果） -->
+    <div class="absolute bottom-40 left-1/2 -translate-x-1/2 z-20">
+      <div class="flex space-x-3">
+        <button
+          v-for="(item, index) in contentData"
+          :key="`indicator-${index}`"
+          @click="goToPage(index)"
+          class="relative transition-all duration-500 ease-out hover:scale-110"
+          :class="{
+            'w-5 h-5': index !== currentIndex,
+            'w-6 h-6': index === currentIndex
+          }"
+        >
+          <!-- 外圈光晕效果 -->
+          <div
+            class="absolute inset-0 rounded-full transition-all duration-700"
+            :class="{
+              'bg-white/20 animate-pulse': index !== currentIndex,
+              'bg-yellow-300/40 animate-ping': index === currentIndex
+            }"
+          ></div>
+
+          <!-- 内圈萤火虫 -->
+          <div
+            class="relative w-full h-full rounded-full transition-all duration-500 border"
+            :class="{
+              'bg-white/30 border-white/40': index !== currentIndex,
+              'bg-yellow-200 border-yellow-100 shadow-lg shadow-yellow-200/50': index === currentIndex
+            }"
+          >
+            <!-- 萤火虫闪烁效果 -->
+            <div
+              v-if="index === currentIndex"
+              class="absolute inset-0 rounded-full bg-yellow-100 animate-pulse opacity-60"
+            ></div>
+          </div>
+        </button>
       </div>
     </div>
 
@@ -42,7 +82,7 @@
       </button>
     </div>
 
-    <!-- 切换按钮
+    <!-- 切换按钮 -->
     <button
       @click="prev"
       class="absolute left-5 md:left-10 top-1/2 -translate-y-1/2 z-20 text-white text-4xl p-2 rounded-full hover:bg-white/10 transition-colors"
@@ -54,8 +94,17 @@
       class="absolute right-5 md:right-10 top-1/2 -translate-y-1/2 z-20 text-white text-4xl p-2 rounded-full hover:bg-white/10 transition-colors"
     >
       ❯
-    </button> -->
+    </button>
 
+    <!-- 隐藏的图片预加载 -->
+    <div class="hidden">
+      <img
+        v-for="(item, index) in contentData"
+        :key="`preload-${index}`"
+        :src="item.backgroundImage"
+        @load="onImageLoad(index)"
+      />
+    </div>
   </div>
 </template>
 
@@ -77,14 +126,15 @@ import {
   TextureLoader
 } from 'three'
 import { gsap } from 'gsap'
-import { useRouter } from 'vue-router'              // ★ CHANGED: 启用路由
-const router = useRouter()                          // ★ CHANGED: 获取 router 实例
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
-/** ============== 可调参数（让文字圆更靠近月亮） ============== */
-const BUBBLE_DISTANCE = 1.7   // 距离月亮中心（球半径≈1.2）。越小越靠近月亮，建议 1.6~1.9
-const BUBBLE_HEIGHT   = 0.15  // 垂直偏移，正值向上
-const PROJ_X_SCALE    = 0.55  // 屏幕投影X缩放（原0.7），越小越贴近真实位置
-const PROJ_Y_SCALE    = 0.55  // 屏幕投影Y缩放（原0.5）
+/** ============== 可调参数（调整月亮大小和文字圆位置） ============== */
+const BUBBLE_DISTANCE = 1.4   // 距离月亮中心，更靠近月亮
+const BUBBLE_HEIGHT   = 0.1   // 垂直偏移，稍微降低
+const PROJ_X_SCALE    = 0.6   // 屏幕投影X缩放，稍微增大以补偿月亮缩小
+const PROJ_Y_SCALE    = 0.6   // 屏幕投影Y缩放，稍微增大以补偿月亮缩小
+const MOON_SIZE       = 1.0   // 月亮半径，从1.2缩小到1.0
 
 interface ContentItem {
   title: string
@@ -106,7 +156,7 @@ const contentData = ref<ContentItem[]>([
     description: 'Did you know\n one out of two women\n don\'t work in Malaysia?',
     targetRotationY: 0, //0度
     color: '#312e81',
-    buttonText: 'Learn More',
+    buttonText: 'Find Jobs',
     path: '/jobs',
     backgroundImage: '/images/homepage-jobs-for-me.png',
   },
@@ -115,7 +165,7 @@ const contentData = ref<ContentItem[]>([
     description: 'A lot of women struggle\n with family responsibilities\nand financial stability.',
     targetRotationY: Math.PI / 3, //60度
     color: '#1e293b',
-    buttonText: 'Learn More',
+    buttonText: 'Explore Map',
     path: '/map',
     backgroundImage: '/images/map.png',
   },
@@ -124,7 +174,7 @@ const contentData = ref<ContentItem[]>([
     description: 'Do you want to\nreturn to your career?',
     targetRotationY: (2 * Math.PI) / 3, //120度
     color: '#dc2626',
-    buttonText: 'Learn More',
+    buttonText: 'Start Journey',
     path: '/jobs',
     backgroundImage: '/images/jobs-for-me.png',
   },
@@ -133,7 +183,7 @@ const contentData = ref<ContentItem[]>([
     description: 'Worried about\ninterviews and\nmaking resumes?',
     targetRotationY: Math.PI, //180度
     color: '#064e3b',
-    buttonText: 'Learn More',
+    buttonText: 'Try Tools',
     path: '/ai',
     backgroundImage: '/images/ai-tools.png',
   },
@@ -142,7 +192,7 @@ const contentData = ref<ContentItem[]>([
     description: 'Looking for financial\nsupport as a mother?',
     targetRotationY: (4 * Math.PI) / 3, //240度
     color: '#7c3aed',
-    buttonText: 'Learn More',
+    buttonText: 'Apply Now',
     path: '/grants',
     backgroundImage: '/images/grants.png',
   },
@@ -151,7 +201,7 @@ const contentData = ref<ContentItem[]>([
     description: 'CitaCita is here to\nsupport you!',
     targetRotationY: (5 * Math.PI) / 3, //300度
     color: '#059669',
-    buttonText: 'Learn More',
+    buttonText: 'Get Help',
     path: '/faq',
     backgroundImage: '/images/faq.png',
   },
@@ -159,6 +209,7 @@ const contentData = ref<ContentItem[]>([
 
 const currentIndex = ref(0)
 const currentBgColor = ref(contentData.value[0].color)
+const loadedImages = ref<Set<number>>(new Set())
 
 let scene: Scene
 let camera: PerspectiveCamera
@@ -170,7 +221,12 @@ let animationFrameId: number
 let isAnimating = false
 const anchorPositionVector = new Vector3()
 
-/** 计算并更新文字圆的位置（用了新的投影缩放系数） */
+/** 图片预加载回调 */
+const onImageLoad = (index: number) => {
+  loadedImages.value.add(index)
+}
+
+/** 计算并更新文字圆的位置（智能避让导航栏和底部UI） */
 const updateTextPosition = () => {
   if (!textContainerRef.value || !mainContainerRef.value) return
   textAnchor.getWorldPosition(anchorPositionVector)
@@ -182,8 +238,55 @@ const updateTextPosition = () => {
   const x = (anchorPositionVector.x * PROJ_X_SCALE + 0.5) * width
   const y = (-anchorPositionVector.y * PROJ_Y_SCALE + 0.5) * height
 
-  const clampedX = Math.max(boxWidth / 2, Math.min(x, width - boxWidth / 2))
-  const clampedY = Math.max(boxHeight / 2, Math.min(y, height - boxHeight / 2))
+  // 避让区域设置
+  const NAV_HEIGHT = 80
+  const NAV_MARGIN = 20
+  const SAFE_TOP = NAV_HEIGHT + NAV_MARGIN
+
+  // 底部UI避让 - 萤火虫指示器现在在 bottom-40 (160px)，按钮在 bottom-10 (40px)
+  const SAFE_BOTTOM = 200  // 从底部算起的安全区域
+
+  const cardTop = y - boxHeight / 2
+  const cardBottom = y + boxHeight / 2
+
+  let finalX = x
+  let finalY = y
+
+  // 避让顶部导航栏
+  if (cardTop < SAFE_TOP) {
+    const overlap = SAFE_TOP - cardTop
+    if (overlap < boxHeight * 0.6) {
+      finalY = SAFE_TOP + boxHeight / 2
+    } else {
+      if (x < width / 2) {
+        finalX = Math.min(x + overlap * 0.8, width - boxWidth / 2 - 20)
+        finalY = Math.max(y + overlap * 0.5, SAFE_TOP + boxHeight / 2)
+      } else {
+        finalX = Math.max(x - overlap * 0.8, boxWidth / 2 + 20)
+        finalY = Math.max(y + overlap * 0.5, SAFE_TOP + boxHeight / 2)
+      }
+    }
+  }
+
+  // 避让底部UI元素
+  if (cardBottom > height - SAFE_BOTTOM) {
+    const bottomOverlap = cardBottom - (height - SAFE_BOTTOM)
+    finalY = height - SAFE_BOTTOM - boxHeight / 2
+
+    // 如果向上推移后与顶部冲突，则向侧边推移
+    if (finalY - boxHeight / 2 < SAFE_TOP) {
+      finalY = Math.max(SAFE_TOP + boxHeight / 2, height / 2)
+      if (x < width / 2) {
+        finalX = Math.min(x + bottomOverlap, width - boxWidth / 2 - 20)
+      } else {
+        finalX = Math.max(x - bottomOverlap, boxWidth / 2 + 20)
+      }
+    }
+  }
+
+  // 确保最终位置在屏幕范围内
+  const clampedX = Math.max(boxWidth / 2 + 10, Math.min(finalX, width - boxWidth / 2 - 10))
+  const clampedY = Math.max(boxHeight / 2 + 10, Math.min(finalY, height - boxHeight / 2 - 10))
 
   textContainerRef.value.style.transform =
     `translate(-50%, -50%) translate(${clampedX}px, ${clampedY}px)`
@@ -202,7 +305,7 @@ onMounted(() => {
 
   const textureLoader = new TextureLoader()
 
-  const geometry = new SphereGeometry(1.2, 64, 64)
+  const geometry = new SphereGeometry(MOON_SIZE, 64, 64)
   const material = new MeshStandardMaterial({
     metalness: 0.0,
     roughness: 0.95,
@@ -242,17 +345,17 @@ onMounted(() => {
   mainShape.rotation.x = 0.3
   mainShape.rotation.z = 0.1
 
-  const orbitPathRadius = 2.0
+  const orbitPathRadius = 1.6  // 缩小轨道半径，从2.0改为1.6
   const orbitGroup = new Object3D()
   orbitGroup.rotation.z = Math.PI / 16
   orbitGroup.rotation.x = Math.PI / 32
   mainShape.add(orbitGroup)
 
-  const orbitGeometry = new TorusGeometry(orbitPathRadius, 0.005, 8, 100)
+  const orbitGeometry = new TorusGeometry(orbitPathRadius, 0.003, 8, 100)  // 缩小轨道线粗细
   const orbitMaterial = new MeshBasicMaterial({
     color: 0x4fc3f7,
     transparent: true,
-    opacity: 0.4,
+    opacity: 0.3,  // 降低透明度，让轨道更微妙
   })
   const orbit = new Mesh(orbitGeometry, orbitMaterial)
   orbit.rotation.x = Math.PI / 2
@@ -261,11 +364,11 @@ onMounted(() => {
   satellitePivot = new Object3D()
   orbitGroup.add(satellitePivot)
 
-  const orbiterGeometry = new SphereGeometry(0.06, 16, 16)
+  const orbiterGeometry = new SphereGeometry(0.04, 16, 16)  // 缩小卫星大小
   const orbiterMaterial = new MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.7  // 降低卫星透明度
   })
   const orbiter = new Mesh(orbiterGeometry, orbiterMaterial)
   orbiter.position.x = orbitPathRadius
@@ -308,6 +411,12 @@ onUnmounted(() => {
   renderer.dispose()
   scene.clear()
 })
+
+/** 跳转到指定页面 */
+const goToPage = (index: number) => {
+  if (index === currentIndex.value || isAnimating) return
+  currentIndex.value = index
+}
 
 const handleMouseWheel = (event: WheelEvent) => {
   if (isAnimating) return
@@ -374,7 +483,7 @@ const handleResize = () => {
 
 const handleButtonClick = () => {
   const targetPath = contentData.value[currentIndex.value].path
-  router.push(targetPath)                               // ★ CHANGED: 真正跳转，而不是 alert
+  router.push(targetPath)
 }
 </script>
 
