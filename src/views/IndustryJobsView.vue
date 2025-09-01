@@ -240,7 +240,7 @@ onMounted(() => {
           />
           <ul
             v-if="suggestions.length"
-            class="absolute z-10 mt-1 w-full bg-white border border-input rounded-md shadow-md max-h-60 overflow-auto"
+            class="absolute z-10 mt-1 w-full bg-white border border-input rounded-md shadow-md max-h-60 overflow-auto text-black"
           >
             <li
               v-for="s in suggestions"

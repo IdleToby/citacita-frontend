@@ -96,7 +96,24 @@ const jobTasks = computed(() => {
     }
   }
 
-  return finalTasks
+  // Additional cleanup for incomplete parenthetical references and proper endings
+  return finalTasks.map(task => {
+    let cleanedTask = task
+
+    // Remove incomplete parenthetical references like (ica, (wm, (u, etc.
+    cleanedTask = cleanedTask.replace(/\s*\([a-zA-Z]{1,4}\s*$/g, '')
+
+    // Clean up any trailing incomplete words or punctuation
+    cleanedTask = cleanedTask.replace(/\s+and\s*$/, '')
+
+    // Ensure proper sentence ending
+    if (!cleanedTask.match(/[.;]$/)) {
+      // If the task doesn't end with . or ;, add a semicolon
+      cleanedTask = cleanedTask.trim() + ';'
+    }
+
+    return cleanedTask.trim()
+  }).filter(task => task.length > 1) // Filter out empty or single character tasks
 })
 
 const jobExamples = computed(() => {
@@ -108,6 +125,8 @@ const jobExamples = computed(() => {
     .replace(/^\s*\.\s*/gm, '')
     // Remove extra indentation (multiple spaces at start of lines)
     .replace(/^\s{2,}/gm, '')
+    // Fix character encoding issues - replace garbled apostrophe with proper single quote
+    .replace(/¡¯/g, "'")
     // Split by common delimiters like semicolons, commas, or line breaks
     .split(/[;,\n]/)
     .map(example => example.trim())
@@ -116,7 +135,29 @@ const jobExamples = computed(() => {
     .map(example => example.replace(/^[\.\s]+/, '').trim())
     .filter(example => example.length > 0)
 
-  return cleanedExamples
+  // Merge examples that don't start with 6-digit code (####-##) with the previous example
+  const mergedExamples = []
+  for (let i = 0; i < cleanedExamples.length; i++) {
+    const currentExample = cleanedExamples[i]
+
+    // Check if current example starts with 6-digit code pattern (####-##)
+    const hasCodePattern = /^\d{4}-\d{2}\s/.test(currentExample)
+
+    if (hasCodePattern || mergedExamples.length === 0) {
+      // If has code pattern or is the first example, add as new item
+      mergedExamples.push(currentExample)
+    } else {
+      // If no code pattern, merge with previous example using comma
+      if (mergedExamples.length > 0) {
+        mergedExamples[mergedExamples.length - 1] += `, ${currentExample}`
+      } else {
+        // Fallback: if no previous examples, add as is
+        mergedExamples.push(currentExample)
+      }
+    }
+  }
+
+  return mergedExamples
 })
 
 
