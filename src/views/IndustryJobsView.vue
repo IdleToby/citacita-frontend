@@ -181,7 +181,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-full bg-white text-black">
+  <div class="w-full min-h-full text-white relative">
+        <!-- Fixed Background Layer with Blur -->
+    <div
+      class="fixed inset-0 -z-10"
+      :style="{
+        backgroundImage: 'url(/images/homepage-jobs-for-me.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        filter: 'blur(2.5px)'
+      }"
+    ></div>
+    <!-- Background Overlay for additional opacity -->
+    <div class="fixed inset-0 -z-10 bg-black/30"></div>
     <!-- Go Back Button -->
     <div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-10">
       <button
@@ -215,14 +228,15 @@ onMounted(() => {
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-3xl md:text-4xl font-bold">{{ t('industryJobsPage.title') }}</h1>
-          <p class="text-muted-foreground">{{ t('industryJobsPage.majorGroup') }}: {{ industryName }}</p>
+          <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{{ t('industryJobsPage.title') }}</h1>
+          <p class="text-white/90 drop-shadow-md">{{ t('industryJobsPage.majorGroup') }}: {{ industryName }}</p>
         </div>
         <div class="w-full md:w-80 relative">
           <Input
             v-model="jobQuery"
             :placeholder="t('industryJobsPage.searchPlaceholder')"
             @input="onSearchInput"
+            class="bg-white text-black placeholder:text-gray-500"
           />
           <ul
             v-if="suggestions.length"
@@ -248,15 +262,15 @@ onMounted(() => {
 
       <!-- Loading state -->
       <div v-if="loading" class="text-center py-8">
-        <p>Loading jobs...</p>
+        <p class="text-white text-xl">Loading jobs...</p>
       </div>
 
       <!-- Error state -->
-      <div v-else-if="error" class="text-center py-8 text-red-600">
-        <p>{{ error }}</p>
+      <div v-else-if="error" class="text-center py-8">
+        <p class="text-white text-xl mb-4">{{ error }}</p>
         <button
           @click="fetchJobs"
-          class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
         >
           Retry
         </button>
@@ -264,8 +278,8 @@ onMounted(() => {
 
       <!-- No results found message -->
       <div v-else-if="jobQuery && !filteredJobs.length" class="text-center py-8">
-        <p class="text-lg text-gray-600">{{ t('industryJobsPage.noResultsFound', { query: jobQuery }) }}</p>
-        <p class="text-sm text-muted-foreground mt-2">{{ t('industryJobsPage.tryDifferentSearch') }}</p>
+        <p class="text-lg text-white drop-shadow-md">{{ t('industryJobsPage.noResultsFound', { query: jobQuery }) }}</p>
+        <p class="text-sm text-white/80 mt-2 drop-shadow-sm">{{ t('industryJobsPage.tryDifferentSearch') }}</p>
       </div>
 
       <!-- Jobs grid -->
@@ -273,10 +287,10 @@ onMounted(() => {
         <button
           v-for="job in filteredJobs"
           :key="job.id"
-          class="group aspect-square rounded-xl border border-input bg-card hover:shadow-md transition p-4 flex items-center justify-center text-center"
+          class="group aspect-square rounded-xl border border-input bg-white hover:shadow-md transition p-4 flex items-center justify-center text-center"
           @click="goToJob(job.id)"
         >
-          <span class="text-lg font-medium group-hover:text-primary">{{ job.title }}</span>
+          <span class="text-lg font-medium text-gray-800 group-hover:text-primary">{{ job.title }}</span>
         </button>
       </div>
     </div>

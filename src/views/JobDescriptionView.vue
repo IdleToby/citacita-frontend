@@ -196,7 +196,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-full bg-white text-black">
+  <div class="w-full min-h-screen text-white relative overflow-hidden">
+        <!-- Fixed Background Layer with Blur -->
+    <div
+      class="fixed inset-0 -z-10"
+      :style="{
+        backgroundImage: 'url(/images/homepage-jobs-for-me.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        filter: 'blur(2.5px)'
+      }"
+    ></div>
+    <!-- Background Overlay for additional opacity -->
+    <div class="fixed inset-0 -z-10 bg-black/30"></div>
     <!-- Go Back Button -->
     <div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-10">
       <button
@@ -227,60 +240,84 @@ onMounted(() => {
       </button>
     </div>
 
-    <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div class="max-w-7xl mx-auto px-4 py-8 h-screen flex flex-col">
       <!-- Loading state -->
-      <div v-if="loading" class="text-center py-8">
-        <p>Loading job details...</p>
+      <div v-if="loading" class="text-center py-8 flex-1 flex items-center justify-center">
+        <p class="text-white text-xl">Loading job details...</p>
       </div>
 
       <!-- Error state -->
-      <div v-else-if="error" class="text-center py-8 text-red-600">
-        <p>{{ error }}</p>
-        <button
-          @click="fetchJobDetails"
-          class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
+      <div v-else-if="error" class="text-center py-8 flex-1 flex items-center justify-center">
+        <div>
+          <p class="text-white text-xl mb-4">{{ error }}</p>
+          <button
+            @click="fetchJobDetails"
+            class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       </div>
 
       <!-- Job details -->
       <template v-else>
-        <header class="space-y-3">
-          <div class="space-y-1">
-            <h1 class="text-3xl md:text-4xl font-bold">
+        <!-- Top Headers -->
+        <div class="flex justify-between items-start mb-6">
+          <!-- Left: Unit Group Title + Code -->
+          <div class="flex-1">
+            <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
               {{ jobTitle }}
-              <span class="text-lg font-normal text-muted-foreground ml-2">({{ jobDetails.unitGroupCode }})</span>
+              <span class="text-lg font-normal ml-2">({{ jobDetails.unitGroupCode }})</span>
             </h1>
-            <p class="text-muted-foreground">{{ t('jobDescriptionPage.majorGroup') }}: {{ jobDetails.majorGroupTitle || industryName }}</p>
           </div>
-          <div>
-            <p class="text-xl font-semibold">{{ t('jobDescriptionPage.skillLevel') }}: {{ skillLevel }}</p>
-          </div>
-        </header>
 
-        <section class="space-y-2">
-          <h2 class="text-xl font-semibold">{{ t('jobDescriptionPage.jobDescription') }}</h2>
-          <p class="text-sm md:text-base">{{ jobDescription }}</p>
-        </section>
-
-        <section class="space-y-2">
-          <h2 class="text-xl font-semibold">{{ t('jobDescriptionPage.tasks') }}</h2>
-          <div class="border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
-            <ul class="list-disc ml-6 space-y-1">
-              <li v-for="(task, idx) in jobTasks" :key="idx">{{ task }}</li>
-            </ul>
+          <!-- Right: Major Group Title + Skill Level -->
+          <div class="flex-1 text-right">
+            <h2 class="text-xl md:text-2xl font-bold text-white drop-shadow-lg">
+              {{ jobDetails.majorGroupTitle || industryName }}
+              <span class="text-base font-normal ml-2">({{ t('jobDescriptionPage.skillLevel') }}: {{ skillLevel }})</span>
+            </h2>
           </div>
-        </section>
+        </div>
 
-        <section class="space-y-2">
-          <h2 class="text-xl font-semibold">{{ t('jobDescriptionPage.examples') }}</h2>
-          <div class="border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
-            <ul class="list-disc ml-6 space-y-1">
-              <li v-for="(example, idx) in jobExamples" :key="idx">{{ example }}</li>
-            </ul>
+        <!-- Job Description Card -->
+        <div class="mb-6">
+          <div class="bg-blue-100/90 backdrop-blur-sm rounded-lg p-6 border border-blue-200">
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">{{ t('jobDescriptionPage.jobDescription') }}</h3>
+            <p class="text-gray-700 text-base leading-relaxed">{{ jobDescription }}</p>
           </div>
-        </section>
+        </div>
+
+        <!-- Bottom Cards: Tasks and Examples -->
+        <div class="flex gap-6">
+          <!-- Tasks Card (2/3 width) -->
+          <div class="flex-[2]">
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg p-6 border border-gray-200 flex flex-col" style="height: 400px;">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">{{ t('jobDescriptionPage.tasks') }}</h3>
+              <div class="flex-1 overflow-hidden">
+                <div class="h-full overflow-y-auto pr-2">
+                  <ul class="list-disc ml-6 space-y-2 text-gray-700">
+                    <li v-for="(task, idx) in jobTasks" :key="idx" class="leading-relaxed">{{ task }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Examples Card (1/3 width) -->
+          <div class="flex-1">
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg p-6 border border-gray-200 flex flex-col" style="height: 400px;">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">{{ t('jobDescriptionPage.examples') }}</h3>
+              <div class="flex-1 overflow-hidden">
+                <div class="h-full overflow-y-auto pr-2">
+                  <ul class="list-disc ml-6 space-y-2 text-gray-700">
+                    <li v-for="(example, idx) in jobExamples" :key="idx" class="leading-relaxed">{{ example }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </template>
     </div>
 
