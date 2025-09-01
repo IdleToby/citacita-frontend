@@ -99,8 +99,14 @@ async function fetchJobs() {
 
 const filteredJobs = computed(() => {
   const q = jobQuery.value.trim().toLowerCase()
-  if (!q) return jobs.value
-  return jobs.value.filter((j) => j.title.toLowerCase().startsWith(q))
+  let result = jobs.value
+
+  if (q) {
+    result = jobs.value.filter((j) => j.title.toLowerCase().startsWith(q))
+  }
+
+  // Sort alphabetically by title
+  return result.sort((a, b) => a.title.localeCompare(b.title))
 })
 
 // API-based autocomplete suggestions

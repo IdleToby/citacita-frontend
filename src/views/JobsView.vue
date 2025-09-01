@@ -312,7 +312,7 @@ onMounted(() => {
               :src="getMajorGroupImage(industry.id)"
               :alt="industry.name"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-              @error="$event.target.style.display='none'"
+              @error="($event.target as HTMLImageElement)?.style && (($event.target as HTMLImageElement).style.display='none')"
             />
           </div>
 
