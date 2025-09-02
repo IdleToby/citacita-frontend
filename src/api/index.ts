@@ -68,7 +68,16 @@ export const getSkillLevelByLang = (lang: string = 'en') => {
 
 // Get skill level by language and major group code
 export const getSkillLevelByLangAndId = (lang: string = 'en', majorGroupCode: string) => {
-  return api.get('/api/skill/getSkillLevelByLangAndId', { params: { lang, majorGroupCode } })
+  // Add cache-busting parameter to ensure fresh data on locale changes
+  const cacheBuster = Date.now()
+  return api.get('/api/skill/getSkillLevelByLangAndId', {
+    params: { lang, majorGroupCode, _t: cacheBuster },
+    // Disable axios caching for this request
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
+  })
 }
 
 // Get job list by language and major group code
@@ -78,10 +87,31 @@ export const getJobListByLangAndMajorGroupCode = (lang: string = 'en', majorGrou
 
 // Get detailed job information by language and unit group code
 export const getDetailJobByLangAndUnitGroupCode = (lang: string = 'en', unitGroupCode: string) => {
-  return api.get('/api/job/getDetailJobByLangAndUnitGroupCode', { params: { lang, unitGroupCode } })
+  // Add cache-busting parameter to ensure fresh data on locale changes
+  const cacheBuster = Date.now()
+  return api.get('/api/job/getDetailJobByLangAndUnitGroupCode', {
+    params: { lang, unitGroupCode, _t: cacheBuster },
+    // Disable axios caching for this request
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
+  })
 }
 
 // Auto-complete job search by language and unit group title
 export const autoCompleteJobByLangAndUnitGroupTitle = (lang: string = 'en', unitGroupTitle: string) => {
   return api.get('/api/job/autoCompleteJobByLangAndUnitGroupTitle', { params: { lang, unitGroupTitle } })
+}
+
+// Get all jobs (includes separate language fields)
+export const getAllJobs = () => {
+  const cacheBuster = Date.now()
+  return api.get('/api/job/getAllJobs', {
+    params: { _t: cacheBuster },
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
+  })
 }

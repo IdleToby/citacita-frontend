@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { getDetailJobByLangAndUnitGroupCode, getSkillLevelByLangAndId } from '@/api'
+import { getDetailJobByLangAndUnitGroupCode, getSkillLevelByLangAndId, getAllJobs } from '@/api'
 import TestQuiz from '@/views/TestQuiz.vue'
 
 const route = useRoute()
@@ -56,31 +56,68 @@ const skillDetails = ref({
   skillLevel: ''
 })
 
-const jobTitle = computed(() => jobDetails.value.unitGroupTitle || `Job ${jobId.value}`)
-const skillLevel = computed(() => skillDetails.value.skillLevel || jobDetails.value.skillLevel || 'Unknown')
-const jobDescription = computed(() => jobDetails.value.unitGroupDescription || 'No description available.')
+// Helper to force reactivity on locale change
+const localeRef = computed(() => locale.value)
+
+const jobTitle = computed(() => {
+  // Depend on locale to force reactivity
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const currentLocale = localeRef.value
+  return jobDetails.value.unitGroupTitle || `Job ${jobId.value}`
+})
+const skillLevel = computed(() => {
+    // Depend on locale to force reactivity
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const currentLocale = localeRef.value
+  return skillDetails.value.skillLevel || jobDetails.value.skillLevel || 'Unknown'
+})
+const jobDescription = computed(() => {
+  // Depend on locale to force reactivity
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const currentLocale = localeRef.value
+  return jobDetails.value.unitGroupDescription || 'No description available.'
+})
 const jobTasks = computed(() => {
+  // Force reactivity on locale change to ensure re-parsing
+  const currentLocale = localeRef.value
   if (!jobDetails.value.tasksInclude) return ['No tasks available']
 
+  console.log(`Parsing jobTasks for locale: ${currentLocale}, content: ${jobDetails.value.tasksInclude?.substring(0, 100)}...`)
+
   // Clean up the tasks string and convert alphabetical ordering to bullet points
-  const cleanedTasks = jobDetails.value.tasksInclude
+  const tasksText = jobDetails.value.tasksInclude
     // Remove leading dots and spaces
     .replace(/^\s*\.\s*/gm, '')
     // Remove extra indentation (multiple spaces at start of lines)
     .replace(/^\s{2,}/gm, '')
-    // Normalize letter casing for alphabetical lists (A) -> a), B) -> b), etc.)
-    .replace(/\b([A-Z])\)/g, (match, letter) => letter.toLowerCase() + ')')
-    // Split by alphabetical markers and "and" prefixes
-    .split(/(?=\s*[a-z]\))|(?=\s*and\s*$)|(?=\s*and\s+[a-z]\))/)
+    .trim()
+
+  // Split by alphabetical markers for both English and Chinese content
+  // Look for patterns like "A)", "a)", "A）", "a）" etc.
+  let cleanedTasks = []
+
+  // First, try to split by alphabetical markers (both English and Chinese parentheses)
+  const alphabeticalSplit = tasksText.split(/\s*[A-Za-z][\)）]\s*/)
+
+  if (alphabeticalSplit.length > 1) {
+    // If we found alphabetical markers, use the split result (skip first empty element)
+    cleanedTasks = alphabeticalSplit.slice(1)
+  } else {
+    // If no alphabetical markers found, try splitting by semicolons or Chinese semicolons
+    cleanedTasks = tasksText.split(/[;；]/).filter(task => task.trim().length > 0)
+  }
+
+  // Clean up each task
+  cleanedTasks = cleanedTasks
     .map(task => task.trim())
     .filter(task => task.length > 0)
-    // Remove alphabetical markers (a), b), c), etc.) and "and" prefixes
-    .map(task => task.replace(/^(and\s+)?[a-z]\)\s*/i, '').trim())
-    // Remove any remaining leading dots or periods and extra whitespace
+    // Remove any remaining alphabetical markers at the beginning
+    .map(task => task.replace(/^(and\s+|和\s+)?[A-Za-z][\)）]\s*/i, '').trim())
+    // Remove any remaining leading dots or periods
     .map(task => task.replace(/^[\.\s]+/, '').trim())
     .filter(task => task.length > 0)
 
-  // Fix the "and" separation issue - combine standalone "and" with the next task
+  // Handle "and" separation for English content
   const finalTasks = []
   for (let i = 0; i < cleanedTasks.length; i++) {
     const currentTask = cleanedTasks[i]
@@ -104,11 +141,11 @@ const jobTasks = computed(() => {
     cleanedTask = cleanedTask.replace(/\s*\([a-zA-Z]{1,4}\s*$/g, '')
 
     // Clean up any trailing incomplete words or punctuation
-    cleanedTask = cleanedTask.replace(/\s+and\s*$/, '')
+    cleanedTask = cleanedTask.replace(/\s+(and|和)\s*$/, '')
 
-    // Ensure proper sentence ending
-    if (!cleanedTask.match(/[.;]$/)) {
-      // If the task doesn't end with . or ;, add a semicolon
+    // Ensure proper sentence ending for non-Chinese content
+    if (!cleanedTask.match(/[.;；。]$/)) {
+      // If the task doesn't end with proper punctuation, add a semicolon
       cleanedTask = cleanedTask.trim() + ';'
     }
 
@@ -117,49 +154,132 @@ const jobTasks = computed(() => {
 })
 
 const jobExamples = computed(() => {
+  // Force reactivity on locale change to ensure re-parsing
+  const currentLocale = localeRef.value
   if (!jobDetails.value.examples) return ['No examples available']
 
-  // Clean up the examples string similar to tasks
-  const cleanedExamples = jobDetails.value.examples
+  console.log(`Parsing jobExamples for locale: ${currentLocale}, content: ${jobDetails.value.examples?.substring(0, 100)}...`)
+
+  // Clean up the examples string
+  const examplesText = jobDetails.value.examples
     // Remove leading dots and spaces
     .replace(/^\s*\.\s*/gm, '')
     // Remove extra indentation (multiple spaces at start of lines)
     .replace(/^\s{2,}/gm, '')
     // Fix character encoding issues - replace garbled apostrophe with proper single quote
     .replace(/¡¯/g, "'")
-    // Split by common delimiters like semicolons, commas, or line breaks
-    .split(/[;,\n]/)
-    .map(example => example.trim())
-    .filter(example => example.length > 0)
-    // Remove any remaining leading dots or periods
-    .map(example => example.replace(/^[\.\s]+/, '').trim())
-    .filter(example => example.length > 0)
+    .trim()
 
-  // Merge examples that don't start with 6-digit code (####-##) with the previous example
-  const mergedExamples = []
-  for (let i = 0; i < cleanedExamples.length; i++) {
-    const currentExample = cleanedExamples[i]
+  // Split by 6-digit code patterns to separate examples
+  // Look for patterns like "4311-01", "4311-02", etc.
+  const codePattern = /(\d{4}-\d{2})/g
+  const matches = [...examplesText.matchAll(codePattern)]
 
-    // Check if current example starts with 6-digit code pattern (####-##)
-    const hasCodePattern = /^\d{4}-\d{2}\s/.test(currentExample)
-
-    if (hasCodePattern || mergedExamples.length === 0) {
-      // If has code pattern or is the first example, add as new item
-      mergedExamples.push(currentExample)
-    } else {
-      // If no code pattern, merge with previous example using comma
-      if (mergedExamples.length > 0) {
-        mergedExamples[mergedExamples.length - 1] += `, ${currentExample}`
-      } else {
-        // Fallback: if no previous examples, add as is
-        mergedExamples.push(currentExample)
-      }
-    }
+  if (matches.length === 0) {
+    // If no code patterns found, try splitting by common delimiters
+    return examplesText.split(/[;；,，\n]/)
+      .map(example => example.trim())
+      .filter(example => example.length > 0)
+      .map(example => example.replace(/^[\.\s]+/, '').trim())
+      .filter(example => example.length > 0)
   }
 
-  return mergedExamples
+  const examples = []
+  let lastIndex = 0
+
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i]
+    const matchIndex = match.index
+
+    // If this isn't the first match and there's content before this match
+    if (i > 0 && matchIndex > lastIndex) {
+      // Get the text from the end of the previous example to the start of this one
+      const prevContent = examplesText.substring(lastIndex, matchIndex).trim()
+      if (prevContent && examples.length > 0) {
+        // Add this content to the previous example if it doesn't start with a code
+        examples[examples.length - 1] += prevContent
+      }
+    }
+
+    // Find the end of this example (either the start of the next code or end of string)
+    const nextMatch = matches[i + 1]
+    const endIndex = nextMatch ? nextMatch.index : examplesText.length
+
+    // Extract the full example starting with the code
+    const fullExample = examplesText.substring(matchIndex, endIndex).trim()
+
+    // Clean up the example
+    const cleanedExample = fullExample
+      .replace(/^[\.\s]+/, '')
+      .replace(/[;；,，\s]*$/, '') // Remove trailing punctuation and spaces
+      .trim()
+
+    if (cleanedExample.length > 0) {
+      examples.push(cleanedExample)
+    }
+
+    lastIndex = endIndex
+  }
+
+  // Final cleanup - ensure each example starts with a code and remove extra punctuation
+  return examples
+    .map(example => {
+      // Clean up any trailing semicolons, commas, or extra whitespace
+      return example.replace(/[;；,，\s]+$/, '').trim()
+    })
+    .filter(example => example.length > 0)
+    .filter(example => /^\d{4}-\d{2}/.test(example)) // Only keep examples that start with codes
 })
 
+
+// Fallback function to get localized job details from getAllJobs
+async function getLocalizedJobFromAllJobs(unitGroupCode: string, locale: string) {
+  console.log('=== Trying fallback getAllJobs method ===')
+  try {
+    const response = await getAllJobs()
+    if (response.data.code === 200 && Array.isArray(response.data.data)) {
+      const job = response.data.data.find((job: any) => job.unitGroupCode === unitGroupCode)
+      if (job) {
+        console.log('Found job in getAllJobs:', job)
+
+        // Map the appropriate language fields based on locale
+        const localizedJob = { ...job }
+
+        if (locale === 'zh-CN') {
+          // Use Chinese fields if available
+          localizedJob.unitGroupTitle = job.unitGroupTitleChinese || job.unitGroupTitle
+          localizedJob.unitGroupDescription = job.unitGroupDescriptionChinese || job.unitGroupDescription
+          localizedJob.tasksInclude = job.tasksIncludeChinese || job.tasksInclude
+          localizedJob.examples = job.examplesChinese || job.examples
+          localizedJob.majorGroupTitle = job.majorGroupTitleChinese || job.majorGroupTitle
+          localizedJob.subMajorGroupTitle = job.subMajorGroupTitleChinese || job.subMajorGroupTitle
+          localizedJob.minorGroupTitle = job.minorGroupTitleChinese || job.minorGroupTitle
+          localizedJob.skillLevel = job.skillLevelChinese || job.skillLevel
+
+          console.log('=== Chinese Localization Applied ===')
+          console.log('tasksIncludeChinese:', job.tasksIncludeChinese?.substring(0, 100) + '...')
+          console.log('Using tasksInclude:', localizedJob.tasksInclude?.substring(0, 100) + '...')
+        } else if (locale === 'ms') {
+          // Use Malay fields if available
+          localizedJob.unitGroupTitle = job.unitGroupTitleMalay || job.unitGroupTitle
+          localizedJob.unitGroupDescription = job.unitGroupDescriptionMalay || job.unitGroupDescription
+          localizedJob.tasksInclude = job.tasksIncludeMalay || job.tasksInclude
+          localizedJob.examples = job.examplesMalay || job.examples
+          localizedJob.majorGroupTitle = job.majorGroupTitleMalay || job.majorGroupTitle
+          localizedJob.subMajorGroupTitle = job.subMajorGroupTitleMalay || job.subMajorGroupTitle
+          localizedJob.minorGroupTitle = job.minorGroupTitleMalay || job.minorGroupTitle
+          localizedJob.skillLevel = job.skillLevelMalay || job.skillLevel
+        }
+        // For 'en' locale, use default fields (no change needed)
+
+        return localizedJob
+      }
+    }
+  } catch (err) {
+    console.error('Error in getAllJobs fallback:', err)
+  }
+  return null
+}
 
 // Fetch job details from API
 async function fetchJobDetails() {
@@ -168,16 +288,53 @@ async function fetchJobDetails() {
     return
   }
 
+  console.log(`Fetching job details for locale: ${locale.value}, unitGroupCode: ${unitGroupCode.value}`)
   loading.value = true
   error.value = ''
+
   try {
+    // First try the primary API
     const response = await getDetailJobByLangAndUnitGroupCode(locale.value, unitGroupCode.value)
+    console.log('=== Primary API Response Debug ===')
+    console.log('Request locale:', locale.value)
+    console.log('Request unitGroupCode:', unitGroupCode.value)
+    console.log('Full API response:', response.data)
+
     if (response.data.code === 200) {
       jobDetails.value = response.data.data
+      console.log('=== Job Details Debug ===')
+      console.log('jobDetails object keys:', Object.keys(jobDetails.value))
+      console.log('unitGroupTitle:', jobDetails.value.unitGroupTitle)
+      console.log('unitGroupDescription:', jobDetails.value.unitGroupDescription?.substring(0, 100) + '...')
+      console.log('tasksInclude full content:', jobDetails.value.tasksInclude)
+      console.log('examples:', jobDetails.value.examples?.substring(0, 100) + '...')
+      console.log('majorGroupTitle:', jobDetails.value.majorGroupTitle)
+
+      // Check if content appears to be in the wrong language (simple heuristic)
+      const isTasksEnglish = /^[a-zA-Z\s,;.()/-]+$/.test(jobDetails.value.tasksInclude?.substring(0, 50) || '')
+      const isChineseLocale = locale.value === 'zh-CN'
+
+      console.log('Tasks appears to be English:', isTasksEnglish)
+      console.log('Current locale is Chinese:', isChineseLocale)
+
+      // If we're requesting Chinese but getting English content, try fallback
+      if (isChineseLocale && isTasksEnglish && jobDetails.value.tasksInclude) {
+        console.log('Primary API returned English content for Chinese locale, trying fallback...')
+        const localizedJob = await getLocalizedJobFromAllJobs(unitGroupCode.value, locale.value)
+
+        if (localizedJob) {
+          console.log('Using localized job from getAllJobs fallback')
+          jobDetails.value = localizedJob
+        } else {
+          console.log('Fallback failed, using original response')
+        }
+      }
+
       // After getting job details, fetch skill level details
       await fetchSkillDetails()
     } else {
       error.value = 'Failed to fetch job details'
+      console.error('API returned non-200 code:', response.data)
     }
   } catch (err) {
     console.error('Error fetching job details:', err)
@@ -213,9 +370,34 @@ watch(unitGroupCode, () => {
 })
 
 // Watch for locale changes to refetch data
-watch(locale, () => {
-  if (unitGroupCode.value) {
-    fetchJobDetails()
+watch(locale, (newLocale, oldLocale) => {
+  console.log(`Locale changed from ${oldLocale} to ${newLocale}`)
+  if (unitGroupCode.value && newLocale !== oldLocale) {
+    // Clear existing data to prevent showing stale content
+    jobDetails.value = {
+      unitGroupCode: '',
+      majorGroupCode: '',
+      majorGroupTitle: '',
+      subMajorGroupCode: '',
+      subMajorGroupTitle: '',
+      minorGroupCode: '',
+      minorGroupTitle: '',
+      unitGroupTitle: '',
+      unitGroupDescription: '',
+      tasksInclude: '',
+      examples: '',
+      skillLevel: ''
+    }
+    skillDetails.value = {
+      majorGroupCode: '',
+      majorGroupTitle: '',
+      educationLevel: '',
+      skillLevel: ''
+    }
+    // Add a small delay to ensure locale change is fully processed
+    setTimeout(() => {
+      fetchJobDetails()
+    }, 100)
   }
 })
 
