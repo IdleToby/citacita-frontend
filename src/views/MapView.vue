@@ -287,6 +287,8 @@ const fetchPlacesByCircle = async (lat: number, lon: number, radius: number) => 
     lang,
   })
 
+  params.set('bias', `proximity:${lon},${lat}`)
+
   await searchPlaces(params)
   updateCircle(lat, lon, radius)
   if (map) map.setView([lat, lon], 15)
