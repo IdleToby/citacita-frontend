@@ -2,6 +2,20 @@
   <div class="questionnaire">
     <h2>Job Suggestion Quiz</h2>
 
+    <!-- Progress Bar -->
+    <div v-if="currentQuestion < questions.length" class="progress-container">
+      <div class="progress-info">
+        <span class="progress-text">Question {{ currentQuestion + 1 }} of {{ expectedTotalQuestions }}</span>
+        <span class="remaining-text">{{ expectedTotalQuestions - currentQuestion - 1 }} questions remaining</span>
+      </div>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          :style="{ width: ((currentQuestion + 1) / expectedTotalQuestions) * 100 + '%' }"
+        ></div>
+      </div>
+    </div>
+
     <!-- 问题显示 -->
     <div v-if="currentQuestion < questions.length">
       <p>{{ questions[currentQuestion].question }}</p>
@@ -380,6 +394,11 @@ const majorGroupQuestions = {
 const currentQuestion = ref(0);
 const answers = reactive<any[]>([]);
 
+// 计算期望的总问题数量（总是7个：2个基础 + 5个专业组问题）
+const expectedTotalQuestions = computed(() => {
+  return 2 + 5; // 2个基础问题 + 5个专业组问题
+});
+
 // 替换整个 isLastQuestion 计算属性
 const isLastQuestion = computed(() => {
   // 如果没有选择 major group，不可能是最后一个问题
@@ -395,7 +414,7 @@ const isLastQuestion = computed(() => {
 
   // 如果找到了对应的code并且有对应的问题，计算总数
   if (selectedMajorCode && (majorGroupQuestions as any)[selectedMajorCode]) {
-    const expectedTotal = 2 + (majorGroupQuestions as any)[selectedMajorCode].length; // 2个基础 + 5个major group
+    const expectedTotal = expectedTotalQuestions.value;
     const isLast = currentQuestion.value === expectedTotal - 1;
 
     return isLast;
@@ -552,7 +571,7 @@ function generateMatchReason(item: any) {
 }
 
 const recommendedUnits = computed(() => {
-  if (currentQuestion.value < questions.length) return [];
+  if (currentQuestion.value < expectedTotalQuestions.value) return [];
 
   // 计算分数并存储
   // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -623,7 +642,7 @@ function goToJob(unit: any) {
 // 7. 导航函数
 // ----------------------
 function nextQuestion() {
-  if (currentQuestion.value < questions.length - 1) {
+  if (currentQuestion.value < expectedTotalQuestions.value - 1) {
     currentQuestion.value++;
   } else if (isLastQuestion.value) {
     // 如果是最后一个问题，点击后跳转到结果页面
@@ -672,7 +691,7 @@ function restoreQuizResults() {
         // Use nextTick to ensure questions array is updated before setting current question
         nextTick(() => {
           // Set current question to show results (beyond last question)
-          currentQuestion.value = questions.length;
+          currentQuestion.value = expectedTotalQuestions.value;
         });
 
         return true;
@@ -703,13 +722,82 @@ defineExpose({
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   font-weight: 700;
   color: #1f2937;
-  margin: 0 0 2rem 0;
+  margin: 0 0 1.5rem 0;
   text-align: center;
   background: linear-gradient(135deg, #C65A0F, #ea580c);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 2px 4px rgba(198, 90, 15, 0.1);
+}
+
+/* Progress Bar Styles */
+.progress-container {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(198, 90, 15, 0.1);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.progress-text {
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.remaining-text {
+  font-size: clamp(0.8rem, 1vw, 0.9rem);
+  color: #6b7280;
+  font-style: italic;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #C65A0F, #ea580c);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .questionnaire h3 {
@@ -1016,6 +1104,30 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
 @media (max-width: 640px) {
   .questionnaire {
     padding: 0 1rem;
+  }
+
+  .progress-container {
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-text {
+    font-weight: 700;
+  }
+
+  .remaining-text {
+    font-size: 0.8rem;
+  }
+
+  .progress-bar {
+    height: 10px;
   }
 
   .buttons {
