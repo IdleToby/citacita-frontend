@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getDetailJobByLangAndUnitGroupCode, getSkillLevelByLangAndId, getAllJobs } from '@/api'
@@ -13,9 +13,29 @@ const error = ref('')
 
 const showQuizModal = ref(false)
 const showSkillLevelHelper = ref(false)
+const testQuizRef = ref<any>(null)
 
 function goToQuiz() {
   showQuizModal.value = true
+  // Check if we need to restore quiz results
+  nextTick(() => {
+    setTimeout(() => {
+      if (testQuizRef.value && testQuizRef.value.restoreQuizResults) {
+        const stored = sessionStorage.getItem('jobQuizResults')
+        if (stored) {
+          try {
+            const quizState = JSON.parse(stored)
+            // Check if results are not too old (within 2 hours)
+            if (Date.now() - quizState.timestamp < 7200000) {
+              testQuizRef.value.restoreQuizResults()
+            }
+          } catch (error) {
+            console.error('Error checking quiz results:', error)
+          }
+        }
+      }
+    }, 100) // Small delay to ensure component is fully ready
+  })
 }
 
 function closeQuizModal() {
@@ -417,14 +437,44 @@ watch(locale, (newLocale, oldLocale) => {
   }
 })
 
-// Go back to IndustryJobsView
+// Go back to IndustryJobsView or Quiz Results
 function goBack() {
-  const majorGroupCode = route.query.majorGroupCode || jobDetails.value.majorGroupCode
-  router.push({
-    name: 'industry-jobs',
-    params: { industry: industrySlug.value },
-    query: { majorGroupCode }
-  })
+  // Check if user came from quiz results
+  if (route.query.fromQuiz === 'true') {
+    // Try to restore quiz results and show quiz modal
+    const stored = sessionStorage.getItem('jobQuizResults')
+    if (stored) {
+      try {
+        const quizState = JSON.parse(stored)
+        // Check if results are not too old (within 2 hours)
+        if (Date.now() - quizState.timestamp < 7200000) {
+          // Open quiz modal and restore results
+          showQuizModal.value = true
+          // Wait for next tick to ensure TestQuiz component is mounted, then restore state
+          nextTick(() => {
+            setTimeout(() => {
+              if (testQuizRef.value && testQuizRef.value.restoreQuizResults) {
+                testQuizRef.value.restoreQuizResults()
+              }
+            }, 100) // Small delay to ensure component is fully ready
+          })
+          return
+        }
+      } catch (error) {
+        console.error('Error restoring quiz results:', error)
+      }
+    }
+    // Fallback: if quiz results unavailable, go to jobs page
+    router.push({ name: 'jobs' })
+  } else {
+    // Normal navigation back to industry jobs view
+    const majorGroupCode = route.query.majorGroupCode || jobDetails.value.majorGroupCode
+    router.push({
+      name: 'industry-jobs',
+      params: { industry: industrySlug.value },
+      query: { majorGroupCode }
+    })
+  }
 }
 
 // Close skill level helper when clicking outside
@@ -638,7 +688,7 @@ onUnmounted(() => {
 
       <!-- 问卷组件 -->
       <div class="p-6">
-        <TestQuiz @quiz-completed="closeQuizModal" />
+        <TestQuiz ref="testQuizRef" @quiz-completed="closeQuizModal" />
       </div>
     </div>
   </div>

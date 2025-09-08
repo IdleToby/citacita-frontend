@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, reactive, ref, watch} from "vue";
+import {computed, reactive, ref, watch, nextTick} from "vue";
 // ----------------------
 // 5. 模拟数据
 // ----------------------
@@ -378,7 +378,7 @@ const majorGroupQuestions = {
 // 3. Vue 状态
 // ----------------------
 const currentQuestion = ref(0);
-const answers = reactive([]);
+const answers = reactive<any[]>([]);
 
 // 替换整个 isLastQuestion 计算属性
 const isLastQuestion = computed(() => {
@@ -394,8 +394,8 @@ const isLastQuestion = computed(() => {
   );
 
   // 如果找到了对应的code并且有对应的问题，计算总数
-  if (selectedMajorCode && majorGroupQuestions[selectedMajorCode]) {
-    const expectedTotal = 2 + majorGroupQuestions[selectedMajorCode].length; // 2个基础 + 5个major group
+  if (selectedMajorCode && (majorGroupQuestions as any)[selectedMajorCode]) {
+    const expectedTotal = 2 + (majorGroupQuestions as any)[selectedMajorCode].length; // 2个基础 + 5个major group
     const isLast = currentQuestion.value === expectedTotal - 1;
 
     return isLast;
@@ -417,14 +417,14 @@ watch(
     const mgCode = Object.keys(majorGroupQuestions).find((key) => {
       return mapMajorGroupCodeToTitle(key) === newMajor;
     });
-    if (mgCode && majorGroupQuestions[mgCode]) {
-      questions.push(...majorGroupQuestions[mgCode]);
+    if (mgCode && (majorGroupQuestions as any)[mgCode]) {
+      questions.push(...(majorGroupQuestions as any)[mgCode]);
     }
   }
 );
 
 // 映射 major_group_code -> title
-function mapMajorGroupCodeToTitle(code) {
+function mapMajorGroupCodeToTitle(code: string) {
   const map = {
     "1": "Managers",
     "2": "Professionals",
@@ -437,13 +437,13 @@ function mapMajorGroupCodeToTitle(code) {
     "9": "Elementary Occupations",
     "0": "Armed Forces"
   };
-  return map[code];
+  return (map as any)[code];
 }
 
 // ----------------------
 // 6. 分数计算和推荐逻辑
 // ----------------------
-const allScores = ref([]);
+const allScores = ref<any[]>([]);
 
 // 新增：提取用户选择的关键词
 function extractUserSelectedKeywords() {
@@ -462,7 +462,7 @@ function extractUserSelectedKeywords() {
 }
 
 function computeScores() {
-  const scores = [];
+  const scores: any[] = [];
 
   const selectedMajorTitle = answers[1];
   const selectedMajorCode = Object.keys(majorGroupQuestions).find(code =>
@@ -495,11 +495,11 @@ function computeScores() {
     }
 
     // 3. 预定义关键词匹配（权重: 30%）
-    const unitKeywords = majorGroupKeywords[selectedMajorCode]?.keywords || [];
+    const unitKeywords = selectedMajorCode ? (majorGroupKeywords as any)[selectedMajorCode]?.keywords || [] : [];
     const text = (unit.unit_group_description + " " + unit.tasks_include).toLowerCase();
 
     let keywordMatches = 0;
-    unitKeywords.forEach((keyword) => {
+    unitKeywords.forEach((keyword: any) => {
       if (text.includes(keyword.toLowerCase())) {
         keywordMatches++;
       }
@@ -541,7 +541,7 @@ function computeScores() {
 }
 
 // 新增：生成匹配原因说明
-function generateMatchReason(item) {
+function generateMatchReason(item: any) {
   const reasons = [];
   if (item.details?.skillMatch > 15) reasons.push("Educational Matching");
   if (item.details?.majorMatch > 20) reasons.push("Professional field matching");
@@ -580,7 +580,7 @@ const recommendedUnits = computed(() => {
 // 在 setup 函数中
 const router = useRouter()
 
-function goToJob(unit) {
+function goToJob(unit: any) {
   const fullUnitInfo = unitData.find(u => u.unit_group_code === unit.unit_group_code);
 
   if (!fullUnitInfo) {
@@ -594,14 +594,24 @@ function goToJob(unit) {
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9-]/g, '');
 
-  // 使用 window.location 强制整个页面跳转
-  // window.location.href = `/jobs/${industrySlug}/${unit.unit_group_code}?unitGroupCode=${unit.unit_group_code}&t=${Date.now()}`;
-  //改为使用 router.push 进行路由跳转
+  // Store quiz results and answers for restoration later
+  const quizState = {
+    results: recommendedUnits.value,
+    answers: [...answers],
+    currentQuestion: currentQuestion.value,
+    timestamp: Date.now()
+  };
+  sessionStorage.setItem('jobQuizResults', JSON.stringify(quizState));
+
+  // Navigate to job description with fromQuiz flag
   router.push(
     {
       name: 'job-description',
       params: {industry: industrySlug, jobId: unit.unit_group_code},
-      query: {unitGroupCode: unit.unit_group_code}
+      query: {
+        unitGroupCode: unit.unit_group_code,
+        fromQuiz: 'true'
+      }
     }
   )
 
@@ -635,6 +645,49 @@ function restart() {
 function finishQuiz() {
   emit('quiz-completed')
 }
+
+// Function to restore quiz results from sessionStorage
+function restoreQuizResults() {
+  const stored = sessionStorage.getItem('jobQuizResults');
+  if (stored) {
+    try {
+      const quizState = JSON.parse(stored);
+      // Check if results are not too old (within 2 hours)
+      if (Date.now() - quizState.timestamp < 7200000) {
+        // Restore answers
+        answers.length = 0;
+        answers.push(...quizState.answers);
+
+        // Force rebuild questions array based on restored answers
+        if (answers[1]) {
+          const mgCode = Object.keys(majorGroupQuestions).find((key) => {
+            return mapMajorGroupCodeToTitle(key) === answers[1];
+          });
+          if (mgCode && (majorGroupQuestions as any)[mgCode]) {
+            questions.splice(2);
+            questions.push(...(majorGroupQuestions as any)[mgCode]);
+          }
+        }
+
+        // Use nextTick to ensure questions array is updated before setting current question
+        nextTick(() => {
+          // Set current question to show results (beyond last question)
+          currentQuestion.value = questions.length;
+        });
+
+        return true;
+      }
+    } catch (error) {
+      console.error('Error restoring quiz results:', error);
+    }
+  }
+  return false;
+}
+
+// Expose restoreQuizResults for external use
+defineExpose({
+  restoreQuizResults
+})
 </script>
 
 <style scoped>

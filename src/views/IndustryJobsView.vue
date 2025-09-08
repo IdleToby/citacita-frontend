@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
@@ -25,9 +25,29 @@ const loading = ref(false)
 const error = ref('')
 
 const showQuizModal = ref(false)
+const testQuizRef = ref<any>(null)
 
 function goToQuiz() {
   showQuizModal.value = true
+  // Check if we need to restore quiz results
+  nextTick(() => {
+    setTimeout(() => {
+      if (testQuizRef.value && testQuizRef.value.restoreQuizResults) {
+        const stored = sessionStorage.getItem('jobQuizResults')
+        if (stored) {
+          try {
+            const quizState = JSON.parse(stored)
+            // Check if results are not too old (within 2 hours)
+            if (Date.now() - quizState.timestamp < 7200000) {
+              testQuizRef.value.restoreQuizResults()
+            }
+          } catch (error) {
+            console.error('Error checking quiz results:', error)
+          }
+        }
+      }
+    }, 100) // Small delay to ensure component is fully ready
+  })
 }
 
 function closeQuizModal() {
@@ -414,7 +434,7 @@ onMounted(() => {
 
       <!-- 问卷组件 -->
       <div class="p-6">
-        <TestQuiz @quiz-completed="closeQuizModal" />
+        <TestQuiz ref="testQuizRef" @quiz-completed="closeQuizModal" />
       </div>
     </div>
   </div>
