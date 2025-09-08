@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getDetailJobByLangAndUnitGroupCode, getSkillLevelByLangAndId, getAllJobs } from '@/api'
@@ -12,6 +12,7 @@ const loading = ref(false)
 const error = ref('')
 
 const showQuizModal = ref(false)
+const showSkillLevelHelper = ref(false)
 
 function goToQuiz() {
   showQuizModal.value = true
@@ -19,6 +20,20 @@ function goToQuiz() {
 
 function closeQuizModal() {
   showQuizModal.value = false
+}
+
+function toggleSkillLevelHelper() {
+  showSkillLevelHelper.value = !showSkillLevelHelper.value
+}
+
+function getSkillLevelExplanation(skillLevel: string) {
+  const explanations: Record<string, string> = {
+    'First': 'Low-skilled. Primary education.',
+    'Second': 'Semi-skilled. Secondary or post-secondary education. Malaysian Skill Certificate (SKM) Level 1 and Level 2; or equivalent.',
+    'Third': 'Skilled. Diploma; or Malaysian Skill Diploma (DKM) Level 4 / Malaysian Skill Certificate (SKM) Level 3; or equivalent.',
+    'Fourth': 'Skilled. PHD/Master/Degree; or Malaysian Skill Advanced Diploma (DLKM) Level 5 and above; or equivalent.'
+  }
+  return explanations[skillLevel] || 'Skill level information not available.'
 }
 
 const industrySlug = computed(() => String(route.params.industry || 'industry'))
@@ -143,11 +158,17 @@ const jobTasks = computed(() => {
     // Clean up any trailing incomplete words or punctuation
     cleanedTask = cleanedTask.replace(/\s+(and|和)\s*$/, '')
 
+    // Remove extra spaces after apostrophes (e.g., "students'     work" -> "students' work")
+    cleanedTask = cleanedTask.replace(/'\s{2,}/g, "' ")
+
     // Ensure proper sentence ending for non-Chinese content
     if (!cleanedTask.match(/[.;；。]$/)) {
       // If the task doesn't end with proper punctuation, add a semicolon
       cleanedTask = cleanedTask.trim() + ';'
     }
+
+    // Capitalize the first letter of each task
+    cleanedTask = cleanedTask.charAt(0).toUpperCase() + cleanedTask.slice(1)
 
     return cleanedTask.trim()
   }).filter(task => task.length > 1) // Filter out empty or single character tasks
@@ -170,65 +191,57 @@ const jobExamples = computed(() => {
     .replace(/¡¯/g, "'")
     .trim()
 
-  // Split by 6-digit code patterns to separate examples
-  // Look for patterns like "4311-01", "4311-02", etc.
-  const codePattern = /(\d{4}-\d{2})/g
-  const matches = [...examplesText.matchAll(codePattern)]
+  // Split by common delimiters first
+  let examples = examplesText.split(/[;；,，\n]/)
+    .map(example => example.trim())
+    .filter(example => example.length > 0)
 
-  if (matches.length === 0) {
-    // If no code patterns found, try splitting by common delimiters
-    return examplesText.split(/[;；,，\n]/)
-      .map(example => example.trim())
-      .filter(example => example.length > 0)
-      .map(example => example.replace(/^[\.\s]+/, '').trim())
-      .filter(example => example.length > 0)
-  }
+  // If no examples found by delimiters, try splitting by 6-digit code patterns
+  if (examples.length <= 1) {
+    const codePattern = /(\d{4}-\d{2})/g
+    const matches = [...examplesText.matchAll(codePattern)]
 
-  const examples = []
-  let lastIndex = 0
+    if (matches.length > 0) {
+      examples = []
 
-  for (let i = 0; i < matches.length; i++) {
-    const match = matches[i]
-    const matchIndex = match.index
+      for (let i = 0; i < matches.length; i++) {
+        const match = matches[i]
+        const matchIndex = match.index
 
-    // If this isn't the first match and there's content before this match
-    if (i > 0 && matchIndex > lastIndex) {
-      // Get the text from the end of the previous example to the start of this one
-      const prevContent = examplesText.substring(lastIndex, matchIndex).trim()
-      if (prevContent && examples.length > 0) {
-        // Add this content to the previous example if it doesn't start with a code
-        examples[examples.length - 1] += prevContent
+        // Find the end of this example (either the start of the next code or end of string)
+        const nextMatch = matches[i + 1]
+        const endIndex = nextMatch ? nextMatch.index : examplesText.length
+
+        // Extract the full example starting with the code
+        const fullExample = examplesText.substring(matchIndex, endIndex).trim()
+
+        if (fullExample.length > 0) {
+          examples.push(fullExample)
+        }
       }
     }
-
-    // Find the end of this example (either the start of the next code or end of string)
-    const nextMatch = matches[i + 1]
-    const endIndex = nextMatch ? nextMatch.index : examplesText.length
-
-    // Extract the full example starting with the code
-    const fullExample = examplesText.substring(matchIndex, endIndex).trim()
-
-    // Clean up the example
-    const cleanedExample = fullExample
-      .replace(/^[\.\s]+/, '')
-      .replace(/[;；,，\s]*$/, '') // Remove trailing punctuation and spaces
-      .trim()
-
-    if (cleanedExample.length > 0) {
-      examples.push(cleanedExample)
-    }
-
-    lastIndex = endIndex
   }
 
-  // Final cleanup - ensure each example starts with a code and remove extra punctuation
+  // Final cleanup - remove 6-digit codes, clean up, and capitalize
   return examples
     .map(example => {
-      // Clean up any trailing semicolons, commas, or extra whitespace
-      return example.replace(/[;；,，\s]+$/, '').trim()
+      let cleanedExample = example
+        // Remove 6-digit codes at the beginning (e.g., "4311-01", "4311-02")
+        .replace(/^\d{4}-\d{2}\s*/, '')
+        // Remove leading dots and spaces
+        .replace(/^[\.\s]+/, '')
+        // Remove trailing punctuation and extra whitespace
+        .replace(/[;；,，\s]+$/, '')
+        .trim()
+
+      // Capitalize the first letter
+      if (cleanedExample.length > 0) {
+        cleanedExample = cleanedExample.charAt(0).toUpperCase() + cleanedExample.slice(1)
+      }
+
+      return cleanedExample
     })
     .filter(example => example.length > 0)
-    .filter(example => /^\d{4}-\d{2}/.test(example)) // Only keep examples that start with codes
 })
 
 
@@ -411,10 +424,25 @@ function goBack() {
   })
 }
 
+// Close skill level helper when clicking outside
+function handleClickOutside(event: Event) {
+  const target = event.target as HTMLElement
+  if (!target.closest('.skill-level-container')) {
+    showSkillLevelHelper.value = false
+  }
+}
+
 onMounted(() => {
   if (unitGroupCode.value) {
     fetchJobDetails()
   }
+  // Add click outside listener
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  // Remove click outside listener
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -490,16 +518,42 @@ onMounted(() => {
           <div class="flex-1">
             <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
               {{ jobTitle }}
-              <span class="text-lg font-normal ml-2">({{ jobDetails.unitGroupCode }})</span>
             </h1>
           </div>
 
           <!-- Right: Major Group Title + Skill Level -->
-          <div class="flex-1 text-right">
+          <div class="flex-1 text-right skill-level-container relative">
             <h2 class="text-xl md:text-2xl font-bold text-white drop-shadow-lg">
               {{ jobDetails.majorGroupTitle || industryName }}
-              <span class="text-base font-normal ml-2">({{ t('jobDescriptionPage.skillLevel') }}: {{ skillLevel }})</span>
+              <span class="text-base font-normal ml-2">
+                ({{ t('jobDescriptionPage.skillLevel') }}: {{ skillLevel }}
+                <button
+                  @click="toggleSkillLevelHelper"
+                  class="ml-1 w-5 h-5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors duration-200"
+                  title="Click for skill level explanation"
+                >
+                  ?
+                </button>
+                )
+              </span>
             </h2>
+
+            <!-- Skill Level Helper Tooltip -->
+            <div
+              v-if="showSkillLevelHelper"
+              class="absolute right-0 mt-2 max-w-md bg-white rounded-lg shadow-lg border border-gray-200 p-4 text-left z-50"
+              @click.stop
+            >
+              <div class="text-sm text-gray-800">
+                <p>{{ getSkillLevelExplanation(skillLevel) }}</p>
+              </div>
+              <button
+                @click="showSkillLevelHelper = false"
+                class="absolute top-2 right-2 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-bold text-gray-600 transition-colors duration-200"
+              >
+                ×
+              </button>
+            </div>
           </div>
         </div>
 
