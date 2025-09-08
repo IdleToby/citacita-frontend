@@ -51,7 +51,8 @@ function getSkillLevelExplanation(skillLevel: string) {
     'First': 'Low-skilled. Primary education.',
     'Second': 'Semi-skilled. Secondary or post-secondary education. Malaysian Skill Certificate (SKM) Level 1 and Level 2; or equivalent.',
     'Third': 'Skilled. Diploma; or Malaysian Skill Diploma (DKM) Level 4 / Malaysian Skill Certificate (SKM) Level 3; or equivalent.',
-    'Fourth': 'Skilled. PHD/Master/Degree; or Malaysian Skill Advanced Diploma (DLKM) Level 5 and above; or equivalent.'
+    'Fourth': 'Skilled. PHD/Master/Degree; or Malaysian Skill Advanced Diploma (DLKM) Level 5 and above; or equivalent.',
+    'Not applicable': 'Education qualification is not a prerequisite.'
   }
   return explanations[skillLevel] || 'Skill level information not available.'
 }
@@ -616,12 +617,6 @@ onUnmounted(() => {
               <div class="text-sm text-gray-800">
                 <p>{{ getSkillLevelExplanation(skillLevel) }}</p>
               </div>
-              <button
-                @click="showSkillLevelHelper = false"
-                class="absolute top-2 right-2 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-bold text-gray-600 transition-colors duration-200"
-              >
-                ×
-              </button>
             </div>
           </div>
         </div>
