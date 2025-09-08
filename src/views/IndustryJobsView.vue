@@ -227,8 +227,9 @@ onMounted(() => {
     ></div>
     <!-- Background Overlay for additional opacity -->
     <div class="fixed inset-0 -z-10 bg-black/30"></div>
-    <!-- Go Back Button -->
-    <div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-10">
+
+    <!-- Go Back Button - Middle Left -->
+    <div class="fixed left-4 top-1/2 transform -translate-y-1/2 z-10">
       <button
         @click="goBack"
         class="group flex items-center justify-center w-12 h-12 bg-white border-2 border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-x-1"
@@ -254,6 +255,21 @@ onMounted(() => {
         >
           {{ t('common.goBack') }}
         </span>
+      </button>
+    </div>
+
+    <!-- Job Quiz Button -->
+    <div class="fixed left-3 top-1/6 transform -translate-y-1/2 z-10">
+      <button
+        class="px-5 py-5 bg-[#C65A0F] text-white shadow-lg rounded-full text-sm md:text-base font-bold hover:scale-105 hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+        aria-label="Job quiz"
+        title="Job quiz"
+        @click="goToQuiz"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+        </svg>
+        {{ t('jobDescriptionPage.jobQuiz') }}
       </button>
     </div>
 
@@ -294,7 +310,7 @@ onMounted(() => {
 
       <!-- Loading state -->
       <div v-if="loading" class="text-center py-8">
-        <p class="text-white text-xl">Loading jobs...</p>
+        <p class="text-white text-xl">Loading...</p>
       </div>
 
       <!-- Error state -->
@@ -376,16 +392,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-
-    <!-- Floating Job quiz bubble -->
-    <button
-      class="fixed bottom-6 right-6 h-20 w-20 rounded-full bg-[#C65A0F] text-white shadow-lg flex items-center justify-center text-xs md:text-sm font-bold hover:scale-110 transition-transform duration-200 text-center leading-tight"
-      aria-label="Job quiz"
-      title="Job quiz"
-      @click="goToQuiz"
-    >
-      {{ t('industryJobsPage.jobQuiz') }}
-    </button>
   </div>
   <!-- Modal弹窗 -->
   <div

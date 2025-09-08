@@ -105,6 +105,8 @@ const jobTasks = computed(() => {
     .replace(/^\s*\.\s*/gm, '')
     // Remove extra indentation (multiple spaces at start of lines)
     .replace(/^\s{2,}/gm, '')
+    // Fix extra spaces after apostrophes early in the process
+    .replace(/['']\s{2,}/g, "' ")
     .trim()
 
   // Split by alphabetical markers for both English and Chinese content
@@ -159,7 +161,8 @@ const jobTasks = computed(() => {
     cleanedTask = cleanedTask.replace(/\s+(and|和)\s*$/, '')
 
     // Remove extra spaces after apostrophes (e.g., "students'     work" -> "students' work")
-    cleanedTask = cleanedTask.replace(/'\s{2,}/g, "' ")
+    // Handle both regular apostrophes and smart quotes
+    cleanedTask = cleanedTask.replace(/['']\s{2,}/g, "' ")
 
     // Ensure proper sentence ending for non-Chinese content
     if (!cleanedTask.match(/[.;；。]$/)) {
@@ -461,8 +464,9 @@ onUnmounted(() => {
     ></div>
     <!-- Background Overlay for additional opacity -->
     <div class="fixed inset-0 -z-10 bg-black/30"></div>
-    <!-- Go Back Button -->
-    <div class="fixed left-6 top-1/2 transform -translate-y-1/2 z-10">
+
+    <!-- Go Back Button - Middle Left -->
+    <div class="fixed left-4 top-1/2 transform -translate-y-1/2 z-10">
       <button
         @click="goBack"
         class="group flex items-center justify-center w-12 h-12 bg-white border-2 border-gray-300 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-x-1"
@@ -491,10 +495,25 @@ onUnmounted(() => {
       </button>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 py-8 h-screen flex flex-col">
+    <!-- Job Quiz Button -->
+    <div class="fixed left-3 top-1/6 transform -translate-y-1/2 z-10">
+      <button
+        class="px-5 py-5 bg-[#C65A0F] text-white shadow-lg rounded-full text-sm md:text-base font-bold hover:scale-105 hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+        aria-label="Job quiz"
+        title="Job quiz"
+        @click="goToQuiz"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+        </svg>
+        {{ t('jobDescriptionPage.jobQuiz') }}
+      </button>
+    </div>
+
+    <div class="max-w-7xl mx-auto pl-20 pr-4 py-8 h-screen flex flex-col">
       <!-- Loading state -->
       <div v-if="loading" class="text-center py-8 flex-1 flex items-center justify-center">
-        <p class="text-white text-xl">Loading job details...</p>
+        <p class="text-white text-xl">Loading...</p>
       </div>
 
       <!-- Error state -->
@@ -514,7 +533,7 @@ onUnmounted(() => {
       <template v-else>
         <!-- Top Headers -->
         <div class="flex justify-between items-start mb-6">
-          <!-- Left: Unit Group Title + Code -->
+          <!-- Left: Unit Group Title -->
           <div class="flex-1">
             <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
               {{ jobTitle }}
@@ -597,16 +616,6 @@ onUnmounted(() => {
         </div>
       </template>
     </div>
-
-    <!-- Floating Job quiz bubble -->
-    <button
-      class="fixed bottom-6 right-6 h-20 w-20 rounded-full bg-[#C65A0F] text-white shadow-lg flex items-center justify-center text-xs md:text-sm font-bold hover:scale-110 transition-transform duration-200 text-center leading-tight"
-      aria-label="Job quiz"
-      title="Job quiz"
-      @click="goToQuiz"
-    >
-      {{ t('jobDescriptionPage.jobQuiz') }}
-    </button>
   </div>
 
   <!-- Modal弹窗 -->
@@ -636,5 +645,3 @@ onUnmounted(() => {
 </template>
 
 <style scoped></style>
-
-
