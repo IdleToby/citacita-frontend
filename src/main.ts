@@ -3,6 +3,7 @@ import './assets/index.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import i18n from './i18n.js'
+import 'highlight.js/styles/github-dark.css'
 
 import App from './App.vue'
 import router from './router'
