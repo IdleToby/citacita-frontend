@@ -63,6 +63,10 @@ const industryName = computed(() => {
 const jobs = ref<Job[]>([])
 const jobQuery = ref('')
 
+// Pagination
+const currentPage = ref(0)
+const jobsPerPage = 10
+
 // Fetch jobs for the selected industry
 async function fetchJobs() {
   if (!majorGroupCode.value) {
@@ -107,6 +111,27 @@ const filteredJobs = computed(() => {
 
   // Sort alphabetically by title
   return result.sort((a, b) => a.title.localeCompare(b.title))
+})
+
+// Pagination computed properties
+const totalPages = computed(() => {
+  return Math.ceil(filteredJobs.value.length / jobsPerPage)
+})
+
+const paginatedJobs = computed(() => {
+  const start = currentPage.value * jobsPerPage
+  const end = start + jobsPerPage
+  return filteredJobs.value.slice(start, end)
+})
+
+// Reset to first page when search query changes
+watch(jobQuery, () => {
+  currentPage.value = 0
+})
+
+// Reset to first page when jobs are refetched
+watch(jobs, () => {
+  currentPage.value = 0
 })
 
 // API-based autocomplete suggestions
@@ -157,6 +182,13 @@ function goToJob(jobId: string) {
     params: { industry: industrySlug.value, jobId },
     query: { unitGroupCode: jobId }
   })
+}
+
+// Pagination navigation functions
+function goToPage(pageIndex: number) {
+  if (pageIndex >= 0 && pageIndex < totalPages.value) {
+    currentPage.value = pageIndex
+  }
 }
 
 // Watch for route changes to refetch jobs
@@ -283,15 +315,65 @@ onMounted(() => {
       </div>
 
       <!-- Jobs grid -->
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <button
-          v-for="job in filteredJobs"
-          :key="job.id"
-          class="group aspect-square rounded-xl border border-input bg-white hover:shadow-md transition p-4 flex items-center justify-center text-center"
-          @click="goToJob(job.id)"
-        >
-          <span class="text-lg font-medium text-gray-800 group-hover:text-primary">{{ job.title }}</span>
-        </button>
+      <div v-else class="space-y-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <button
+            v-for="job in paginatedJobs"
+            :key="job.id"
+            class="group aspect-square rounded-xl border border-input bg-white hover:shadow-md transition p-4 flex items-center justify-center text-center"
+            @click="goToJob(job.id)"
+          >
+            <span class="text-lg font-medium text-gray-800 group-hover:text-primary">{{ job.title }}</span>
+          </button>
+        </div>
+
+        <!-- Firefly Pagination Indicators -->
+        <div v-if="totalPages > 1" class="flex justify-center py-8">
+          <div class="flex space-x-3">
+            <button
+              v-for="pageIndex in totalPages"
+              :key="`page-${pageIndex - 1}`"
+              @click="goToPage(pageIndex - 1)"
+              class="relative transition-all duration-500 ease-out hover:scale-110"
+              :class="{
+                'w-5 h-5': pageIndex - 1 !== currentPage,
+                'w-6 h-6': pageIndex - 1 === currentPage
+              }"
+            >
+              <!-- 外圈光晕效果 -->
+              <div
+                class="absolute inset-0 rounded-full transition-all duration-700"
+                :class="{
+                  'bg-white/20 animate-pulse': pageIndex - 1 !== currentPage,
+                  'bg-yellow-300/40 animate-ping': pageIndex - 1 === currentPage
+                }"
+              ></div>
+
+              <!-- 内圈萤火虫 -->
+              <div
+                class="relative w-full h-full rounded-full transition-all duration-500 border"
+                :class="{
+                  'bg-white/30 border-white/40': pageIndex - 1 !== currentPage,
+                  'bg-yellow-200 border-yellow-100 shadow-lg shadow-yellow-200/50': pageIndex - 1 === currentPage
+                }"
+              >
+                <!-- 萤火虫闪烁效果 -->
+                <div
+                  v-if="pageIndex - 1 === currentPage"
+                  class="absolute inset-0 rounded-full bg-yellow-100 animate-pulse opacity-60"
+                ></div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Page Info -->
+        <div v-if="totalPages > 1" class="text-center">
+          <p class="text-white/80 text-sm drop-shadow-sm">
+            Page {{ currentPage + 1 }} of {{ totalPages }}
+            ({{ filteredJobs.length }} jobs total)
+          </p>
+        </div>
       </div>
     </div>
 
