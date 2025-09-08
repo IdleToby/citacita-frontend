@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ref, onMounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode } from '@/api'
 import { Input } from '@/components/ui/input'
@@ -55,6 +55,7 @@ const searchQuery = ref('')
 
 const showQuizModal = ref(false)
 const testQuizRef = ref<any>(null)
+const searchContainerRef = ref<HTMLElement | null>(null)
 
 function goToQuiz() {
   showQuizModal.value = true
@@ -162,7 +163,7 @@ async function fetchSuggestions(query: string) {
   suggestions.value = allJobs.value
     .filter((job) => job.title.toLowerCase().includes(queryLower))
     .map((job) => job.title)
-    .slice(0, 5)
+    .slice(0, 3)
 }
 
 // Create highlighted suggestions for display
@@ -188,6 +189,14 @@ function onSearchInput() {
 function chooseSuggestion(suggestion: string) {
   searchQuery.value = suggestion
   suggestions.value = [] // Clear suggestions after selection
+}
+
+// Handle click outside to close suggestions
+function handleClickOutside(event: Event) {
+  const target = event.target as HTMLElement
+  if (searchContainerRef.value && !searchContainerRef.value.contains(target)) {
+    suggestions.value = []
+  }
 }
 
 // Check if search query matches a job and navigate directly to job description
@@ -246,6 +255,13 @@ watch(locale, () => {
 
 onMounted(() => {
   fetchIndustries()
+  // Add click outside listener for autocomplete
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  // Remove click outside listener
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -315,7 +331,7 @@ onMounted(() => {
           <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{{ t('jobsPage.title') }}</h1>
           <p class="text-white/90 drop-shadow-md">{{ t('jobsPage.subtitle') }}</p>
         </div>
-        <div class="w-full md:w-80 relative">
+        <div ref="searchContainerRef" class="w-full md:w-80 relative">
           <Input
             v-model="searchQuery"
             :placeholder="t('jobsPage.searchPlaceholder')"
@@ -324,7 +340,7 @@ onMounted(() => {
           />
           <ul
             v-if="suggestions.length"
-            class="absolute z-10 mt-1 w-full bg-white border border-input rounded-md shadow-md max-h-60 overflow-auto text-black"
+            class="absolute z-10 mt-1 w-full bg-white bg-opacity-50 backdrop-blur-sm border border-input rounded-md shadow-md max-h-32 overflow-auto text-black"
           >
             <li
               v-for="(suggestion, index) in suggestions"
