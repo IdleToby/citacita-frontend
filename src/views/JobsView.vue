@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import { ref, onMounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode, autoCompleteJobByLangAndUnitGroupTitle } from '@/api'
+import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode } from '@/api'
 import { Input } from '@/components/ui/input'
 import TestQuiz from '@/views/TestQuiz.vue'
 
@@ -123,37 +123,38 @@ const filteredJobs = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
   if (!q) return []
   return allJobs.value.filter((job) =>
-    job.title.toLowerCase().startsWith(q)
+    job.title.toLowerCase().includes(q)
   )
 })
 
-// API-based autocomplete suggestions for jobs only
+// Autocomplete suggestions from loaded jobs only
 const suggestions = ref<string[]>([])
 
-// Fetch autocomplete suggestions from API
+// Fetch autocomplete suggestions from current loaded jobs only
 async function fetchSuggestions(query: string) {
   if (!query.trim()) {
     suggestions.value = []
     return
   }
 
-  try {
-    const response = await autoCompleteJobByLangAndUnitGroupTitle(locale.value, query)
-    if (response.data.code === 200) {
-      // Filter API results to only show jobs that start with the query
-      const queryLower = query.toLowerCase()
-      suggestions.value = response.data.data
-        .map((item: any) => item.unitGroupTitle)
-        .filter((title: string) => title.toLowerCase().startsWith(queryLower))
-        .slice(0, 5)
-    } else {
-      suggestions.value = []
-    }
-  } catch (err) {
-    console.error('Error fetching autocomplete suggestions:', err)
-    suggestions.value = []
-  }
+  // Filter suggestions from all loaded jobs only
+  const queryLower = query.toLowerCase()
+  suggestions.value = allJobs.value
+    .filter((job) => job.title.toLowerCase().includes(queryLower))
+    .map((job) => job.title)
+    .slice(0, 5)
 }
+
+// Create highlighted suggestions for display
+const highlightedSuggestions = computed(() => {
+  const query = searchQuery.value.trim()
+  if (!query) return []
+
+  return suggestions.value.map(suggestion => {
+    const regex = new RegExp(`(${query})`, 'gi')
+    return suggestion.replace(regex, '<strong>$1</strong>')
+  })
+})
 
 // Watch search query changes for autocomplete
 let debounceTimer: ReturnType<typeof setTimeout>
@@ -306,12 +307,12 @@ onMounted(() => {
             class="absolute z-10 mt-1 w-full bg-white border border-input rounded-md shadow-md max-h-60 overflow-auto text-black"
           >
             <li
-              v-for="s in suggestions"
-              :key="s"
+              v-for="(suggestion, index) in suggestions"
+              :key="suggestion"
               class="px-3 py-2 cursor-pointer hover:bg-accent"
-              @click="chooseSuggestion(s)"
+              @click="chooseSuggestion(suggestion)"
             >
-              {{ s }}
+              <span v-html="highlightedSuggestions[index]"></span>
             </li>
           </ul>
         </div>
