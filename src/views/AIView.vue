@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {nextTick, onBeforeUnmount, ref, watch} from 'vue'
+import {computed, nextTick, onBeforeUnmount, ref, watch} from 'vue'
 import {marked} from 'marked'
 import hljs from 'highlight.js'
-import {Button} from "@/components/ui/button";
+import {Button} from '@/components/ui/button'
 
 interface Message {
   id: number
@@ -15,36 +15,41 @@ interface Message {
 marked.use({
   walkTokens(token) {
     if (token.type === 'code') {
-      const language = hljs.getLanguage(token.lang) ? token.lang : 'plaintext';
-      token.text = hljs.highlight(token.text, {language}).value;
+      const language = hljs.getLanguage(token.lang) ? token.lang : 'plaintext'
+      token.text = hljs.highlight(token.text, {language}).value
     }
-  },
-});
+  }
+})
 
 marked.setOptions({
   langPrefix: 'hljs language-',
   gfm: true,
-  breaks: true, // Render line breaks as <br>
-});
+  breaks: true // Render line breaks as <br>
+} as any)
 
 const userMessage = ref<string>('')
 const messages = ref<Message[]>([])
 const isLoading = ref<boolean>(false)
 const chatWindow = ref<HTMLDivElement | null>(null)
-let controller: AbortController | null = null;
-const copiedMessageId = ref<number | null>(null);
+let controller: AbortController | null = null
+const copiedMessageId = ref<number | null>(null)
+
+// --- State for voice recording ---
+const isRecording = ref<boolean>(false)
+const isTranscribing = ref<boolean>(false)
+let mediaRecorder: MediaRecorder | null = null
+let audioChunks: Blob[] = []
 
 const copyToClipboard = (text: string, messageId: number) => {
   navigator.clipboard.writeText(text).then(() => {
-    copiedMessageId.value = messageId;
+    copiedMessageId.value = messageId
     setTimeout(() => {
-      copiedMessageId.value = null;
-    }, 2000);
+      copiedMessageId.value = null
+    }, 2000)
   }).catch(err => {
-    console.error('Failed to copy text: ', err);
-  });
-};
-
+    console.error('Failed to copy text: ', err)
+  })
+}
 
 const cleanupStream = () => {
   if (controller) {
@@ -111,6 +116,7 @@ const sendMessage = async () => {
         role: m.role,
         content: m.content
       })),
+    // NOTE: Update your model name if needed
     model: 'gpt-oss-120b',
     stream: true
   }
@@ -159,6 +165,76 @@ const sendMessage = async () => {
   }
 }
 
+
+// --- Voice Recording & Direct Transcription Logic ---
+
+const handleStopRecording = async () => {
+  isTranscribing.value = true
+  const audioBlob = new Blob(audioChunks, {type: 'audio/webm'})
+  audioChunks = [] // Clear chunks for the next recording
+
+  try {
+    const formData = new FormData()
+    formData.append('audio', audioBlob, 'recording.webm')
+
+    // Send the audio file to the backend API.
+    const response = await fetch('/api/speech-to-text', {
+      method: 'POST',
+      body: formData,
+    })
+
+    // Check if the request was successful.
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null)
+      const errorMessage = errorData?.error?.message || `Server responded with status ${response.status}`
+      throw new Error(errorMessage)
+    }
+
+    // The backend returns the transcription result directly as JSON.
+    const result = await response.json()
+
+    // --- MODIFIED ---
+    // Extract text from the `combinedPhrases` array based on the new JSON structure.
+    const transcribedText = result.combinedPhrases[0]?.text || '[Transcription complete, but no text found.]'
+    userMessage.value = transcribedText
+
+  } catch (error) {
+    console.error('Error during transcription:', error)
+    userMessage.value = `[Error: ${error instanceof Error ? error.message : 'Transcription failed'}]`
+  } finally {
+    isTranscribing.value = false
+  }
+}
+
+
+const toggleRecording = async () => {
+  if (isRecording.value) {
+    mediaRecorder?.stop()
+    isRecording.value = false
+  } else {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({audio: true})
+      isRecording.value = true
+      audioChunks = []
+      mediaRecorder = new MediaRecorder(stream, {mimeType: 'audio/webm'})
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data)
+      }
+      mediaRecorder.onstop = handleStopRecording
+      mediaRecorder.start()
+    } catch (err) {
+      console.error('Error accessing microphone:', err)
+      alert('Microphone access was denied. Please allow microphone access in your browser settings.')
+    }
+  }
+}
+
+const inputPlaceholder = computed(() => {
+  if (isRecording.value) return 'Recording... Click the mic to stop.'
+  if (isTranscribing.value) return 'Uploading and transcribing audio...'
+  return 'type here to chat...'
+})
+
 const scrollToBottom = () => {
   nextTick(() => {
     chatWindow.value?.scrollTo({top: chatWindow.value.scrollHeight, behavior: 'smooth'})
@@ -168,6 +244,9 @@ watch(messages, scrollToBottom, {deep: true})
 
 onBeforeUnmount(() => {
   cleanupStream()
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop()
+  }
 })
 </script>
 
@@ -201,11 +280,6 @@ onBeforeUnmount(() => {
               ? 'bg-[#292D49C4]/70 text-white rounded-br-none'
               : 'bg-gray-200/70 text-gray-900 rounded-bl-none'"
           >
-            <!--            <span class="mb-0.5 block text-[11px] font-semibold opacity-70">-->
-            <!--              {{ m.role === 'user' ? 'You' : 'AI' }}-->
-            <!--            </span>-->
-
-            <!-- Copy Button -->
             <button
               v-if="m.role === 'assistant' && m.content"
               @click="copyToClipboard(m.content, m.id)"
@@ -245,7 +319,6 @@ onBeforeUnmount(() => {
         <p class="text-base">Start a conversation!</p>
       </div>
 
-      <!-- Streaming Indicator -->
       <div
         v-if="isLoading"
         class="pointer-events-none justify-self-end rounded w-auto h-15 transition-opacity opacity-100"
@@ -266,16 +339,11 @@ onBeforeUnmount(() => {
         class="relative flex w-full items-center rounded-full bg-gray-100/80 px-4 py-2 shadow-inner cursor-pointer">
         <button type="button" class="text-gray-600 hover:text-blue-600 focus:outline-none mr-2">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
+            xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              stroke-linecap="round" stroke-linejoin="round"
               d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
             />
           </svg>
@@ -283,27 +351,27 @@ onBeforeUnmount(() => {
 
         <input
           v-model="userMessage"
-          :disabled="isLoading"
+          :disabled="isLoading || isRecording || isTranscribing"
           type="text"
-          placeholder="type here to chat..."
+          :placeholder="inputPlaceholder"
           class="flex-1 border-none bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-500 disabled:cursor-not-allowed"
           autocomplete="off"
           @keydown.enter.prevent="sendMessage"
         />
 
-        <button type="button"
-                class="text-gray-600 hover:text-blue-600 focus:outline-none ml-2 cursor-pointer">
+        <button
+          @click="toggleRecording"
+          type="button"
+          :disabled="isLoading || isTranscribing"
+          class="text-gray-600 hover:text-blue-600 focus:outline-none ml-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400"
+          :class="{ 'text-red-600 animate-pulse': isRecording }"
+        >
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
+            xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              stroke-linecap="round" stroke-linejoin="round"
               d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
             />
           </svg>
@@ -311,21 +379,16 @@ onBeforeUnmount(() => {
       </div>
 
       <button
-        :disabled="isLoading || !userMessage.trim()"
+        :disabled="isLoading || !userMessage.trim() || isRecording || isTranscribing"
         type="submit"
         class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400 cursor-pointer"
       >
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-width="2"
+          xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
         >
           <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            stroke-linecap="round" stroke-linejoin="round"
             d="M13 5l7 7-7 7M5 12h14"
           />
         </svg>
