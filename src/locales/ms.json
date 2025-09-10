@@ -79,5 +79,96 @@
       "couldNotFind": "Tidak dapat mencari kemudahan.",
       "selectLocation": "Sila pilih lokasi daripada senarai."
     }
+  },
+  "quiz": {
+    "title": "Kuiz Cadangan Pekerjaan",
+    "progress": {
+      "question": "Soalan {current} daripada {total}",
+      "remaining": "{remaining} soalan yang tinggal"
+    },
+    "buttons": {
+      "previous": "Sebelumnya",
+      "next": "Seterusnya",
+      "submit": "Hantar", 
+      "restart": "Mula Semula Soal Selidik",
+      "close": "Tutup Kuiz"
+    },
+    "results": {
+      "title": "Kumpulan Unit yang Disyorkan",
+      "noResults": "Tiada kerjaya yang sepadan ditemui. Sila cuba pilihan yang berbeza.",
+      "summary": "Berdasarkan jawapan kuiz anda, kami telah menganalisis keutamaan anda dan memadankannya dengan laluan kerjaya yang sesuai.",
+      "profileAnalysis": "Analisis Profil Anda:",
+      "education": "Pendidikan",
+      "field": "Bidang",
+      "keyInterests": "{count} Minat Utama Dipilih",
+      "topMatches": "Berikut adalah padanan kerjaya teratas anda:",
+      "matchScore": "Skor Padanan: {score}%",
+      "whyMatches": "Mengapa kerjaya ini sesuai dengan anda:",
+      "matchReasons": {
+        "educationMatch": "Padanan Pendidikan: {level} anda selaras dengan keperluan untuk peranan ini.",
+        "educationNote": "Nota Pendidikan: Peranan ini biasanya memerlukan {required}, tetapi peralihan kerjaya adalah mungkin.",
+        "fieldMatch": "Padanan Bidang: Kerjaya ini adalah dalam bidang pilihan anda iaitu {field}.",
+        "skillsMatch": "Padanan Kemahiran Teras: Peranan ini melibatkan aktiviti utama yang selaras dengan {group}.",
+        "interestMatch": "Padanan Minat: {count} daripada minat yang anda pilih ({interests}) adalah berkaitan secara langsung dengan kerjaya ini.",
+        "careerOutlook": "Prospek Kerjaya:",
+        "excellent": "Ini adalah padanan yang sangat baik untuk profil anda!",
+        "strong": "Ini adalah padanan yang kuat dengan potensi yang baik untuk kepuasan kerjaya.",
+        "suitable": "Ini boleh menjadi pilihan yang sesuai untuk diterokai lebih lanjut.",
+        "development": "Kerjaya ini mungkin memerlukan pembangunan kemahiran atau pengalaman tambahan."
+      }
+    },
+    "questions": {
+      "education": "Apakah tahap pendidikan tertinggi anda?",
+      "jobArea": "Bidang pekerjaan umum manakah yang anda minati?",
+      "activities": "Manakah antara aktiviti/kemahiran ini yang menarik minat anda? (Soalan {number})"
+    },
+    "educationLevels": [
+      "Tahap Pertama (Pendidikan rendah)",
+      "Tahap Kedua (Pendidikan menengah)",
+      "Tahap Ketiga (Ijazah sarjana muda atau setaraf)",
+      "Tahap Keempat (Sarjana/PhD atau pendidikan lanjutan)"
+    ],
+    "jobAreas": {
+      "managers": {
+        "title": "Pengurus",
+        "description": "Merancang, memimpin, dan menyelaras dasar dan aktiviti organisasi, jabatan, atau perusahaan."
+      },
+      "professionals": {
+        "title": "Profesional",
+        "description": "Menggunakan pengetahuan saintifik atau artistik, menjalankan penyelidikan, atau mengajar subjek khusus."
+      },
+      "technicians": {
+        "title": "Juruteknik dan Profesional Bersekutu",
+        "description": "Melaksanakan tugas teknikal yang menyokong penyelidikan, sains, seni, peraturan, atau operasi."
+      },
+      "clerical": {
+        "title": "Pekerja Sokongan Perkeranian",
+        "description": "Menguruskan rekod, mengatur maklumat, dan mengendalikan tugas pentadbiran dan perkeranian."
+      },
+      "service": {
+        "title": "Pekerja Perkhidmatan dan Jualan",
+        "description": "Menyediakan perkhidmatan peribadi, perlindungan, atau menjual barangan di kedai, pasar, atau tempat yang serupa."
+      },
+      "agricultural": {
+        "title": "Pekerja Mahir Pertanian, Perhutanan, Ternakan dan Perikanan",
+        "description": "Menanam tanaman, menguruskan hutan, memelihara haiwan, dan menuai atau menangkap ikan dan sumber akuatik."
+      },
+      "craft": {
+        "title": "Pekerja Kraf dan Perdagangan Berkaitan",
+        "description": "Membina, membaiki, dan menghasilkan barangan menggunakan alat, mesin, dan teknik khusus."
+      },
+      "operators": {
+        "title": "Pengendali Loji dan Mesin serta Pemasang",
+        "description": "Mengendalikan dan memantau mesin, kenderaan, atau peralatan industri; memasang produk."
+      },
+      "elementary": {
+        "title": "Pekerjaan Asas",
+        "description": "Menjalankan tugas yang mudah, rutin, atau menuntut tenaga fizikal menggunakan alat atau mesin asas."
+      },
+      "armed": {
+        "title": "Angkatan Tentera",
+        "description": "Berkhidmat dalam tentera untuk mempertahankan negara, mengekalkan ketertiban, menyokong usaha bantuan, dan mengambil bahagian dalam operasi pengaman."
+      }
+    }
   }
 }

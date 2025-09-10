@@ -1,12 +1,12 @@
 <template>
   <div class="questionnaire">
-    <h2>Job Suggestion Quiz</h2>
+    <h2>{{ $t('quiz.title') }}</h2>
 
     <!-- Progress Bar -->
     <div v-if="currentQuestion < questions.length" class="progress-container">
       <div class="progress-info">
-        <span class="progress-text">Question {{ currentQuestion + 1 }} of {{ expectedTotalQuestions }}</span>
-        <span class="remaining-text">{{ expectedTotalQuestions - currentQuestion - 1 }} questions remaining</span>
+        <span class="progress-text">{{ $t('quiz.progress.question', { current: currentQuestion + 1, total: expectedTotalQuestions }) }}</span>
+        <span class="remaining-text">{{ $t('quiz.progress.remaining', { remaining: expectedTotalQuestions - currentQuestion - 1 }) }}</span>
       </div>
       <div class="progress-bar">
         <div
@@ -18,72 +18,92 @@
 
     <!-- 问题显示 -->
     <div v-if="currentQuestion < questions.length">
-      <p>{{ questions[currentQuestion].question }}</p>
-      <div v-for="(option, idx) in questions[currentQuestion].options" :key="idx">
-        <label class="option-with-tooltip">
-          <input
-            type="radio"
-            :name="'q' + currentQuestion"
-            :value="typeof option === 'object' ? option.value : option"
-            v-model="answers[currentQuestion]"
-          />
-          <span class="option-text">
-            {{ typeof option === 'object' ? option.value : option }}
-          </span>
+      <p>{{ getQuestionText(currentQuestion) }}</p>
+      <div v-for="(option, idx) in questions[currentQuestion].options" :key="idx" class="option-container">
+        <div class="option-wrapper">
+          <label class="option-with-tooltip">
+            <input
+              type="radio"
+              :name="'q' + currentQuestion"
+              :value="getOptionValue(option)"
+              v-model="answers[currentQuestion]"
+            />
+            <span class="option-text">
+              {{ getOptionText(option) }}
+            </span>
+          </label>
           <span
-            v-if="typeof option === 'object' && option.description"
+            v-if="hasDescription(option)"
             class="info-icon"
-            :title="option.description"
+            @click="toggleDescription(idx)"
           >
-            ?
+            {{ expandedDescriptions[currentQuestion + '-' + idx] ? '−' : '+' }}
           </span>
-        </label>
+        </div>
+        <!-- 可展开的描述 -->
+        <div 
+          v-if="hasDescription(option) && expandedDescriptions[currentQuestion + '-' + idx]"
+          class="description-panel"
+        >
+          {{ getOptionDescription(option) }}
+        </div>
       </div>
 
       <div class="buttons">
-        <button @click="prevQuestion" :disabled="currentQuestion === 0">Previous</button>
-        <!-- 最后一个问题显示Submit -->
+        <button @click="prevQuestion" :disabled="currentQuestion === 0">{{ $t('quiz.buttons.previous') }}</button>
         <button
           @click="nextQuestion"
           :disabled="!answers[currentQuestion]"
           :class="{ 'submit-button': isLastQuestion }"
         >
-          {{ isLastQuestion ? 'Submit' : 'Next' }}
+          {{ isLastQuestion ? $t('quiz.buttons.submit') : $t('quiz.buttons.next') }}
         </button>
       </div>
     </div>
 
     <!-- 结果显示 -->
     <div v-else>
-      <h3>Recommended Unit Groups</h3>
+      <h3>{{ $t('quiz.results.title') }}</h3>
 
       <div v-if="recommendedUnits[0]?.unit_group_code === 'No matching results'">
-        <p>No matching careers found. Please try different options.</p>
+        <p>{{ $t('quiz.results.noResults') }}</p>
       </div>
 
       <div v-else>
-        <p>Based on your answers, we recommend these careers:</p>
-        <ul class="recommendation-list">
+        <div class="results-summary">
+          <p><strong>{{ $t('quiz.results.summary') }}</strong></p>
+          <div class="analysis-details">
+            <h4>{{ $t('quiz.results.profileAnalysis') }}</h4>
+            <div class="profile-tags">
+              <span class="tag education-tag">{{ $t('quiz.results.education') }}: {{ getEducationText(answers[0]) }}</span>
+              <span class="tag field-tag">{{ $t('quiz.results.field') }}: {{ getJobAreaText(answers[1]) }}</span>
+              <span class="tag keywords-tag">{{ $t('quiz.results.keyInterests', { count: extractUserSelectedKeywords().length }) }}</span>
+            </div>
+          </div>
+        </div>
 
+        <p>{{ $t('quiz.results.topMatches') }}</p>
+        <ul class="recommendation-list">
           <li v-for="(unit, index) in recommendedUnits" :key="unit.unit_group_code"
               class="recommendation-item">
             <div class="rank-title">
               <strong class="clickable-title" @click="goToJob(unit)">#{{ index + 1 }}:
-                {{ unit.unit_group_code }} - {{ unit.unit_group_title }}</strong>
+                {{ unit.unit_group_code }} - {{ translateJobTitleFromData(unit.unit_group_code, locale) }} </strong>
             </div>
             <div class="match-info">
-              <span class="match-score">Matching Percentage: {{ unit.score }}%</span>
+              <span class="match-score">{{ $t('quiz.results.matchScore', { score: unit.score }) }}</span>
             </div>
-            <div class="match-reason">
-              <span>Matching reason: {{ unit.matchReason }}</span>
+            <div class="detailed-match-reason">
+              <h5>{{ $t('quiz.results.whyMatches') }}</h5>
+              <div v-html="unit.detailedReason"></div>
             </div>
           </li>
         </ul>
       </div>
       <div class="result-buttons">
-        <button @click="restart">Restart Questionnaire</button>
+        <button @click="restart">{{ $t('quiz.buttons.restart') }}</button>
         <button @click="finishQuiz" class="close-button">
-          Close Quiz
+          {{ $t('quiz.buttons.close') }}
         </button>
       </div>
     </div>
@@ -92,307 +112,131 @@
 
 <script setup lang="ts">
 import {computed, reactive, ref, watch, nextTick} from "vue";
+import { useI18n } from 'vue-i18n';
 // ----------------------
 // 5. 模拟数据
 // ----------------------
 import unitData from "@/data/unit_group_data.json";
 import majorGroupKeywords from "@/data/major_group_keywords.json";
+import { keywordTranslations } from "@/data/keyword_translations.js";
 import {useRouter} from 'vue-router'
 
 const emit = defineEmits(['quiz-completed'])
 
+// 使用 vue-i18n
+const { t: $t, locale } = useI18n();
+
+// 新增：控制描述展开状态
+const expandedDescriptions = reactive<Record<string, boolean>>({});
+
+// 新增：切换描述显示
+function toggleDescription(optionIndex: number) {
+  const key = currentQuestion.value + '-' + optionIndex;
+  expandedDescriptions[key] = !expandedDescriptions[key];
+}
+function getFieldSuffix(lang: string): string {
+  switch(lang) {
+    case 'ms': return '_malay';
+    case 'zh-CN': return '_chinese';
+    case 'en':
+    default: return '';
+  }
+}
+
+// 从数据对象中获取多语言字段值
+function getMultilingualField(dataObj: any, baseFieldName: string, targetLang: string): string {
+  const suffix = getFieldSuffix(targetLang);
+  const fieldName = baseFieldName + suffix;
+  return dataObj[fieldName] || dataObj[baseFieldName] || '';
+}
+
+// 翻译关键词
+function translateKeyword(keyword: string, targetLang: string): string {
+  if (targetLang === 'en') return keyword;
+  
+  const translation = keywordTranslations[keyword.toLowerCase()];
+  if (translation && translation[targetLang]) {
+    return translation[targetLang];
+  }
+  return keyword;
+}
+
+// 从unitData中查找并翻译职业标题
+function translateJobTitleFromData(unitGroupCode: string, targetLang: string): string {
+  const unit = unitData.find(u => u.unit_group_code === unitGroupCode);
+  if (unit) {
+    return getMultilingualField(unit, 'unit_group_title', targetLang);
+  }
+  return '';
+}
+
 // ----------------------
-// 1. 基础问卷问题
+// 1. 基础问卷问题 - 现在使用多语言
 // ----------------------
-const baseQuestions = [
+const jobAreaKeys = ['managers', 'professionals', 'technicians', 'clerical', 'service', 'agricultural', 'craft', 'operators', 'elementary', 'armed'];
+
+const baseQuestions = computed(() => [
   {
-    question: "What is your highest education level?",
+    question: $t('quiz.questions.education'),
     type: "single_choice",
-    options: ["First Level (Primary education)", "Second Level (High school education)", "Third Level (Bachelor's degree or equivalent)", "Fourth Level (Master's/PhD or advanced education)"],
+    options: [
+      "First Level (Primary education)",
+      "Second Level (High school education)", 
+      "Third Level (Bachelor's degree or equivalent)",
+      "Fourth Level (Master's/PhD or advanced education)"
+    ],
     key: "skill_level"
   },
   {
-    question: "Which general job area are you interested in?",
+    question: $t('quiz.questions.jobArea'),
     type: "single_choice",
-    options: [
-      {
-        value: "Managers",
-        description: "Plan, lead, and coordinate the policies and activities of organizations, departments, or enterprises."
-      },
-      {
-        value: "Professionals",
-        description: "Apply scientific or artistic knowledge, conduct research, or teach specialized subjects."
-      },
-      {
-        value: "Technicians and Associate Professionals",
-        description: "Perform technical tasks supporting research, science, arts, regulations, or operations."
-      },
-      {
-        value: "Clerical Support Workers",
-        description: "Manage records, organize information, and handle administrative and clerical tasks."
-      },
-      {
-        value: "Service and Sales Workers",
-        description: "Provide personal services, protection, or sell goods in shops, markets, or similar settings."
-      },
-      {
-        value: "Skilled Agricultural, Forestry, Livestock and Fishery Workers",
-        description: "Grow crops, manage forests, raise animals, and harvest or catch fish and aquatic resources."
-      },
-      {
-        value: "Craft and Related Trades Workers",
-        description: "Construct, repair, and produce goods using tools, machinery, and specialized techniques."
-      },
-      {
-        value: "Plant and Machine Operators and Assemblers",
-        description: "Operate and monitor machinery, vehicles, or industrial equipment; assemble products."
-      },
-      {
-        value: "Elementary Occupations",
-        description: "Carry out simple, routine, or physically demanding tasks using basic tools or machines."
-      },
-      {
-        value: "Armed Forces",
-        description: "Serve in the military to defend the nation, maintain order, support relief efforts, and participate in peacekeeping operations."
-      }
-    ],
+    options: jobAreaKeys.map(key => ({
+      key: key,
+      value: $t(`quiz.jobAreas.${key}.title`),
+      description: $t(`quiz.jobAreas.${key}.description`)
+    })),
     key: "major_group"
   }
-];
-
-
-// ----------------------
-// 2. 每个 Major Group 的 5 道问题
-// key 为 major group code (与 baseQuestions 第二题对应)
-// ----------------------
-const majorGroupQuestions = {
-  "1": [
-    {
-      "question": "Which activity appeals to you most in a managerial context?",
-      "options": ["planning / tasks", "managing / related", "monitoring / directing", "operations / workers"]
-    },
-    {
-      "question": "Which managerial task would you like to perform?",
-      "options": ["managers / services", "performing / organisation", "policies / scheduling", "activities / procedures"]
-    },
-    {
-      "question": "Which of these management responsibilities do you prefer?",
-      "options": ["overseeing / plan", "ensuring / controlling", "directing / operations", "workers / services"]
-    },
-    {
-      "question": "Which management activity interests you the most?",
-      "options": ["activities / scheduling", "tasks / monitoring", "planning / directing", "organisation / policies"]
-    },
-    {
-      "question": "Which aspect of managerial work is appealing?",
-      "options": ["performing / tasks", "managing / operations", "workers / ensuring", "services / monitoring"]
-    }
-  ],
-  "2": [
-    {
-      "question": "Which professional activity interests you?",
-      "options": ["work / related", "performing / knowledge", "coordinating / performance", "tasks / preparing"]
-    },
-    {
-      "question": "Which professional task appeals to you?",
-      "options": ["enhancing / research", "systems / development", "conducting / planning", "advising / health"]
-    },
-    {
-      "question": "Which of these professional responsibilities do you prefer?",
-      "options": ["reports / information", "developing / methods", "planning / knowledge", "tasks / coordinating"]
-    },
-    {
-      "question": "Which professional activity would you like to perform?",
-      "options": ["preparing / development", "research / systems", "advising / performance", "enhancing / work"]
-    },
-    {
-      "question": "Which professional task is most appealing?",
-      "options": ["work / tasks", "knowledge / development", "coordination / planning", "information / conducting"]
-    }
-  ],
-  "3": [
-    {
-      "question": "Which technician task interests you?",
-      "options": ["tasks / monitoring", "related / performing", "equipment / workers", "supervising / scheduling"]
-    },
-    {
-      "question": "Which technical activity do you prefer?",
-      "options": ["work / assisting", "technical / preparing", "medical / materials", "operating / health"]
-    },
-    {
-      "question": "Which technician responsibility appeals to you?",
-      "options": ["preparing / systems", "scheduling / technical", "monitoring / equipment", "assisting / performing"]
-    },
-    {
-      "question": "Which technical task is most interesting?",
-      "options": ["workers / operating", "tasks / materials", "technical / research", "health / systems"]
-    },
-    {
-      "question": "Which aspect of technical work do you like?",
-      "options": ["supervising / preparing", "assisting / tasks", "equipment / monitoring", "operating / technical"]
-    }
-  ],
-  "4": [
-    {
-      "question": "Which clerical task appeals to you?",
-      "options": ["tasks / related", "information / workers", "performing / supervising", "scheduling / records"]
-    },
-    {
-      "question": "Which clerical activity would you prefer?",
-      "options": ["monitoring / clients", "preparing / clerks", "documents / telephone", "data / services"]
-    },
-    {
-      "question": "Which aspect of clerical work interests you?",
-      "options": ["receiving / recording", "reports / mail", "supervising / tasks", "workers / information"]
-    },
-    {
-      "question": "Which clerical task would you choose?",
-      "options": ["preparing / documents", "monitoring / records", "clients / data", "scheduling / services"]
-    },
-    {
-      "question": "Which clerical responsibility appeals to you most?",
-      "options": ["tasks / clerks", "information / monitoring", "performing / records", "data / clients"]
-    }
-  ],
-  "5": [
-    {
-      "question": "Which service/sales task interests you?",
-      "options": ["performing / tasks", "related / workers", "goods / supervising", "customers / food"]
-    },
-    {
-      "question": "Which service activity appeals to you?",
-      "options": ["services / care", "taking / cleaning", "preparing / assisting", "sales / items"]
-    },
-    {
-      "question": "Which aspect of service work do you like?",
-      "options": ["ensuring / vehicles", "giving / personal", "tasks / goods", "workers / performing"]
-    },
-    {
-      "question": "Which service/sales task would you choose?",
-      "options": ["performing / tasks", "related / cleaning", "goods / assisting", "customers / services"]
-    },
-    {
-      "question": "Which service activity is most appealing?",
-      "options": ["preparing / workers", "sales / items", "care / services", "taking / tasks"]
-    }
-  ],
-  "6": [
-    {
-      "question": "Which agricultural task interests you?",
-      "options": ["products / marketing", "performing / livestock", "related / crops", "sale / operations"]
-    },
-    {
-      "question": "Which farming activity appeals to you?",
-      "options": ["tasks / markets", "determining / maintaining", "animals / delivery", "farm / regular"]
-    },
-    {
-      "question": "Which agricultural responsibility do you prefer?",
-      "options": ["organisations / purchasing", "supplies / delivery", "performing / crops", "related / farm"]
-    },
-    {
-      "question": "Which farm-related task interests you?",
-      "options": ["tasks / livestock", "maintaining / products", "marketing / delivery", "operations / crops"]
-    },
-    {
-      "question": "Which aspect of agricultural work appeals to you?",
-      "options": ["farm / animals", "sale / tasks", "determining / supplies", "regular / markets"]
-    }
-  ],
-  "7": [
-    {
-      "question": "Which craft/trade task interests you?",
-      "options": ["related / performing", "tasks / repairing", "making / equipment", "metal / repair"]
-    },
-    {
-      "question": "Which craft activity appeals to you?",
-      "options": ["materials / using", "buildings / installing", "parts / articles", "cutting / workers"]
-    },
-    {
-      "question": "Which aspect of craft work do you like?",
-      "options": ["machines / structures", "make / related", "performing / tasks", "repair / equipment"]
-    },
-    {
-      "question": "Which craft task would you choose?",
-      "options": ["installing / buildings", "materials / cutting", "articles / workers", "metal / tasks"]
-    },
-    {
-      "question": "Which craft responsibility interests you?",
-      "options": ["making / performing", "repairing / tasks", "equipment / related", "using / structures"]
-    }
-  ],
-  "8": [
-    {
-      "question": "Which plant/machine operator task appeals to you?",
-      "options": ["operating / machines", "monitoring / equipment", "products / related", "performing / tasks"]
-    },
-    {
-      "question": "Which machine operation activity interests you?",
-      "options": ["operators / operate", "machine / materials", "machinery / paper", "monitor / metal"]
-    },
-    {
-      "question": "Which operator task do you prefer?",
-      "options": ["plant / make", "used / equipment", "tasks / performing", "machines / monitoring"]
-    },
-    {
-      "question": "Which aspect of machinery work appeals to you?",
-      "options": ["products / related", "operators / machine", "materials / operate", "monitor / plant"]
-    },
-    {
-      "question": "Which plant/machine operator task would you choose?",
-      "options": ["machines / performing", "equipment / tasks", "monitoring / operators", "materials / machinery"]
-    }
-  ],
-  "9": [
-    {
-      "question": "Which elementary occupation task interests you?",
-      "options": ["tasks / related", "cleaning / performing", "goods / collecting", "various / washing"]
-    },
-    {
-      "question": "Which basic work activity appeals to you?",
-      "options": ["labourers / work", "food / clean", "perform / materials", "simple / items"]
-    },
-    {
-      "question": "Which elementary task would you choose?",
-      "options": ["hand / loading", "unloading / carrying", "tasks / performing", "goods / clean"]
-    },
-    {
-      "question": "Which basic work responsibility interests you?",
-      "options": ["various / labourers", "food / items", "clean / perform", "materials / tasks"]
-    },
-    {
-      "question": "Which elementary activity appeals to you most?",
-      "options": ["tasks / related", "cleaning / goods", "performing / work", "collecting / items"]
-    }
-  ],
-  "0": [
-    {
-      "question": "Which armed forces task appeals to you?",
-      "options": ["personnel / support", "officers / ensuring", "planning / public", "combat / order"]
-    },
-    {
-      "question": "Which defense activity interests you?",
-      "options": ["training / knowledge", "group / assets", "duty / defence", "threats / deployed"]
-    },
-    {
-      "question": "Which armed forces responsibility would you choose?",
-      "options": ["assisting / helping", "provides / groups", "planning / training", "knowledge / duty"]
-    },
-    {
-      "question": "Which defense task appeals to you most?",
-      "options": ["public / combat", "order / training", "knowledge / group", "assets / deployed"]
-    },
-    {
-      "question": "Which armed forces activity interests you?",
-      "options": ["personnel / support", "planning / order", "officers / duty", "combat / threats"]
-    }
-  ]
-};
+]);
 
 // ----------------------
-// 3. Vue 状态
+// 2. 生成随机关键词问题的函数
 // ----------------------
-const currentQuestion = ref(0);
-const answers = reactive<any[]>([]);
+function generateRandomKeywordQuestions(majorGroupCode: string, numQuestions: number = 5): any[] {
+  const keywordData = (majorGroupKeywords as any)[majorGroupCode];
+  if (!keywordData || !keywordData.keywords) {
+    return [];
+  }
+
+  const keywords = [...keywordData.keywords]; // 复制数组以避免修改原数组
+  const questions = [];
+  const usedKeywords = new Set<string>();
+
+  for (let i = 0; i < numQuestions; i++) {
+    // 过滤掉已使用的关键词
+    const availableKeywords = keywords.filter(keyword => !usedKeywords.has(keyword));
+    
+    if (availableKeywords.length < 4) {
+      // 如果可用关键词不足4个，重置已使用的关键词
+      usedKeywords.clear();
+      availableKeywords.push(...keywords);
+    }
+
+    // 随机选择4个不重复的关键词作为选项
+    const shuffled = availableKeywords.sort(() => 0.5 - Math.random());
+    const selectedKeywords = shuffled.slice(0, 4);
+    
+    // 标记这些关键词为已使用
+    selectedKeywords.forEach(keyword => usedKeywords.add(keyword));
+
+    questions.push({
+      question: $t('quiz.questions.activities', { number: i + 1 }),
+      options: selectedKeywords
+    });
+  }
+
+  return questions;
+}
 
 // 计算期望的总问题数量（总是7个：2个基础 + 5个专业组问题）
 const expectedTotalQuestions = computed(() => {
@@ -408,15 +252,14 @@ const isLastQuestion = computed(() => {
 
   // 找到对应的 major group code
   const selectedMajorTitle = answers[1];
-  const selectedMajorCode = Object.keys(majorGroupQuestions).find(code =>
+  const selectedMajorCode = Object.keys(majorGroupKeywords).find(code =>
     mapMajorGroupCodeToTitle(code) === selectedMajorTitle
   );
 
-  // 如果找到了对应的code并且有对应的问题，计算总数
-  if (selectedMajorCode && (majorGroupQuestions as any)[selectedMajorCode]) {
+  // 如果找到了对应的code
+  if (selectedMajorCode) {
     const expectedTotal = expectedTotalQuestions.value;
     const isLast = currentQuestion.value === expectedTotal - 1;
-
     return isLast;
   }
 
@@ -424,25 +267,50 @@ const isLastQuestion = computed(() => {
 });
 
 // ----------------------
+// 3. Vue 状态
+// ----------------------
+const currentQuestion = ref(0);
+const answers = reactive<any[]>([]);
+
+// ----------------------
 // 4. 动态生成问题
 // ----------------------
-const questions = reactive([...baseQuestions]);
+const questions = reactive([...baseQuestions.value]);
+
+// 监听语言变化，重新生成基础问题和关键词问题
+watch(locale, () => {
+  // 重新生成基础问题
+  questions.splice(0, 2, ...baseQuestions.value);
+  
+  // 如果已经选择了工作领域，重新生成关键词问题
+  if (answers[1]) {
+    const mgCode = Object.keys(majorGroupKeywords).find((key) => {
+      return mapMajorGroupCodeToTitle(key) === answers[1];
+    });
+    if (mgCode) {
+      questions.splice(2);
+      const randomQuestions = generateRandomKeywordQuestions(mgCode, 5);
+      questions.push(...randomQuestions);
+    }
+  }
+}, { immediate: true });
 
 watch(
   () => answers[1],
   (newMajor) => {
     if (!newMajor) return;
     questions.splice(2);
-    const mgCode = Object.keys(majorGroupQuestions).find((key) => {
+    const mgCode = Object.keys(majorGroupKeywords).find((key) => {
       return mapMajorGroupCodeToTitle(key) === newMajor;
     });
-    if (mgCode && (majorGroupQuestions as any)[mgCode]) {
-      questions.push(...(majorGroupQuestions as any)[mgCode]);
+    if (mgCode) {
+      const randomQuestions = generateRandomKeywordQuestions(mgCode, 5);
+      questions.push(...randomQuestions);
     }
   }
 );
 
-// 映射 major_group_code -> title
+// 映射 major_group_code -> title (使用英文作为基准)
 function mapMajorGroupCodeToTitle(code: string) {
   const map = {
     "1": "Managers",
@@ -460,6 +328,145 @@ function mapMajorGroupCodeToTitle(code: string) {
 }
 
 // ----------------------
+// 多语言辅助函数
+// ----------------------
+function getQuestionText(questionIndex: number) {
+  if (questionIndex === 0) {
+    return $t('quiz.questions.education');
+  } else if (questionIndex === 1) {
+    return $t('quiz.questions.jobArea');
+  } else {
+    const questionNumber = questionIndex - 1;
+    return $t('quiz.questions.activities', { number: questionNumber });
+  }
+}
+
+function getOptionValue(option: any) {
+  if (typeof option === 'object') {
+    if (option.key) {
+      // 工作领域用英文原值
+      const keyToEnglishMap = {
+        'managers': 'Managers',
+        'professionals': 'Professionals',
+        'technicians': 'Technicians and Associate Professionals',
+        'clerical': 'Clerical Support Workers',
+        'service': 'Service and Sales Workers',
+        'agricultural': 'Skilled Agricultural, Forestry, Livestock and Fishery Workers',
+        'craft': 'Craft and Related Trades Workers',
+        'operators': 'Plant and Machine Operators and Assemblers',
+        'elementary': 'Elementary Occupations',
+        'armed': 'Armed Forces'
+      };
+      return keyToEnglishMap[option.key] || option.value;
+    }
+
+    // 教育选项：强制返回完整英文
+    const originalEducationOptions = [
+      "First Level (Primary education)",
+      "Second Level (High school education)", 
+      "Third Level (Bachelor's degree or equivalent)",
+      "Fourth Level (Master's/PhD or advanced education)"
+    ];
+
+    if (originalEducationOptions.includes(option.value)) {
+      return option.value;
+    }
+  }
+
+  return option;
+}
+
+
+function getOptionText(option: any) {
+  if (typeof option === 'object' && option.key) {
+    // 工作领域选项
+    return $t(`quiz.jobAreas.${option.key}.title`);
+  }
+  
+  // 检查是否是教育等级
+  const originalEducationOptions = [
+    "First Level (Primary education)",
+    "Second Level (High school education)", 
+    "Third Level (Bachelor's degree or equivalent)",
+    "Fourth Level (Master's/PhD or advanced education)"
+  ];
+  
+  const index = originalEducationOptions.indexOf(option);
+  if (index !== -1) {
+    return $t(`quiz.educationLevels.${index}`);
+  }
+
+  if (typeof option === 'string') {
+    return translateKeyword(option, locale.value);
+  }
+  
+  return option;
+}
+
+function getOptionDescription(option: any) {
+  if (typeof option === 'object' && option.key) {
+    return $t(`quiz.jobAreas.${option.key}.description`);
+  }
+  return option.description || '';
+}
+
+function hasDescription(option: any) {
+  if (typeof option === 'object') {
+    return !!(option.description || option.key);
+  }
+  return false;
+}
+
+function getEducationText(education: string) {
+  const shortToFullMap: Record<string, string> = {
+    'First': "First Level (Primary education)",
+    'Second': "Second Level (High school education)",
+    'Third': "Third Level (Bachelor's degree or equivalent)",
+    'Fourth': "Fourth Level (Master's/PhD or advanced education)"
+  };
+
+  // 如果传进来的是短形式，先映射到完整的
+  const normalized = shortToFullMap[education] || education;
+
+  const originalEducationOptions = [
+    "First Level (Primary education)",
+    "Second Level (High school education)", 
+    "Third Level (Bachelor's degree or equivalent)",
+    "Fourth Level (Master's/PhD or advanced education)"
+  ];
+
+  const index = originalEducationOptions.indexOf(normalized);
+  if (index !== -1) {
+    return $t(`quiz.educationLevels.${index}`);
+  }
+
+  return normalized;
+}
+
+
+function getJobAreaText(jobArea: string) {
+  // 找到对应的key
+  const englishToKeyMap = {
+    'Managers': 'managers',
+    'Professionals': 'professionals',
+    'Technicians and Associate Professionals': 'technicians',
+    'Clerical Support Workers': 'clerical',
+    'Service and Sales Workers': 'service',
+    'Skilled Agricultural, Forestry, Livestock and Fishery Workers': 'agricultural',
+    'Craft and Related Trades Workers': 'craft',
+    'Plant and Machine Operators and Assemblers': 'operators',
+    'Elementary Occupations': 'elementary',
+    'Armed Forces': 'armed'
+  };
+  
+  const key = (englishToKeyMap as any)[jobArea];
+  if (key) {
+    return $t(`quiz.jobAreas.${key}.title`);
+  }
+  return jobArea;
+}
+
+// ----------------------
 // 6. 分数计算和推荐逻辑
 // ----------------------
 const allScores = ref<any[]>([]);
@@ -471,9 +478,7 @@ function extractUserSelectedKeywords() {
   // 从第3题开始（前2题是基础信息）
   for (let i = 2; i < answers.length; i++) {
     if (answers[i]) {
-      // 将用户选择的选项按 " / " 分割，提取关键词
-      const keywords = answers[i].split(' / ');
-      selectedKeywords.push(...keywords);
+      selectedKeywords.push(answers[i]);
     }
   }
 
@@ -484,7 +489,7 @@ function computeScores() {
   const scores: any[] = [];
 
   const selectedMajorTitle = answers[1];
-  const selectedMajorCode = Object.keys(majorGroupQuestions).find(code =>
+  const selectedMajorCode = Object.keys(majorGroupKeywords).find(code =>
     mapMajorGroupCodeToTitle(code) === selectedMajorTitle
   );
   const selectedSkillLevel = answers[0];
@@ -498,7 +503,7 @@ function computeScores() {
       skillMatch: 0,
       majorMatch: 0,
       keywordMatch: 0,
-      userChoiceMatch: 0 // 新增：用户选择匹配
+      userChoiceMatch: 0
     };
 
     // 1. 教育等级匹配（权重: 20%）
@@ -530,7 +535,7 @@ function computeScores() {
     details.keywordMatch = keywordScore;
     score += keywordScore;
 
-    // 4. 新增：用户选择关键词匹配（权重: 25%）
+    // 4. 用户选择关键词匹配（权重: 25%）
     let userChoiceMatches = 0;
     userSelectedKeywords.forEach((keyword) => {
       if (text.includes(keyword)) {
@@ -552,6 +557,7 @@ function computeScores() {
       major_group_code: unit.major_group_code,
       skill_level: unit.skill_level,
       details: details,
+      unit_data: unit
     });
   });
 
@@ -559,15 +565,75 @@ function computeScores() {
   return scores.sort((a, b) => b.score - a.score);
 }
 
-// 新增：生成匹配原因说明
-function generateMatchReason(item: any) {
+// 改进的匹配原因生成函数 - 使用多语言
+function generateDetailedMatchReason(item: any) {
   const reasons = [];
-  if (item.details?.skillMatch > 15) reasons.push("Educational Matching");
-  if (item.details?.majorMatch > 20) reasons.push("Professional field matching");
-  if (item.details?.keywordMatch > 20) reasons.push("Skill keyword matching");
-  if (item.details?.userChoiceMatch > 15) reasons.push("Personal choice preference matching");
+  const details = item.details;
+  const userKeywords = extractUserSelectedKeywords();
 
-  return reasons.join(" + ") || "Basic Matching";
+  // 教育匹配
+  if (details.skillMatch > 15) {
+    reasons.push(`<div class="reason-item education">
+      <span class="reason-icon">🎓</span>
+      <span class="reason-text"><strong>${$t('quiz.results.matchReasons.educationMatch', { level: getEducationText(answers[0]) })}</strong></span>
+    </div>`);
+  } else {
+    reasons.push(`<div class="reason-item education-partial">
+      <span class="reason-icon">📚</span>
+      <span class="reason-text"><strong>${$t('quiz.results.matchReasons.educationNote', { required: getEducationText(answers[0])})}</strong></span>
+    </div>`);
+  }
+
+  // 专业领域匹配
+  if (details.majorMatch > 20) {
+    reasons.push(`<div class="reason-item field">
+      <span class="reason-icon">💼</span>
+      <span class="reason-text"><strong>${$t('quiz.results.matchReasons.fieldMatch', { field: getJobAreaText(answers[1]) })}</strong></span>
+    </div>`);
+  }
+
+  // 技能关键词匹配
+  if (details.keywordMatch > 20) {
+    reasons.push(`<div class="reason-item skills">
+      <span class="reason-icon">⚡</span>
+      <span class="reason-text"><strong>${$t('quiz.results.matchReasons.skillsMatch', { group: getJobAreaText(answers[1]) })}</strong></span>
+    </div>`);
+  }
+
+  // 个人兴趣匹配
+  if (details.userChoiceMatch > 15) {
+  const matchedCount = Math.round((details.userChoiceMatch / 25) * userKeywords.length);
+  
+  const translatedKeywords = userKeywords.slice(0, 3).map(keyword => 
+    translateKeyword(keyword, locale.value)
+  );
+  const displayKeywords = translatedKeywords.join(', ') + (userKeywords.length > 3 ? '...' : '');
+  
+  reasons.push(`<div class="reason-item interests">
+    <span class="reason-icon">❤️</span>
+    <span class="reason-text"><strong>${$t('quiz.results.matchReasons.interestMatch', { count: matchedCount, interests: displayKeywords })}</strong></span>
+  </div>`);
+  }
+
+  // 职业前景信息
+  const score = item.score;
+  let prospectText = "";
+  if (score >= 80) {
+    prospectText = $t('quiz.results.matchReasons.excellent');
+  } else if (score >= 60) {
+    prospectText = $t('quiz.results.matchReasons.strong');
+  } else if (score >= 40) {
+    prospectText = $t('quiz.results.matchReasons.suitable');
+  } else {
+    prospectText = $t('quiz.results.matchReasons.development');
+  }
+
+  reasons.push(`<div class="reason-item prospect">
+    <span class="reason-icon">🚀</span>
+    <span class="reason-text"><strong>${$t('quiz.results.matchReasons.careerOutlook')} ${prospectText}</strong></span>
+  </div>`);
+
+  return reasons.join('');
 }
 
 const recommendedUnits = computed(() => {
@@ -582,7 +648,7 @@ const recommendedUnits = computed(() => {
       unit_group_code: "No matching careers found",
       unit_group_title: "No matching careers found",
       score: 0,
-      matchReason: ""
+      detailedReason: ""
     }];
   }
 
@@ -591,7 +657,7 @@ const recommendedUnits = computed(() => {
     unit_group_code: item.unit_group_code,
     unit_group_title: item.unit_title,
     score: item.score,
-    matchReason: generateMatchReason(item),
+    detailedReason: generateDetailedMatchReason(item),
     details: item.details
   }));
 });
@@ -637,7 +703,6 @@ function goToJob(unit: any) {
   emit('quiz-completed')
 }
 
-
 // ----------------------
 // 7. 导航函数
 // ----------------------
@@ -659,6 +724,10 @@ function prevQuestion() {
 function restart() {
   currentQuestion.value = 0;
   answers.length = 0;
+  // 清空描述展开状态
+  Object.keys(expandedDescriptions).forEach(key => {
+    delete expandedDescriptions[key];
+  });
 }
 
 function finishQuiz() {
@@ -679,12 +748,13 @@ function restoreQuizResults() {
 
         // Force rebuild questions array based on restored answers
         if (answers[1]) {
-          const mgCode = Object.keys(majorGroupQuestions).find((key) => {
+          const mgCode = Object.keys(majorGroupKeywords).find((key) => {
             return mapMajorGroupCodeToTitle(key) === answers[1];
           });
-          if (mgCode && (majorGroupQuestions as any)[mgCode]) {
+          if (mgCode) {
             questions.splice(2);
-            questions.push(...(majorGroupQuestions as any)[mgCode]);
+            const randomQuestions = generateRandomKeywordQuestions(mgCode, 5);
+            questions.push(...randomQuestions);
           }
         }
 
@@ -847,11 +917,16 @@ defineExpose({
   border-radius: 50%;
 }
 
-/* 选项容器 */
-.questionnaire > div:first-child > div:not(.buttons) {
-  display: grid;
-  gap: 12px;
-  margin: 1.5rem 0;
+/* 新增：选项容器样式 */
+.option-container {
+  margin-bottom: 12px;
+}
+
+.option-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
 }
 
 /* 选项标签样式 */
@@ -868,6 +943,7 @@ defineExpose({
   overflow: hidden;
   font-size: clamp(0.9rem, 1.2vw, 1rem);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  flex: 1;
 }
 
 .questionnaire label::before {
@@ -918,6 +994,70 @@ defineExpose({
   color: #C65A0F;
   font-weight: bold;
   font-size: 1.2rem;
+}
+
+/* 新增：描述面板样式 */
+.description-panel {
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fef3e2, #fdf2e9);
+  border-left: 3px solid #C65A0F;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 2px 8px rgba(198, 90, 15, 0.1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+/* 修改的信息图标样式 */
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #C65A0F;
+  color: white;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.info-icon:hover {
+  background: #ea580c;
+  transform: scale(1.1);
+}
+
+.info-icon:active {
+  transform: scale(0.95);
+}
+
+/* 选项容器 */
+.questionnaire > div:first-child > div:not(.buttons) {
+  display: grid;
+  gap: 8px;
+  margin: 1.5rem 0;
 }
 
 /* 按钮容器 */
@@ -1016,6 +1156,51 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
   box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
 }
 
+/* 新增：结果总结样式 */
+.results-summary {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 2px solid #0ea5e9;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.analysis-details h4 {
+  margin: 1rem 0 0.5rem 0;
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.profile-tags {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.tag {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.education-tag {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+}
+
+.field-tag {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.keywords-tag {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
 /* 结果页面样式 */
 .recommendation-list {
   list-style-type: none;
@@ -1064,7 +1249,7 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
 }
 
 .match-info {
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
 .match-score {
@@ -1079,14 +1264,80 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
 }
 
-.match-reason {
-  color: #6b7280;
-  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
-  font-style: italic;
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: rgba(107, 114, 128, 0.05);
-  border-radius: 6px;
+/* 新增：详细原因样式 */
+.detailed-match-reason {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.detailed-match-reason h5 {
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.reason-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.reason-item:last-child {
+  margin-bottom: 0;
+}
+
+.reason-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.reason-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.education {
+  background: rgba(139, 69, 19, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.education-partial {
+  background: rgba(245, 158, 11, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.field {
+  background: rgba(5, 150, 105, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.skills {
+  background: rgba(168, 85, 247, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.interests {
+  background: rgba(239, 68, 68, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.prospect {
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  padding: 8px;
 }
 
 /* 无结果样式 */
@@ -1098,6 +1349,24 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
   background: linear-gradient(135deg, #f9fafb, #f3f4f6);
   border-radius: 12px;
   border: 2px dashed #d1d5db;
+}
+
+.result-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.clickable-title {
+  cursor: pointer;
+  color: #007bff;
+}
+
+.clickable-title:hover {
+  text-decoration: underline;
 }
 
 /* 响应式设计 */
@@ -1146,7 +1415,26 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
   }
 
   .questionnaire > div:first-child > div:not(.buttons) {
-    gap: 8px;
+    gap: 6px;
+  }
+
+  .profile-tags {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tag {
+    text-align: center;
+  }
+
+  .result-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .result-buttons button {
+    width: 100%;
+    max-width: 280px;
   }
 }
 
@@ -1162,6 +1450,10 @@ button:not(.submit-button):not(.close-button):hover:not(:disabled) {
 
   .buttons {
     padding: 0.8rem 0;
+  }
+
+  .results-summary {
+    padding: 1.5rem;
   }
 }
 
@@ -1186,105 +1478,5 @@ button:focus-visible,
 input[type="radio"]:focus-visible {
   outline: 2px solid #C65A0F;
   outline-offset: 2px;
-}
-
-/* 在testquiz.vue的<style scoped>中添加 */
-.result-buttons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 2rem;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 640px) {
-  .result-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .result-buttons button {
-    width: 100%;
-    max-width: 280px;
-  }
-}
-
-.clickable-title {
-  cursor: pointer;
-  color: #007bff;
-}
-
-.clickable-title:hover {
-  text-decoration: underline;
-}
-
-
-/* 问号图标 - 绝对定位，不影响布局 */
-.info-icon {
-  position: absolute;
-  right: 12px; /* 固定在右边 */
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: #C65A0F;
-  color: white;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: help;
-  transition: all 0.3s ease;
-  z-index: 2;
-}
-
-.info-icon:hover {
-  background: #ea580c;
-  transform: translateY(-50%) scale(1.1);
-}
-
-/* Tooltip */
-.info-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px; /* 从18px增加到24px */
-  height: 24px; /* 从18px增加到24px */
-  background: #C65A0F;
-  color: white;
-  border-radius: 50%;
-  font-size: 16px; /* 从12px增加到16px */
-  font-weight: bold;
-  cursor: help;
-  transition: all 0.1s ease;
-  z-index: 2;
-}
-
-/* 箭头指向问号 */
-.info-icon[title]:hover::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 24px;
-  transform: translateY(-50%);
-  border: 5px solid transparent;
-  border-left-color: rgba(0, 0, 0, 0.92);
-  z-index: 1000;
-}
-
-/* 为有描述的选项预留右侧空间 */
-.questionnaire label:has(.info-icon) {
-  padding-right: 55px;
-}
-
-.questionnaire label:has(.info-icon) .option-text {
-  margin-right: 35px;
 }
 </style>

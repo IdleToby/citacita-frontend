@@ -79,5 +79,96 @@
       "couldNotFind": "Could not find facilities.",
       "selectLocation": "Please select a location from the list."
     }
+  },
+  "quiz": {
+    "title": "Job Suggestion Quiz",
+    "progress": {
+      "question": "Question {current} of {total}",
+      "remaining": "{remaining} questions remaining"
+    },
+    "buttons": {
+      "previous": "Previous", 
+      "next": "Next",
+      "submit": "Submit",
+      "restart": "Restart Questionnaire",
+      "close": "Close Quiz"
+    },
+    "results": {
+      "title": "Recommended Unit Groups",
+      "noResults": "No matching careers found. Please try different options.",
+      "summary": "Based on your quiz responses, we've analyzed your preferences and matched them with suitable career paths.",
+      "profileAnalysis": "Your Profile Analysis:",
+      "education": "Education",
+      "field": "Field", 
+      "keyInterests": "{count} Key Interests Selected",
+      "topMatches": "Here are your top career matches:",
+      "matchScore": "Match Score: {score}%",
+      "whyMatches": "Why this career matches you:",
+      "matchReasons": {
+        "educationMatch": "Education Match: Your {level} aligns perfectly with the requirements for this role.",
+        "educationNote": "Education Note: This role typically requires {required}, but career transitions are possible.",
+        "fieldMatch": "Field Match: This career is in your preferred field of {field}.",
+        "skillsMatch": "Core Skills Match: This role involves key activities that align with {group}.",
+        "interestMatch": "Interest Match: {count} of your selected interests ({interests}) are directly relevant to this career.",
+        "careerOutlook": "Career Outlook:",
+        "excellent": "This is an excellent match for your profile!",
+        "strong": "This is a strong match with good potential for career satisfaction.",
+        "suitable": "This could be a suitable option worth exploring further.",
+        "development": "This career may require additional skills development or experience."
+      }
+    },
+    "questions": {
+      "education": "What is your highest education level?",
+      "jobArea": "Which general job area are you interested in?",
+      "activities": "Which of these activities/skills interests you most? (Question {number})"
+    },
+    "educationLevels": [
+      "First Level (Primary education)",
+      "Second Level (High school education)",
+      "Third Level (Bachelor's degree or equivalent)", 
+      "Fourth Level (Master's/PhD or advanced education)"
+    ],
+    "jobAreas": {
+      "managers": {
+        "title": "Managers",
+        "description": "Plan, lead, and coordinate the policies and activities of organizations, departments, or enterprises."
+      },
+      "professionals": {
+        "title": "Professionals",
+        "description": "Apply scientific or artistic knowledge, conduct research, or teach specialized subjects."
+      },
+      "technicians": {
+        "title": "Technicians and Associate Professionals", 
+        "description": "Perform technical tasks supporting research, science, arts, regulations, or operations."
+      },
+      "clerical": {
+        "title": "Clerical Support Workers",
+        "description": "Manage records, organize information, and handle administrative and clerical tasks."
+      },
+      "service": {
+        "title": "Service and Sales Workers",
+        "description": "Provide personal services, protection, or sell goods in shops, markets, or similar settings."
+      },
+      "agricultural": {
+        "title": "Skilled Agricultural, Forestry, Livestock and Fishery Workers",
+        "description": "Grow crops, manage forests, raise animals, and harvest or catch fish and aquatic resources."
+      },
+      "craft": {
+        "title": "Craft and Related Trades Workers",
+        "description": "Construct, repair, and produce goods using tools, machinery, and specialized techniques."
+      },
+      "operators": {
+        "title": "Plant and Machine Operators and Assemblers",
+        "description": "Operate and monitor machinery, vehicles, or industrial equipment; assemble products."
+      },
+      "elementary": {
+        "title": "Elementary Occupations", 
+        "description": "Carry out simple, routine, or physically demanding tasks using basic tools or machines."
+      },
+      "armed": {
+        "title": "Armed Forces",
+        "description": "Serve in the military to defend the nation, maintain order, support relief efforts, and participate in peacekeeping operations."
+      }
+    }
   }
 }

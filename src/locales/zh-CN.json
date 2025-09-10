@@ -79,5 +79,96 @@
       "couldNotFind": "找不到设施。",
       "selectLocation": "请从列表中选择一个位置。"
     }
+  },
+  "quiz": {
+    "title": "职业建议测验",
+    "progress": {
+      "question": "第 {current} 题，共 {total} 题",
+      "remaining": "还剩 {remaining} 题"
+    },
+    "buttons": {
+      "previous": "上一题",
+      "next": "下一题", 
+      "submit": "提交",
+      "restart": "重新开始问卷",
+      "close": "关闭测验"
+    },
+    "results": {
+      "title": "推荐职业组别",
+      "noResults": "未找到匹配的职业。请尝试不同的选项。",
+      "summary": "根据您的测验回答，我们已分析了您的偏好并将其与合适的职业道路匹配。",
+      "profileAnalysis": "您的个人资料分析：",
+      "education": "教育背景",
+      "field": "专业领域",
+      "keyInterests": "已选择 {count} 个关键兴趣",
+      "topMatches": "以下是您的顶级职业匹配：",
+      "matchScore": "匹配分数：{score}%",
+      "whyMatches": "为什么这个职业适合您：",
+      "matchReasons": {
+        "educationMatch": "教育匹配：您的{level}完全符合此职位的要求。",
+        "educationNote": "教育说明：此职位通常需要{required}，但职业转换是可能的。",
+        "fieldMatch": "领域匹配：这个职业在您偏好的{field}领域。",
+        "skillsMatch": "核心技能匹配：此职位涉及与{group}一致的关键活动。",
+        "interestMatch": "兴趣匹配：您选择的兴趣中有{count}个（{interests}）与此职业直接相关。",
+        "careerOutlook": "职业前景：",
+        "excellent": "这是您个人资料的绝佳匹配！",
+        "strong": "这是一个强有力的匹配，具有良好的职业满意度潜力。",
+        "suitable": "这可能是一个值得进一步探索的合适选择。",
+        "development": "这个职业可能需要额外的技能发展或经验。"
+      }
+    },
+    "questions": {
+      "education": "您的最高教育水平是什么？",
+      "jobArea": "您对哪个一般工作领域感兴趣？",
+      "activities": "这些活动/技能中哪个最吸引您？（第 {number} 题）"
+    },
+    "educationLevels": [
+      "第一级（小学教育）",
+      "第二级（中学教育）", 
+      "第三级（学士学位或同等学历）",
+      "第四级（硕士/博士或高等教育）"
+    ],
+    "jobAreas": {
+      "managers": {
+        "title": "管理人员",
+        "description": "规划、领导和协调组织、部门或企业的政策和活动。"
+      },
+      "professionals": {
+        "title": "专业人员",
+        "description": "应用科学或艺术知识，进行研究，或教授专业科目。"
+      },
+      "technicians": {
+        "title": "技术员和副专业人员",
+        "description": "执行支持研究、科学、艺术、法规或运营的技术任务。"
+      },
+      "clerical": {
+        "title": "文书支持工作人员",
+        "description": "管理记录，组织信息，处理行政和文书任务。"
+      },
+      "service": {
+        "title": "服务和销售工作人员",
+        "description": "提供个人服务、保护或在商店、市场或类似场所销售商品。"
+      },
+      "agricultural": {
+        "title": "熟练的农业、林业、畜牧业和渔业工作人员",
+        "description": "种植作物，管理森林，饲养动物，收获或捕捞鱼类和水产资源。"
+      },
+      "craft": {
+        "title": "手工艺和相关行业工作人员",
+        "description": "使用工具、机械和专业技术建造、修理和生产商品。"
+      },
+      "operators": {
+        "title": "工厂和机器操作员及装配工",
+        "description": "操作和监控机械、车辆或工业设备；装配产品。"
+      },
+      "elementary": {
+        "title": "基础职业",
+        "description": "使用基本工具或机器执行简单、例行或体力要求高的任务。"
+      },
+      "armed": {
+        "title": "武装部队",
+        "description": "在军队服役以保卫国家，维持秩序，支持救援工作，参与维和行动。"
+      }
+    }
   }
 }
