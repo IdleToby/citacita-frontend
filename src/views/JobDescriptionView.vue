@@ -501,7 +501,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen text-white relative overflow-hidden">
+  <div class="w-full h-screen text-white relative overflow-hidden">
         <!-- Fixed Background Layer with Blur -->
     <div
       class="fixed inset-0 -z-10"

@@ -221,6 +221,74 @@ function goToPage(pageIndex: number) {
   }
 }
 
+function goToPreviousPage() {
+  if (currentPage.value > 0) {
+    currentPage.value--
+  }
+}
+
+function goToNextPage() {
+  if (currentPage.value < totalPages.value - 1) {
+    currentPage.value++
+  }
+}
+
+// Smart pagination display logic
+const paginationPages = computed((): Array<number | 'ellipsis'> => {
+  const total = totalPages.value
+  const current = currentPage.value
+  const maxVisible = 4
+
+  if (total <= maxVisible) {
+    // Show all pages if total is less than max visible
+    return Array.from({ length: total }, (_, i) => i)
+  }
+
+  const pages: Array<number | 'ellipsis'> = []
+
+  if (current <= 1) {
+    // Show first pages: 1 2 ... last-1 last
+    pages.push(0, 1)
+    if (total > 3) {
+      pages.push('ellipsis')
+      pages.push(total - 2, total - 1)
+    }
+  } else if (current >= total - 2) {
+    // Show last pages: 1 2 ... second-last last
+    pages.push(0, 1)
+    if (total > 3) {
+      pages.push('ellipsis')
+      pages.push(total - 2, total - 1)
+    }
+  } else {
+    // Show middle pages: 1 ... current-1 current current+1 ... last
+    pages.push(0)
+    if (current > 2) {
+      pages.push('ellipsis')
+    }
+    pages.push(current - 1, current, current + 1)
+    if (current < total - 3) {
+      pages.push('ellipsis')
+    }
+    pages.push(total - 1)
+  }
+
+  // Remove duplicates and maintain order
+  const uniquePages: Array<number | 'ellipsis'> = []
+  const seen = new Set<number>()
+
+  for (const page of pages) {
+    if (page === 'ellipsis' || !seen.has(page as number)) {
+      uniquePages.push(page)
+      if (page !== 'ellipsis') {
+        seen.add(page as number)
+      }
+    }
+  }
+
+  return uniquePages
+})
+
 // Watch for route changes to refetch jobs
 watch(majorGroupCode, () => {
   if (majorGroupCode.value) {
@@ -250,7 +318,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-full text-white relative">
+  <div class="w-full h-screen overflow-hidden text-white relative">
         <!-- Fixed Background Layer with Blur -->
     <div
       class="fixed inset-0 -z-10"
@@ -320,7 +388,7 @@ onUnmounted(() => {
       </button>
     </div>
 
-    <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div class="max-w-6xl mx-auto px-4 pt-8 pb-24 space-y-6 h-full overflow-hidden">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{{ t('industryJobsPage.title') }}</h1>
@@ -378,7 +446,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Jobs grid -->
-      <div v-else class="space-y-8">
+      <div v-else class="space-y-8 h-[calc(100%-120px)] overflow-auto pr-1">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <button
             v-for="job in paginatedJobs"
@@ -390,52 +458,91 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <!-- Firefly Pagination Indicators -->
-        <div v-if="totalPages > 1" class="flex justify-center py-8">
-          <div class="flex space-x-3">
+        <!-- Enhanced Pagination with Previous/Next (fixed at bottom, aligned with quiz button) -->
+        <div v-if="totalPages > 1" class="fixed left-1/2 -translate-x-1/2 bottom-4 z-10">
+          <div class="bg-purple-200/30 backdrop-blur-sm rounded-full px-6 py-3 flex items-center space-x-4 border border-purple-200/20 shadow-md">
+            <!-- Previous Button -->
             <button
-              v-for="pageIndex in totalPages"
-              :key="`page-${pageIndex - 1}`"
-              @click="goToPage(pageIndex - 1)"
-              class="relative transition-all duration-500 ease-out hover:scale-110"
+              @click="goToPreviousPage"
+              :disabled="currentPage === 0"
+              class="flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 text-sm font-medium"
               :class="{
-                'w-5 h-5': pageIndex - 1 !== currentPage,
-                'w-6 h-6': pageIndex - 1 === currentPage
+                'text-white hover:bg-purple-700/40 hover:scale-105': currentPage > 0,
+                'text-gray-500 cursor-not-allowed opacity-50': currentPage === 0
               }"
             >
-              <!-- 外圈光晕效果 -->
-              <div
-                class="absolute inset-0 rounded-full transition-all duration-700"
-                :class="{
-                  'bg-white/20 animate-pulse': pageIndex - 1 !== currentPage,
-                  'bg-yellow-300/40 animate-ping': pageIndex - 1 === currentPage
-                }"
-              ></div>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+              <span>Previous</span>
+            </button>
 
-              <!-- 内圈萤火虫 -->
-              <div
-                class="relative w-full h-full rounded-full transition-all duration-500 border"
-                :class="{
-                  'bg-white/30 border-white/40': pageIndex - 1 !== currentPage,
-                  'bg-yellow-200 border-yellow-100 shadow-lg shadow-yellow-200/50': pageIndex - 1 === currentPage
-                }"
-              >
-                <!-- 萤火虫闪烁效果 -->
-                <div
-                  v-if="pageIndex - 1 === currentPage"
-                  class="absolute inset-0 rounded-full bg-yellow-100 animate-pulse opacity-60"
-                ></div>
-              </div>
+            <!-- Page Numbers with Firefly Effect -->
+            <div class="flex items-center space-x-2">
+              <template v-for="(page, index) in paginationPages" :key="index">
+                <!-- Ellipsis -->
+                <span
+                  v-if="page === 'ellipsis'"
+                  class="text-white/60 px-2"
+                >
+                  ...
+                </span>
+
+                <!-- Page Number -->
+                <button
+                  v-else
+                  @click="goToPage(page as number)"
+                  class="relative transition-all duration-500 ease-out hover:scale-110"
+                  :class="{
+                    'w-8 h-8': (page as number) !== currentPage,
+                    'w-10 h-10': (page as number) === currentPage
+                  }"
+                >
+                  <!-- Firefly Outer Glow -->
+                  <div
+                    class="absolute inset-0 rounded-full transition-all duration-700"
+                    :class="{
+                      'bg-purple-300/20 animate-pulse': (page as number) !== currentPage,
+                      'bg-yellow-300/60 animate-ping': (page as number) === currentPage
+                    }"
+                  ></div>
+
+                  <!-- Firefly Inner Circle -->
+                  <div
+                    class="relative w-full h-full rounded-full transition-all duration-500 border flex items-center justify-center text-xs font-bold"
+                    :class="{
+                      'bg-purple-400/30 border-purple-300/40 text-white hover:bg-purple-400/50': (page as number) !== currentPage,
+                      'bg-yellow-200 border-yellow-100 text-purple-900 shadow-lg shadow-yellow-200/50': (page as number) === currentPage
+                    }"
+                  >
+                    <span>{{ (page as number) + 1 }}</span>
+
+                    <!-- Current Page Firefly Effect -->
+                    <div
+                      v-if="(page as number) === currentPage"
+                      class="absolute inset-0 rounded-full bg-yellow-100 animate-pulse opacity-60"
+                    ></div>
+                  </div>
+                </button>
+              </template>
+            </div>
+
+            <!-- Next Button -->
+            <button
+              @click="goToNextPage"
+              :disabled="currentPage >= totalPages - 1"
+              class="flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 text-sm font-medium"
+              :class="{
+                'text-white hover:bg-purple-700/40 hover:scale-105': currentPage < totalPages - 1,
+                'text-gray-500 cursor-not-allowed opacity-50': currentPage >= totalPages - 1
+              }"
+            >
+              <span>Next</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
             </button>
           </div>
-        </div>
-
-        <!-- Page Info -->
-        <div v-if="totalPages > 1" class="text-center">
-          <p class="text-white/80 text-sm drop-shadow-sm">
-            Page {{ currentPage + 1 }} of {{ totalPages }}
-            ({{ filteredJobs.length }} jobs total)
-          </p>
         </div>
       </div>
     </div>
@@ -443,7 +550,7 @@ onUnmounted(() => {
   <!-- Modal弹窗 -->
   <div
     v-if="showQuizModal"
-    class="fixed backdrop-blur-sm bg-white/20 flex justify-center p-4"
+    class="fixed z-30 backdrop-blur-sm bg-white/20 flex justify-center p-4"
     style="top: 90px; left: 0; right: 0; bottom: 0;"
     @click.self="closeQuizModal"
   >
@@ -483,5 +590,3 @@ onUnmounted(() => {
   animation: wiggle 0.6s ease-in-out infinite;
 }
 </style>
-
-
