@@ -78,7 +78,8 @@
     "errors": {
       "couldNotFind": "找不到设施。",
       "selectLocation": "请从列表中选择一个位置。"
-    }
+    },
+    "showMarker": "在地图上显示"
   },
   "quiz": {
     "title": "职业建议测验",

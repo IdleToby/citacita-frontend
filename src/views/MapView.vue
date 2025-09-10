@@ -30,9 +30,9 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
+  SheetDescription, SheetFooter,
   SheetHeader,
-  SheetTitle,
+  SheetTitle
 } from '@/components/ui/sheet'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl // A small hack to make Leaflet re-evaluate icon paths
@@ -378,6 +378,23 @@ const updateBoundary = (bbox: AutocompleteFeature['bbox']) => {
   map.fitBounds(boundaryLayer.getBounds())
 }
 
+const handleShowMarker = () => {
+  if (selectedPlaceForSheet.value) {
+    const { lat, lon } = selectedPlaceForSheet.value.properties
+    if (map) {
+      map.setView([lat, lon], 15)
+      if (markerLayer) {
+        const marker = L.marker([lat, lon]).addTo(markerLayer)
+        marker.bindPopup(
+          `<b>${selectedPlaceForSheet.value.properties.name ?? t('mapPage.unnamedFacility')}</b><br>${selectedPlaceForSheet.value.properties.address_line2}`,
+        )
+        marker.openPopup()
+      }
+    }
+    isSheetOpen.value = false
+  }
+}
+
 // --- Lifecycle & Watchers ---
 onMounted(() => {
   initializeMap()
@@ -509,7 +526,7 @@ watch(locale, (newLocale, oldLocale) => {
                   inputmode="numeric"
                   type="text"
                   placeholder="Radius"
-                  class="h-full text-lg w-full focus-visible:ring-0 border-x-0 border-y-0 rounded-none text-center no-spinner"
+                  class="h-full text-lg w-full focus-visible:ring-0 border-x-0 border-y-0 rounded-none text-center no-spinner pointer-events-none"
                   @keyup.enter="handleSearch"
                   @input="
                     (e: any) => {
@@ -615,7 +632,15 @@ watch(locale, (newLocale, oldLocale) => {
             </p>
           </div>
         </div>
+        <SheetFooter
+          class="flex justify-end space-x-2 bg-white text-black p-4 border-t"
+        >
+          <Button variant="outline" @click="handleShowMarker" class="cursor-pointer bg-blue-500 text-white hover:bg-blue-600 hover:text-white">
+            {{ t('mapPage.showMarker') }}
+          </Button>
+        </SheetFooter>
       </SheetContent>
+
     </Sheet>
   </div>
 </template>

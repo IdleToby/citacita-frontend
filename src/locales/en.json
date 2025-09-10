@@ -78,7 +78,8 @@
     "errors": {
       "couldNotFind": "Could not find facilities.",
       "selectLocation": "Please select a location from the list."
-    }
+    },
+    "showMarker": "Show on map"
   },
   "quiz": {
     "title": "Job Suggestion Quiz",

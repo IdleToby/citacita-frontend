@@ -116,7 +116,6 @@ const sendMessage = async () => {
         role: m.role,
         content: m.content
       })),
-    // NOTE: Update your model name if needed
     model: 'gpt-oss-120b',
     stream: true
   }

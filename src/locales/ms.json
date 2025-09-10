@@ -78,7 +78,8 @@
     "errors": {
       "couldNotFind": "Tidak dapat mencari kemudahan.",
       "selectLocation": "Sila pilih lokasi daripada senarai."
-    }
+    },
+    "showMarker": "Tunjukkan di peta"
   },
   "quiz": {
     "title": "Kuiz Cadangan Pekerjaan",
