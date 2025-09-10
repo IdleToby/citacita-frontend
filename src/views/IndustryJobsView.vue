@@ -90,6 +90,7 @@ const selectedLetter = ref('')
 // Pagination
 const currentPage = ref(0)
 const jobsPerPage = 10
+const pageInput = ref('')
 
 // Fetch jobs for the selected industry
 async function fetchJobs() {
@@ -247,60 +248,30 @@ function goToNextPage() {
   }
 }
 
-// Smart pagination display logic
+// Smart pagination display logic - Always show exactly 4 numbers
 const paginationPages = computed((): Array<number | 'ellipsis'> => {
   const total = totalPages.value
   const current = currentPage.value
-  const maxVisible = 4
 
-  if (total <= maxVisible) {
-    // Show all pages if total is less than max visible
+  if (total <= 4) {
+    // Show all pages if total is 4 or less
     return Array.from({ length: total }, (_, i) => i)
   }
 
   const pages: Array<number | 'ellipsis'> = []
 
   if (current <= 1) {
-    // Show first pages: 1 2 ... last-1 last
-    pages.push(0, 1)
-    if (total > 3) {
-      pages.push('ellipsis')
-      pages.push(total - 2, total - 1)
-    }
+    // Pages 1-2: Show "1, 2, ..., last-1, last"
+    pages.push(0, 1, 'ellipsis', total - 2, total - 1)
   } else if (current >= total - 2) {
-    // Show last pages: 1 2 ... second-last last
-    pages.push(0, 1)
-    if (total > 3) {
-      pages.push('ellipsis')
-      pages.push(total - 2, total - 1)
-    }
+    // Last 2 pages: Show "1, 2, ..., last-1, last"
+    pages.push(0, 1, 'ellipsis', total - 2, total - 1)
   } else {
-    // Show middle pages: 1 ... current-1 current current+1 ... last
-    pages.push(0)
-    if (current > 2) {
-      pages.push('ellipsis')
-    }
-    pages.push(current - 1, current, current + 1)
-    if (current < total - 3) {
-      pages.push('ellipsis')
-    }
-    pages.push(total - 1)
+    // Middle pages: Show "current-1, current, current+1, ..., last"
+    pages.push(current - 1, current, current + 1, 'ellipsis', total - 1)
   }
 
-  // Remove duplicates and maintain order
-  const uniquePages: Array<number | 'ellipsis'> = []
-  const seen = new Set<number>()
-
-  for (const page of pages) {
-    if (page === 'ellipsis' || !seen.has(page as number)) {
-      uniquePages.push(page)
-      if (page !== 'ellipsis') {
-        seen.add(page as number)
-      }
-    }
-  }
-
-  return uniquePages
+  return pages
 })
 
 // Alphabet filter functions
@@ -316,6 +287,21 @@ function selectLetter(letter: string) {
 
 function clearLetterFilter() {
   selectedLetter.value = ''
+}
+
+// Page input functions
+function goToInputPage() {
+  const pageNumber = parseInt(pageInput.value)
+  if (pageNumber && pageNumber >= 1 && pageNumber <= totalPages.value) {
+    currentPage.value = pageNumber - 1 // Convert to 0-based index
+    pageInput.value = '' // Clear input after navigation
+  }
+}
+
+function onPageInputKeyPress(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    goToInputPage()
+  }
 }
 
 // Watch for route changes to refetch jobs
@@ -604,6 +590,26 @@ onUnmounted(() => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </button>
+
+            <!-- Page Input Section -->
+            <div class="flex items-center space-x-2 ml-4 pl-4 border-l border-purple-300/40">
+              <span class="text-white text-sm">Go to:</span>
+              <input
+                v-model="pageInput"
+                @keypress="onPageInputKeyPress"
+                type="number"
+                :min="1"
+                :max="totalPages"
+                placeholder="Page"
+                class="w-16 px-2 py-1 text-xs rounded-lg bg-white/90 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+              />
+              <button
+                @click="goToInputPage"
+                class="px-3 py-1 text-xs font-medium rounded-lg bg-purple-400/30 text-white hover:bg-purple-400/50 transition-colors duration-200"
+              >
+                Go
+              </button>
+            </div>
           </div>
         </div>
       </div>
