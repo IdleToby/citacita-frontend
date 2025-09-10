@@ -603,20 +603,19 @@ onUnmounted(() => {
 
           <!-- Right: Major Group Title + Skill Level -->
           <div class="flex-1 text-right skill-level-container relative">
-            <h2 class="text-xl md:text-2xl font-bold text-white drop-shadow-lg">
+            <h2 class="text-lg md:text-lg font-bold text-white drop-shadow-lg">
               {{ jobDetails.majorGroupTitle || industryName }}
-              <span class="text-base font-normal ml-2">
-                ({{ t('jobDescriptionPage.skillLevel') }}: {{ skillLevel }}
-                <button
-                  @click="toggleSkillLevelHelper"
-                  class="ml-1 w-5 h-5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors duration-200"
-                  title="Click for skill level explanation"
-                >
-                  ?
-                </button>
-                )
-              </span>
             </h2>
+            <div class="text-base font-normal text-white drop-shadow-lg mt-1">
+              {{ t('jobDescriptionPage.skillLevel') }}: {{ skillLevel }}
+              <button
+                @click="toggleSkillLevelHelper"
+                class="ml-1 w-5 h-5 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold text-white transition-colors duration-200"
+                title="Click for skill level explanation"
+              >
+                ?
+              </button>
+            </div>
 
             <!-- Skill Level Helper Tooltip -->
             <div
