@@ -84,6 +84,9 @@ const industryName = computed(() => {
 const jobs = ref<Job[]>([])
 const jobQuery = ref('')
 
+// Alphabet filter
+const selectedLetter = ref('')
+
 // Pagination
 const currentPage = ref(0)
 const jobsPerPage = 10
@@ -126,8 +129,14 @@ const filteredJobs = computed(() => {
   const q = jobQuery.value.trim().toLowerCase()
   let result = jobs.value
 
+  // Filter by search query
   if (q) {
-    result = jobs.value.filter((j) => j.title.toLowerCase().includes(q))
+    result = result.filter((j) => j.title.toLowerCase().includes(q))
+  }
+
+  // Filter by selected letter
+  if (selectedLetter.value) {
+    result = result.filter((j) => j.title.charAt(0).toUpperCase() === selectedLetter.value)
   }
 
   // Sort alphabetically by title
@@ -147,6 +156,11 @@ const paginatedJobs = computed(() => {
 
 // Reset to first page when search query changes
 watch(jobQuery, () => {
+  currentPage.value = 0
+})
+
+// Reset to first page when letter filter changes
+watch(selectedLetter, () => {
   currentPage.value = 0
 })
 
@@ -289,6 +303,21 @@ const paginationPages = computed((): Array<number | 'ellipsis'> => {
   return uniquePages
 })
 
+// Alphabet filter functions
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+
+function selectLetter(letter: string) {
+  if (selectedLetter.value === letter) {
+    selectedLetter.value = '' // Clear filter if same letter clicked
+  } else {
+    selectedLetter.value = letter
+  }
+}
+
+function clearLetterFilter() {
+  selectedLetter.value = ''
+}
+
 // Watch for route changes to refetch jobs
 watch(majorGroupCode, () => {
   if (majorGroupCode.value) {
@@ -388,6 +417,39 @@ onUnmounted(() => {
       </button>
     </div>
 
+    <!-- Alphabet Filter - Right Side -->
+    <div class="fixed right-4 top-32 z-10">
+      <div class="bg-purple-200/30 backdrop-blur-sm rounded-2xl p-2 border border-purple-200/20">
+        <!-- Clear Filter Button -->
+        <button
+          @click="clearLetterFilter"
+          class="w-full mb-1 px-1 py-0.5 text-xs font-medium rounded-lg transition-colors duration-200"
+          :class="{
+            'bg-gradient-to-b from-[#FFA500] to-[#FF6B00] text-white': selectedLetter === '',
+            'bg-purple-400/30 text-white hover:bg-purple-400/50': selectedLetter !== ''
+          }"
+        >
+          ...
+        </button>
+
+        <!-- Alphabet Letters -->
+        <div class="flex flex-col gap-0.5">
+          <button
+            v-for="letter in alphabet"
+            :key="letter"
+            @click="selectLetter(letter)"
+            class="w-6 h-6 rounded-lg text-xs font-bold transition-all duration-200 hover:scale-110"
+            :class="{
+              'bg-yellow-200 text-purple-900 shadow-md': selectedLetter === letter,
+              'bg-purple-400/30 text-white hover:bg-purple-400/50': selectedLetter !== letter
+            }"
+          >
+            {{ letter }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="max-w-6xl mx-auto px-4 pt-8 pb-24 space-y-6 h-full overflow-hidden">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
@@ -468,7 +530,7 @@ onUnmounted(() => {
               class="flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 text-sm font-medium"
               :class="{
                 'text-white hover:bg-purple-700/40 hover:scale-105': currentPage > 0,
-                'text-gray-500 cursor-not-allowed opacity-50': currentPage === 0
+                'text-gray-800 cursor-not-allowed opacity-50': currentPage === 0
               }"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -534,7 +596,7 @@ onUnmounted(() => {
               class="flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 text-sm font-medium"
               :class="{
                 'text-white hover:bg-purple-700/40 hover:scale-105': currentPage < totalPages - 1,
-                'text-gray-500 cursor-not-allowed opacity-50': currentPage >= totalPages - 1
+                'text-gray-800 cursor-not-allowed opacity-50': currentPage >= totalPages - 1
               }"
             >
               <span>Next</span>
