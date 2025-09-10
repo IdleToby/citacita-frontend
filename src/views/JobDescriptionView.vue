@@ -547,17 +547,27 @@ onUnmounted(() => {
     </div>
 
     <!-- Job Quiz Button -->
-    <div class="fixed left-3 top-1/6 transform -translate-y-1/2 z-10">
+    <div class="fixed left-4 bottom-4 z-10">
       <button
-        class="px-5 py-5 bg-[#C65A0F] text-white shadow-lg rounded-full text-sm md:text-base font-bold hover:scale-105 hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+        class="quiz-button group px-2 py-4 bg-gradient-to-b from-[#FFA500] to-[#FF6B00] text-white shadow-lg rounded-2xl text-sm font-bold hover:shadow-xl transition-all duration-200 flex flex-col items-center gap-3 min-w-[100px] relative overflow-hidden"
         aria-label="Job quiz"
         title="Job quiz"
         @click="goToQuiz"
       >
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-        </svg>
-        {{ t('jobDescriptionPage.jobQuiz') }}
+        <!-- Icon -->
+        <div>
+          <img
+            src="/icon.png"
+            alt="Quiz icon"
+            class="w-14 h-14 object-contain"
+          />
+        </div>
+
+        <!-- Text -->
+        <div class="text-center leading-tight">
+          <div class="text-lg font-bold">{{ t('jobDescriptionPage.jobQuiz').split(' ')[0] }}</div>
+          <div class="text-lg font-bold">{{ t('jobDescriptionPage.jobQuiz').split(' ')[1] }}</div>
+        </div>
       </button>
     </div>
 
@@ -689,4 +699,20 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg) translate(0px, 0px);
+  }
+  25% {
+    transform: rotate(-2deg) translate(-1px, 0px);
+  }
+  75% {
+    transform: rotate(2deg) translate(1px, 0px);
+  }
+}
+
+.quiz-button:hover {
+  animation: wiggle 0.6s ease-in-out infinite;
+}
+</style>
