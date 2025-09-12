@@ -225,5 +225,50 @@
     "interview": "Temuduga Olok-olok",
     "interviewDesc": "Berlatih kemahiran temuduga anda dengan AI Temuduga Olok-olok kami",
     "newChat": "Mulakan Perbualan Baharu"
+  },
+  "faq": {
+    "title": "Soalan Lazim",
+    "questions": [
+      {
+        "question": "1. Apakah jenis maklumat kerja yang boleh saya dapat?",
+        "answer": "Maklumat kerja dipaparkan dalam tiga bahagian:\n\"Mengikut Industri\" – Terokai pelbagai industri dan fahami peluang yang tersedia.\n\"Pekerjaan dalam Industri\" – Lihat peranan spesifik dalam industri pilihan anda.\n\"Butiran Jawatan\" – Ketahui keperluan, kemahiran, dan laluan kerjaya bagi setiap peranan."
+      },
+      {
+        "question": "2. Apakah kuiz pekerjaan dan bagaimana ia berfungsi?",
+        "answer": "Kuiz pekerjaan adalah alat pilihan berganda yang membimbing anda langkah demi langkah. Ia sentiasa mencadangkan pekerjaan berdasarkan pilihan anda, supaya anda tidak rasa keliru walaupun anda tidak pasti tentang kelayakan atau kemahiran."
+      },
+      {
+        "question": "3. Bolehkah saya menandakan (bookmark) atau menyimpan pekerjaan untuk kemudian?",
+        "answer": "Buat masa ini, pekerjaan tidak boleh ditandakan. Walau bagaimanapun, setiap halaman jawatan akan menunjukkan kuiz berkaitan dan saranan untuk membantu anda mencari peranan yang paling sesuai."
+      },
+      {
+        "question": "4. Dari mana asal deskripsi kerja ini?",
+        "answer": "Deskripsi pekerjaan ini berasal dari MASCO 2020, disediakan oleh Kementerian Sumber Manusia Malaysia. Anda boleh akses di sini: https://emasco.mohr.gov.my/"
+      },
+      {
+        "question": "5. Bagaimana fungsi peta berfungsi?",
+        "answer": "Peta menunjukkan pusat jagaan kanak-kanak, tadika, taska, dan perkhidmatan sokongan lain berhampiran tempat kerja. Harap maklum: peta tidak boleh disimpan, tetapi anda boleh kembali bila-bila masa untuk mencari lagi."
+      },
+      {
+        "question": "6. Adakah terdapat AI untuk keyakinan dan kesiapsiagaan kerjaya?",
+        "answer": "Platform ini menyediakan pembina resume dikuasakan AI, cadangan bimbingan temuduga, malah cerita model peranan untuk memberi inspirasi kepada wanita yang ingin kembali ke dunia kerja. Alat‑alat ini direka untuk meningkatkan keyakinan secara langkah demi langkah."
+      },
+      {
+        "question": "7. Apakah AI Resume Checker itu?",
+        "answer": "Resume Checker akan menyemak resume anda yang dimuat naik dan menyerlahkan kekuatan serta kawasan yang perlu diperbaiki. Ia memeriksa kejelasan, kata kunci yang sepadan dengan deskripsi kerja, dan maklumat yang hilang. Anda akan menerima cadangan praktikal untuk menjadikan resume anda lebih kuat dan lebih kompetitif."
+      },
+      {
+        "question": "8. Bagaimana alat Temuduga Palsu AI membantu?",
+        "answer": "Temuduga Palsu mensimulasikan soalan-soalan temuduga biasa berdasarkan peranan kerja pilihan anda. AI menganalisis respons anda, nada, dan struktur, kemudian memberi maklum balas konstruktif. Ini membolehkan anda berlatih dalam persekitaran selamat, membina keyakinan, dan memperbaiki diri sebelum menghadapi temuduga sebenar."
+      },
+      {
+        "question": "9. Apa yang dilakukan oleh Chatbot AI?",
+        "answer": "Chatbot AI adalah panduan anda 24/7 untuk laman web ini. Anda boleh bertanya soalan tentang cara melayari halaman, mencari cadangan kerja, menggunakan kuiz, atau mengakses peta penjagaan kanak-kanak. Ia umpama mempunyai pembantu mesra yang membimbing anda melalui laman web bila-bila masa anda perlukan bantuan."
+      },
+      {
+        "question": "10. Adakah alat‑alat AI ini selamat dan boleh dipercayai?",
+        "answer": "Ya. Kami mengikuti amalan AI etika untuk memastikan data anda kekal peribadi dan selamat. Alat AI ini tidak bertujuan menggantikan panduan manusia tetapi untuk memperluas sokongan — membantu anda berasa yakin, bersedia, dan berdaya dalam perjalanan kerjaya anda."
+      }
+    ]
   }
 }

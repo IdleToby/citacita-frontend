@@ -225,5 +225,50 @@
     "interview": "Mock Interview",
     "interviewDesc": "Practice your interview skills with our Mock Interview AI",
     "newChat": "Start New Chat"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "questions": [
+      {
+        "question": "1. What kind of job information can I find?",
+        "answer": "Jobs are displayed in three sections:\n\n1. By Industry – Explore different industries and understand the opportunities available.\n\n2. Jobs in Industry – See specific roles within your chosen industry.\n\n3. Job Details – Learn about the requirements, skills, and pathways for each role."
+      },
+      {
+        "question": "2. What is the job quiz and how does it work?",
+        "answer": "The job quiz is a multiple-choice tool that guides you step by step. It always suggests a job based on your choices, so you don't feel lost even if you're unsure about qualifications or skills."
+      },
+      {
+        "question": "3. Can I bookmark or save jobs for later?",
+        "answer": "Currently, jobs cannot be bookmarked. However, each job page highlights related quizzes and suggestions to help you find the best-fit role."
+      },
+      {
+        "question": "4. Where do these job descriptions come from?",
+        "answer": "These job descriptions come from MASCO 2020, prepared by the Ministry of Human Resources Malaysia. You can access it here: https://emasco.mohr.gov.my/"
+      },
+      {
+        "question": "5. How does the map function work?",
+        "answer": "The map shows childcare centers, kindergartens, nurseries, and other supportive services near workplaces. Please note: the map is not saveable, but you can revisit it anytime to search again."
+      },
+      {
+        "question": "6. Is there AI for confidence and career readiness?",
+        "answer": "The platform provides AI-driven resume builders, interview coaching suggestions, and even role models' stories to inspire women re-entering the workforce. These tools are designed to boost confidence step by step."
+      },
+      {
+        "question": "7. What is the AI Resume Checker?",
+        "answer": "The Resume Checker reviews your uploaded resume and highlights strengths and areas for improvement. It checks for clarity, keywords that match job descriptions, and missing information. You'll receive practical suggestions to make your resume stronger and more competitive."
+      },
+      {
+        "question": "8. How does the AI Mock Interview tool help?",
+        "answer": "The Mock Interview simulates common interview questions based on your chosen job role. The AI analyses your responses, tone, and structure, then provides constructive feedback. This allows you to practice in a safe environment, gain confidence, and improve before facing real interviews."
+      },
+      {
+        "question": "9. What does the AI Chatbot do?",
+        "answer": "The AI Chatbot is your 24/7 guide for the website. You can ask it questions about navigating pages, finding job suggestions, using the quizzes, or accessing childcare maps. It's like having a friendly assistant to walk you through the site whenever you need help."
+      },
+      {
+        "question": "10. Are these AI tools safe and reliable?",
+        "answer": "Yes. We follow ethical AI practices to ensure your data remains private and secure. The AI tools are not meant to replace human guidance but to extend support—helping you feel confident, prepared, and empowered in your career journey."
+      }
+    ]
   }
 }

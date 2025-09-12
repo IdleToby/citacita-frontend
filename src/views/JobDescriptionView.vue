@@ -501,7 +501,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full h-screen text-white relative overflow-hidden">
+  <div class="w-full overflow-hidden text-white relative">
+
         <!-- Fixed Background Layer with Blur -->
     <div
       class="fixed inset-0 -z-10"
@@ -510,7 +511,7 @@ onUnmounted(() => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        filter: 'blur(2.5px)'
+        filter: 'blur(8px)'
       }"
     ></div>
     <!-- Background Overlay for additional opacity -->

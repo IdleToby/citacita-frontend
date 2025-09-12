@@ -275,7 +275,7 @@ onUnmounted(() => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        filter: 'blur(2.5px)'
+        filter: 'blur(8px)'
       }"
     ></div>
     <!-- Background Overlay for additional opacity -->
