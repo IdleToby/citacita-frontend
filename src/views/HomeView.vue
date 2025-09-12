@@ -22,17 +22,17 @@
         style="will-change: transform; top: 0; left: 0; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;"
       >
         <transition name="fade" mode="out-in">
-          <div :key="currentIndex" class="text-white text-center max-w-xs flex flex-col items-center justify-center gap-6">
+          <div :key="currentIndex" class="text-white text-center max-w-xs flex flex-col items-center justify-center gap-2">
             <!-- 框内文本显示 -->
             <p class="text-2xl md:text-2xl font-normal text-white text-center drop-shadow-2xl whitespace-pre-line leading-relaxed tracking-wide" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px rgba(255, 223, 100, 0.8), 0 0 30px rgba(255, 223, 100, 0.4), 0 0 45px rgba(255, 223, 100, 0.2); filter: drop-shadow(0 0 10px rgba(255, 223, 100, 0.6));">
-              {{ contentData[currentIndex].description }}
+              {{ t(`homePage.cards.${contentData[currentIndex].key}.description`) }}
             </p>
             <!-- 按钮移到圆形框内 -->
             <button
-              class="px-8 py-3 bg-white/30 text-xl font-semibold backdrop-blur-sm text-white rounded-full hover:bg-white/50 transition-colors shadow-md border border-white/30"
+              class="px-4 py-2 bg-white/30 text-xl font-semibold backdrop-blur-sm text-white rounded-full hover:bg-white/50 transition-colors shadow-md border border-white/30"
               @click="handleButtonClick"
             >
-              {{ contentData[currentIndex].buttonText }}
+              {{ t(`homePage.cards.${contentData[currentIndex].key}.buttonText`) }}
             </button>
           </div>
         </transition>
@@ -80,9 +80,9 @@
     </div>
 
     <!-- 固定文字 Citacita is here to support you!-->
-    <div class="absolute bottom-14 left-1/2 -translate-x-1/2 z-20">
+    <div class="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 w-full">
       <p class="text-white text-2xl md:text-5xl font-bold text-center drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
-        Citacita is here to support you!
+        {{ t('homePage.supportText') }}
       </p>
     </div>
 
@@ -133,7 +133,10 @@ import {
 } from 'three'
 import { gsap } from 'gsap'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 const router = useRouter()
+
+const { t } = useI18n()
 
 /** ============== 可调参数（调整月亮大小和文字圆位置） ============== */
 const BUBBLE_DISTANCE = 1.4   // 距离月亮中心，更靠近月亮
@@ -143,12 +146,10 @@ const PROJ_Y_SCALE    = 0.6   // 屏幕投影Y缩放，稍微增大以补偿月�
 const MOON_SIZE       = 1.3   // 月亮半径，从1.0调大到1.3
 
 interface ContentItem {
-  title: string
-  description: string
+  key: string
   targetRotationY: number
   color: string
   path: string
-  buttonText: string
   backgroundImage: string
 }
 
@@ -158,56 +159,44 @@ const textContainerRef: Ref<HTMLDivElement | null> = ref(null)
 
 const contentData = ref<ContentItem[]>([
   {
-    title: 'Jobs for Me',
-    description: 'The workplace is brighter when women return.',
-    targetRotationY: 0, //0度
+    key: 'jobs1',
+    targetRotationY: 0,
     color: '#312e81',
-    buttonText: 'Find Jobs',
     path: '/jobs',
     backgroundImage: '/images/homepage-jobs-for-me.png',
   },
   {
-    title: 'Map',
-    description: 'Want to know about nearby childcare facilities?',
-    targetRotationY: Math.PI / 3, //60度
+    key: 'map',
+    targetRotationY: Math.PI / 3,
     color: '#1e293b',
-    buttonText: 'Explore Map',
     path: '/map',
     backgroundImage: '/images/map.png',
   },
-    {
-    title: 'Jobs for Me',
-    description: 'Start your journey of returning to \n your career!',
-    targetRotationY: (2 * Math.PI) / 3, //120度
+  {
+    key: 'jobs2',
+    targetRotationY: (2 * Math.PI) / 3,
     color: '#dc2626',
-    buttonText: 'Start Journey',
     path: '/jobs',
     backgroundImage: '/images/jobs-for-me.png',
   },
   {
-    title: 'AI Tools',
-    description: 'Need help improving your resume or \n interview skills?',
-    targetRotationY: Math.PI, //180度
+    key: 'aiTools',
+    targetRotationY: Math.PI,
     color: '#064e3b',
-    buttonText: 'Try Tools',
     path: '/ai',
     backgroundImage: '/images/ai-tools.png',
   },
   {
-    title: 'Grants',
-    description: 'Find financial or educational support to return to \n your career!',
-    targetRotationY: (4 * Math.PI) / 3, //240度
+    key: 'grants',
+    targetRotationY: (4 * Math.PI) / 3,
     color: '#7c3aed',
-    buttonText: 'Apply Now',
     path: '/grants',
     backgroundImage: '/images/grants.png',
   },
   {
-    title: 'FAQ',
-    description: 'Cita-cita is here to support you to return back to \n the workplace!',
-    targetRotationY: (5 * Math.PI) / 3, //300度
+    key: 'faq',
+    targetRotationY: (5 * Math.PI) / 3,
     color: '#059669',
-    buttonText: 'Get Help',
     path: '/faq',
     backgroundImage: '/images/faq.png',
   },

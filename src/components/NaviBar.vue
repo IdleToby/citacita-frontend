@@ -18,27 +18,27 @@ const navigationItems = [
   {
     path: '/jobs',
     labelKey: 'nav.jobs',
-    tooltip: 'Find jobs based on industries or take a job quiz here'
+    tooltipKey: 'nav.jobsTooltip',
   },
   {
     path: '/map',
     labelKey: 'nav.map',
-    tooltip: 'Find childcare facilities in Malaysian cities'
+    tooltipKey: 'nav.mapTooltip',
   },
   {
     path: '/ai',
     labelKey: 'nav.aiTools',
-    tooltip: 'Access AI-powered career tools and resources'
+    tooltipKey: 'nav.aiToolsTooltip',
   },
   {
     path: '/grants',
     labelKey: 'nav.grants',
-    tooltip: 'Discover available grants and funding opportunities'
+    tooltipKey: 'nav.grantsTooltip'
   },
   {
     path: '/faq',
     labelKey: 'nav.faq',
-    tooltip: 'Find answers to frequently asked questions'
+    tooltipKey: 'nav.faqTooltip'
   }
 ]
 
@@ -98,7 +98,7 @@ const hideTooltip = () => {
             <!-- 提示框内容（无箭头） -->
             <div class="bg-white/90 backdrop-blur-md border border-white/30 rounded-xl shadow-lg px-4 py-3 min-w-[280px] max-w-[320px]">
               <p class="text-gray-800 text-sm font-medium leading-relaxed text-center">
-                {{ item.tooltip }}
+                {{ t(item.tooltipKey) }}
               </p>
             </div>
           </div>

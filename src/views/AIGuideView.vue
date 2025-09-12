@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch, onMounted } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import { Button } from '@/components/ui/button'
@@ -298,6 +298,16 @@ onBeforeUnmount(() => {
   <div
     class="relative z-10 flex h-full w-full flex-col border-none bg-white/70 shadow-lg backdrop-blur-md px-[20%] py-4"
   >
+    <div class="absolute right-8 top-8">
+      <Button
+        @click="handleStartNewChat"
+        class="bg-blue-600 text-white hover:bg-blue-700"
+        :disabled="isLoading"
+        v-show="messages.length > 0 || userMessage.trim() !== '' || isLoading"
+      >
+        Start New Chat
+      </Button>
+    </div>
     <div class="relative flex items-center px-4 py-3 text-gray-800">
       <div class="flex-1 flex justify-center">
         <Tabs v-model="tab" class="w-200">
@@ -307,17 +317,6 @@ onBeforeUnmount(() => {
             <TabsTrigger class="h-10 text-lg" value="mock-interview">Mock Interview</TabsTrigger>
           </TabsList>
         </Tabs>
-      </div>
-
-      <div class="absolute right-4">
-        <Button
-          @click="handleStartNewChat"
-          class="bg-blue-600 text-white hover:bg-blue-700"
-          :disabled="isLoading"
-          v-show="messages.length > 0 || userMessage.trim() !== '' || isLoading"
-        >
-          Start New Chat
-        </Button>
       </div>
     </div>
 

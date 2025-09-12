@@ -6,7 +6,49 @@
     "grants": "Bantuan",
     "aiTools": "Alat AI",
     "map": "Peta",
-    "faq": "Soalan Lazim"
+    "faq": "Soalan Lazim",
+    "homeTooltip": "",
+    "aboutTooltip": "Mengenai projek ini",
+    "jobsTooltip": "Cari pekerjaan berdasarkan industri atau ambil kuiz kerjaya di sini",
+    "grantsTooltip": "Terokai geran dan peluang pembiayaan yang tersedia",
+    "aiToolsTooltip": "Akses alat dan sumber kerjaya berkuasa AI",
+    "mapTooltip": "Cari kemudahan penjagaan kanak-kanak di bandar Malaysia",
+    "faqTooltip": "Cari jawapan kepada soalan lazim"
+  },
+  "homePage": {
+    "cards": {
+      "jobs1": {
+        "title": "Pekerjaan untuk Saya",
+        "description": "Tempat kerja lebih ceria apabila wanita kembali.",
+        "buttonText": "Cari Pekerjaan"
+      },
+      "map": {
+        "title": "Peta",
+        "description": "Ingin tahu tentang kemudahan penjagaan kanak-kanak berdekatan?",
+        "buttonText": "Terokai Peta"
+      },
+      "jobs2": {
+        "title": "Pekerjaan untuk Saya",
+        "description": "Mulakan perjalanan anda untuk kembali bekerja!",
+        "buttonText": "Mulakan Perjalanan"
+      },
+      "aiTools": {
+        "title": "Alat AI",
+        "description": "Perlukan bantuan untuk menambah baik resume atau kemahiran temuduga anda?",
+        "buttonText": "Cuba Alat"
+      },
+      "grants": {
+        "title": "Geran",
+        "description": "Cari sokongan kewangan atau pendidikan untuk kembali bekerja!",
+        "buttonText": "Mohon Sekarang"
+      },
+      "faq": {
+        "title": "Soalan Lazim",
+        "description": "Cita-cita ada di sini untuk menyokong anda kembali ke tempat kerja!",
+        "buttonText": "Dapatkan Bantuan"
+      }
+    },
+    "supportText": "Cita-cita ada di sini untuk menyokong anda!"
   },
   "common": {
     "goBack": "Kembali"

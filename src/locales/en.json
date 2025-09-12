@@ -6,7 +6,49 @@
     "grants": "Grants",
     "aiTools": "AI Tools",
     "map": "Map",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "homeTooltip": "",
+    "aboutTooltip": "About this project",
+    "jobsTooltip": "Find jobs based on industries or take a job quiz here",
+    "grantsTooltip": "Discover available grants and funding opportunities",
+    "aiToolsTooltip": "Access AI-powered career tools and resources",
+    "mapTooltip": "Find childcare facilities in Malaysian cities",
+    "faqTooltip": "Find answers to frequently asked questions"
+  },
+  "homePage": {
+    "cards": {
+      "jobs1": {
+        "title": "Jobs for Me",
+        "description": "The workplace is brighter when women return.",
+        "buttonText": "Find Jobs"
+      },
+      "map": {
+        "title": "Map",
+        "description": "Want to know about nearby childcare facilities?",
+        "buttonText": "Explore Map"
+      },
+      "jobs2": {
+        "title": "Jobs for Me",
+        "description": "Start your journey of returning to your career!",
+        "buttonText": "Start Journey"
+      },
+      "aiTools": {
+        "title": "AI Tools",
+        "description": "Need help improving your resume or interview skills?",
+        "buttonText": "Try Tools"
+      },
+      "grants": {
+        "title": "Grants",
+        "description": "Find financial or educational support to return to your career!",
+        "buttonText": "Apply Now"
+      },
+      "faq": {
+        "title": "FAQ",
+        "description": "Cita-cita is here to support you to return back to the workplace!",
+        "buttonText": "Get Help"
+      }
+    },
+    "supportText": "Citacita is here to support you!"
   },
   "common": {
     "goBack": "Go back"
@@ -88,7 +130,7 @@
       "remaining": "{remaining} questions remaining"
     },
     "buttons": {
-      "previous": "Previous", 
+      "previous": "Previous",
       "next": "Next",
       "submit": "Submit",
       "restart": "Restart Questionnaire",
@@ -100,7 +142,7 @@
       "summary": "Based on your quiz responses, we've analyzed your preferences and matched them with suitable career paths.",
       "profileAnalysis": "Your Profile Analysis:",
       "education": "Education",
-      "field": "Field", 
+      "field": "Field",
       "keyInterests": "{count} Key Interests Selected",
       "topMatches": "Here are your top career matches:",
       "matchScore": "Match Score: {score}%",
@@ -126,7 +168,7 @@
     "educationLevels": [
       "First Level (Primary education)",
       "Second Level (High school education)",
-      "Third Level (Bachelor's degree or equivalent)", 
+      "Third Level (Bachelor's degree or equivalent)",
       "Fourth Level (Master's/PhD or advanced education)"
     ],
     "jobAreas": {
@@ -139,7 +181,7 @@
         "description": "Apply scientific or artistic knowledge, conduct research, or teach specialized subjects."
       },
       "technicians": {
-        "title": "Technicians and Associate Professionals", 
+        "title": "Technicians and Associate Professionals",
         "description": "Perform technical tasks supporting research, science, arts, regulations, or operations."
       },
       "clerical": {
@@ -163,7 +205,7 @@
         "description": "Operate and monitor machinery, vehicles, or industrial equipment; assemble products."
       },
       "elementary": {
-        "title": "Elementary Occupations", 
+        "title": "Elementary Occupations",
         "description": "Carry out simple, routine, or physically demanding tasks using basic tools or machines."
       },
       "armed": {

@@ -6,7 +6,49 @@
     "grants": "资助",
     "aiTools": "AI 工具",
     "map": "地图",
-    "faq": "常见问题"
+    "faq": "常见问题",
+    "homeTooltip": "",
+    "aboutTooltip": "关于这个项目",
+    "jobsTooltip": "根据行业寻找工作，或在这里参加职业测验",
+    "grantsTooltip": "探索可用的补助和资助机会",
+    "aiToolsTooltip": "使用AI驱动的职业工具和资源",
+    "mapTooltip": "查找马来西亚城市的托儿设施",
+    "faqTooltip": "查找常见问题的答案"
+  },
+  "homePage": {
+    "cards": {
+      "jobs1": {
+        "title": "为我推荐的工作",
+        "description": "当女性重返职场时，职场会更加精彩。",
+        "buttonText": "寻找工作"
+      },
+      "map": {
+        "title": "地图",
+        "description": "想了解附近的托儿设施吗？",
+        "buttonText": "探索地图"
+      },
+      "jobs2": {
+        "title": "为我推荐的工作",
+        "description": "开启你的职业回归之旅！",
+        "buttonText": "开始旅程"
+      },
+      "aiTools": {
+        "title": "AI 工具",
+        "description": "需要提升简历或面试技巧的帮助吗？",
+        "buttonText": "试用工具"
+      },
+      "grants": {
+        "title": "资助",
+        "description": "寻找财务或教育支持，帮助你重返职场！",
+        "buttonText": "立即申请"
+      },
+      "faq": {
+        "title": "常见问题",
+        "description": "Cita-cita 在这里支持你重返职场！",
+        "buttonText": "获取帮助"
+      }
+    },
+    "supportText": "Cita-cita 在这里支持你！"
   },
   "common": {
     "goBack": "返回"
