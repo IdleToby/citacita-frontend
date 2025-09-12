@@ -132,7 +132,7 @@
     "buttons": {
       "previous": "Sebelumnya",
       "next": "Seterusnya",
-      "submit": "Hantar", 
+      "submit": "Hantar",
       "restart": "Mula Semula Soal Selidik",
       "close": "Tutup Kuiz"
     },
@@ -213,5 +213,16 @@
         "description": "Berkhidmat dalam tentera untuk mempertahankan negara, mengekalkan ketertiban, menyokong usaha bantuan, dan mengambil bahagian dalam operasi pengaman."
       }
     }
+  },
+  "AIPage": {
+    "p1": "Bagaimana kami boleh <span class=\"text-[#C85A09DE]\">menyokong</span> anda hari ini?",
+    "p2": "Dapatkan sokongan dengan Chatbot AI kami dalam perjalanan anda kembali ke tempat kerja. Pilih ejen yang sesuai dengan keperluan anda dan mulakan perbualan dengan mudah.",
+    "p3": "Sila ambil perhatian bahawa semua nasihat dijana oleh AI dan harus digunakan dengan berhati-hati.",
+    "checker": "Pemeriksa Resume",
+    "checkerDesc": "Semak resume anda dengan Pemeriksa Resume AI kami",
+    "guide": "Ketahui Tentang Laman Web Kami",
+    "guideDesc": "Perlukan bantuan untuk menavigasi laman web kami? Tanya Chatbot AI kami di sini",
+    "interview": "Temuduga Olok-olok",
+    "interviewDesc": "Berlatih kemahiran temuduga anda dengan AI Temuduga Olok-olok kami"
   }
 }

@@ -4,35 +4,43 @@ import { marked } from 'marked'
 import hljs from 'highlight.js'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
 const router = useRouter()
 const route = useRoute()
 
+const { t } = useI18n()
+
 const getTabFromRoute = (path: string) => {
-  if (path.includes("resume-checker")) return "resume-checker"
-  if (path.includes("guide")) return "guide"
-  if (path.includes("mock-interview")) return "mock-interview"
-  return ""
+  if (path.includes('resume-checker')) return 'resume-checker'
+  if (path.includes('guide')) return 'guide'
+  if (path.includes('mock-interview')) return 'mock-interview'
+  return ''
 }
 
 const tab = ref(getTabFromRoute(route.path))
 
 // tab → route
-watch(tab, (newTab) => {
-  switch (newTab) {
-    case "resume-checker":
-      router.push("/ai/resume-checker")
-      break
-    case "guide":
-      router.push("/ai/guide")
-      break
-    case "mock-interview":
-      router.push("/ai/mock-interview")
-      break
-    default:
-      router.push("/ai")
-  }
-}, { immediate: false })
+watch(
+  tab,
+  (newTab) => {
+    switch (newTab) {
+      case 'resume-checker':
+        router.push('/ai/resume-checker')
+        break
+      case 'guide':
+        router.push('/ai/guide')
+        break
+      case 'mock-interview':
+        router.push('/ai/mock-interview')
+        break
+      default:
+        router.push('/ai')
+    }
+  },
+  { immediate: false },
+)
 
 // route → tab
 watch(route, (newRoute) => {
@@ -310,16 +318,19 @@ onBeforeUnmount(() => {
     </div>
     <div class="relative flex items-center px-4 py-3 text-gray-800">
       <div class="flex-1 flex justify-center">
-        <Tabs v-model="tab" class="w-200">
+        <Tabs v-model="tab" class="w-250">
           <TabsList class="grid w-full grid-cols-3 h-12">
-            <TabsTrigger class="h-10 text-lg" value="resume-checker">Resume Checker</TabsTrigger>
-            <TabsTrigger class="h-10 text-lg" value="guide">Website Guide</TabsTrigger>
-            <TabsTrigger class="h-10 text-lg" value="mock-interview">Mock Interview</TabsTrigger>
+            <TabsTrigger class="h-10 text-lg" value="resume-checker">{{
+              t('AIPage.checker')
+            }}</TabsTrigger>
+            <TabsTrigger class="h-10 text-lg" value="guide">{{ t('AIPage.guide') }}</TabsTrigger>
+            <TabsTrigger class="h-10 text-lg" value="mock-interview">{{
+              t('AIPage.interview')
+            }}</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
     </div>
-
 
     <div ref="chatWindow" class="chat-window flex-1 space-y-4 overflow-y-auto p-4 relative">
       <template v-if="messages.length > 0">
