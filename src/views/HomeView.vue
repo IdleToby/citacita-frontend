@@ -18,15 +18,22 @@
     <div class="absolute top-0 left-0 z-10 w-full h-full pointer-events-none">
       <div
         ref="textContainerRef"
-        class="absolute p-6 rounded-full bg-white/10 backdrop-blur-md pointer-events-auto shadow-xl border border-white/20 transition-transform duration-300 ease-out"
-        style="will-change: transform; top: 0; left: 0; width: 250px; height: 250px; display: flex; align-items: center; justify-content: center;"
+        class="absolute p-8 rounded-full bg-white/10 backdrop-blur-md pointer-events-auto shadow-xl border border-white/20 transition-transform duration-300 ease-out"
+        style="will-change: transform; top: 0; left: 0; width: 400px; height: 400px; display: flex; align-items: center; justify-content: center;"
       >
         <transition name="fade" mode="out-in">
-          <div :key="currentIndex" class="text-white text-center max-w-xs">
+          <div :key="currentIndex" class="text-white text-center max-w-xs flex flex-col items-center justify-center gap-6">
             <!-- 框内文本显示 -->
-            <p class="text-lg md:text-xl font-bold text-white text-center drop-shadow-2xl whitespace-pre-line leading-relaxed tracking-wide" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px rgba(255, 223, 100, 0.8), 0 0 30px rgba(255, 223, 100, 0.4), 0 0 45px rgba(255, 223, 100, 0.2); filter: drop-shadow(0 0 10px rgba(255, 223, 100, 0.6));">
+            <p class="text-2xl md:text-3xl font-normal text-white text-center drop-shadow-2xl whitespace-pre-line leading-relaxed tracking-wide" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px rgba(255, 223, 100, 0.8), 0 0 30px rgba(255, 223, 100, 0.4), 0 0 45px rgba(255, 223, 100, 0.2); filter: drop-shadow(0 0 10px rgba(255, 223, 100, 0.6));">
               {{ contentData[currentIndex].description }}
             </p>
+            <!-- 按钮移到圆形框内 -->
+            <button
+              class="px-8 py-3 bg-white/30 text-2xl font-semibold backdrop-blur-sm text-white rounded-full hover:bg-white/50 transition-colors shadow-md border border-white/30"
+              @click="handleButtonClick"
+            >
+              {{ contentData[currentIndex].buttonText }}
+            </button>
           </div>
         </transition>
       </div>
@@ -72,15 +79,14 @@
       </div>
     </div>
 
-    <!-- 按钮 -->
-    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20">
-      <button
-        class="px-12 py-5 bg-white/20 text-xl font-semibold backdrop-blur-sm text-white rounded-full hover:bg-white/40 transition-colors shadow-md"
-        @click="handleButtonClick"
-      >
-        {{ contentData[currentIndex].buttonText }}
-      </button>
+    <!-- 固定文字 Citacita is here to support you!-->
+    <div class="absolute bottom-16 left-1/2 -translate-x-1/2 z-20">
+      <p class="text-white text-2xl md:text-6xl font-bold text-center drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+        Citacita is here to support you!
+      </p>
     </div>
+
+
 
     <!-- 切换按钮 -->
     <button
@@ -134,7 +140,7 @@ const BUBBLE_DISTANCE = 1.4   // 距离月亮中心，更靠近月亮
 const BUBBLE_HEIGHT   = 0.1   // 垂直偏移，稍微降低
 const PROJ_X_SCALE    = 0.6   // 屏幕投影X缩放，稍微增大以补偿月亮缩小
 const PROJ_Y_SCALE    = 0.6   // 屏幕投影Y缩放，稍微增大以补偿月亮缩小
-const MOON_SIZE       = 1.0   // 月亮半径，从1.2缩小到1.0
+const MOON_SIZE       = 1.3   // 月亮半径，从1.0调大到1.3
 
 interface ContentItem {
   title: string
@@ -153,7 +159,7 @@ const textContainerRef: Ref<HTMLDivElement | null> = ref(null)
 const contentData = ref<ContentItem[]>([
   {
     title: 'Jobs for Me',
-    description: 'Did you know\n one out of two women\n don\'t work in Malaysia?',
+    description: 'The workplace is brighter when women return.',
     targetRotationY: 0, //0度
     color: '#312e81',
     buttonText: 'Find Jobs',
@@ -162,7 +168,7 @@ const contentData = ref<ContentItem[]>([
   },
   {
     title: 'Map',
-    description: 'A lot of women struggle\n with family responsibilities\nand financial stability.',
+    description: 'Want to know about nearby childcare facilities?',
     targetRotationY: Math.PI / 3, //60度
     color: '#1e293b',
     buttonText: 'Explore Map',
@@ -171,7 +177,7 @@ const contentData = ref<ContentItem[]>([
   },
     {
     title: 'Jobs for Me',
-    description: 'Do you want to\nreturn to your career?',
+    description: 'Start your journey of returning to your career!',
     targetRotationY: (2 * Math.PI) / 3, //120度
     color: '#dc2626',
     buttonText: 'Start Journey',
@@ -180,7 +186,7 @@ const contentData = ref<ContentItem[]>([
   },
   {
     title: 'AI Tools',
-    description: 'Worried about\ninterviews and\nmaking resumes?',
+    description: 'Need help improving your resume or interview skills?',
     targetRotationY: Math.PI, //180度
     color: '#064e3b',
     buttonText: 'Try Tools',
@@ -189,7 +195,7 @@ const contentData = ref<ContentItem[]>([
   },
   {
     title: 'Grants',
-    description: 'Looking for financial\nsupport as a mother?',
+    description: 'Find financial or educational support to return to your career!',
     targetRotationY: (4 * Math.PI) / 3, //240度
     color: '#7c3aed',
     buttonText: 'Apply Now',
@@ -198,7 +204,7 @@ const contentData = ref<ContentItem[]>([
   },
   {
     title: 'FAQ',
-    description: 'CitaCita is here to\nsupport you!',
+    description: 'Cita-cita is here to support you to return back to the workplace!',
     targetRotationY: (5 * Math.PI) / 3, //300度
     color: '#059669',
     buttonText: 'Get Help',
@@ -394,7 +400,8 @@ onMounted(() => {
 
   const animate = () => {
     satellitePivot.rotation.y += 0.002
-    mainShape.rotation.x += 0.001
+    // 修改这里：将垂直旋转（rotation.x）改为水平旋转（rotation.y）
+    mainShape.rotation.y += 0.001
     renderer.render(scene, camera)
     animationFrameId = requestAnimationFrame(animate)
   }
