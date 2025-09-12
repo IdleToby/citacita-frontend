@@ -223,6 +223,7 @@
     "guide": "了解我们的网站",
     "guideDesc": "需要帮助浏览我们的网站吗？在这里向我们的 AI 聊天机器人提问",
     "interview": "模拟面试",
-    "interviewDesc": "使用我们的模拟面试 AI 来练习面试技巧"
+    "interviewDesc": "使用我们的模拟面试 AI 来练习面试技巧",
+    "newChat": "开始新对话"
   }
 }

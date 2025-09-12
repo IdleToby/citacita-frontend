@@ -313,20 +313,20 @@ onBeforeUnmount(() => {
         :disabled="isLoading"
         v-show="messages.length > 0 || userMessage.trim() !== '' || isLoading"
       >
-        Start New Chat
+        {{ t('AIPage.newChat') }}
       </Button>
     </div>
     <div class="relative flex items-center px-4 py-3 text-gray-800">
       <div class="flex-1 flex justify-center">
         <Tabs v-model="tab" class="w-250">
           <TabsList class="grid w-full grid-cols-3 h-12">
-            <TabsTrigger class="h-10 text-lg" value="resume-checker">{{
-              t('AIPage.checker')
-            }}</TabsTrigger>
+            <TabsTrigger class="h-10 text-lg" value="resume-checker"
+              >{{ t('AIPage.checker') }}
+            </TabsTrigger>
             <TabsTrigger class="h-10 text-lg" value="guide">{{ t('AIPage.guide') }}</TabsTrigger>
-            <TabsTrigger class="h-10 text-lg" value="mock-interview">{{
-              t('AIPage.interview')
-            }}</TabsTrigger>
+            <TabsTrigger class="h-10 text-lg" value="mock-interview"
+              >{{ t('AIPage.interview') }}
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>

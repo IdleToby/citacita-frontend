@@ -223,6 +223,7 @@
     "guide": "Learn About Our Website",
     "guideDesc": "Need help navigating our website? Just ask our AI Chatbot here",
     "interview": "Mock Interview",
-    "interviewDesc": "Practice your interview skills with our Mock Interview AI"
+    "interviewDesc": "Practice your interview skills with our Mock Interview AI",
+    "newChat": "Start New Chat"
   }
 }
