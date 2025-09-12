@@ -54,8 +54,22 @@ const router = createRouter({
       path: '/faq',
       name: 'faq',
       component: FAQView,
+    },
+    {
+      path: '/ai/resume-checker',
+      name: 'resume-checker',
+      component: () => import('@/views/AIResumeCheckerView.vue'),
+    },
+    {
+      path: '/ai/guide',
+      name: 'ai-guide',
+      component: () => import('@/views/AIGuideView.vue'),
+    },
+    {
+      path: '/ai/mock-interview',
+      name: 'mock-interview',
+      component: () => import('@/views/AIMockInterviewView.vue'),
     }
-
   ],
 })
 
