@@ -404,12 +404,12 @@ onUnmounted(() => {
     </div>
 
     <!-- Alphabet Filter - Right Side -->
-    <div class="fixed right-4 top-32 z-10">
-      <div class="bg-purple-200/30 backdrop-blur-sm rounded-2xl p-2 border border-purple-200/20">
+    <div class="fixed right-4 top-32 bottom-4 z-10">
+      <div class="bg-purple-200/30 backdrop-blur-sm rounded-2xl p-2 border border-purple-200/20 h-full flex flex-col">
         <!-- Clear Filter Button -->
         <button
           @click="clearLetterFilter"
-          class="w-full mb-1 px-1 py-0.5 text-xs font-medium rounded-lg transition-colors duration-200"
+          class="w-full mb-1 px-1 py-0.5 text-[11px] font-medium rounded-lg transition-colors duration-200"
           :class="{
             'bg-gradient-to-b from-[#FFA500] to-[#FF6B00] text-white': selectedLetter === '',
             'bg-purple-400/30 text-white hover:bg-purple-400/50': selectedLetter !== ''
@@ -419,12 +419,12 @@ onUnmounted(() => {
         </button>
 
         <!-- Alphabet Letters -->
-        <div class="flex flex-col gap-0.5">
+        <div class="flex flex-col gap-0.5 flex-1 justify-between">
           <button
             v-for="letter in alphabet"
             :key="letter"
             @click="selectLetter(letter)"
-            class="w-6 h-6 rounded-lg text-xs font-bold transition-all duration-200 hover:scale-110"
+            class="w-6 flex-1 rounded-md text-xs font-bold transition-all duration-200 hover:scale-110"
             :class="{
               'bg-yellow-200 text-purple-900 shadow-md': selectedLetter === letter,
               'bg-purple-400/30 text-white hover:bg-purple-400/50': selectedLetter !== letter
