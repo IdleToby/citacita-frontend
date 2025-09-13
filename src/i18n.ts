@@ -22,14 +22,14 @@ function getInitialLocale(): Locales {
   return 'en'
 }
 
-const i18n = createI18n<[MessageSchema], Locales>({
+const i18n = createI18n({
   legacy: false,
   locale: getInitialLocale(),
   fallbackLocale: 'en',
   messages: {
     en,
     'zh-CN': zhCN,
-    ms,
+    'ms': ms,
   },
 })
 

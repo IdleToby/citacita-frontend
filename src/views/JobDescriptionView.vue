@@ -47,8 +47,34 @@ function toggleSkillLevelHelper() {
 }
 
 function getSkillLevelExplanation(skillLevel: string) {
-  // Use i18n to get the appropriate translation based on the current locale
-  const translationKey = `skillLevelExplanations.${skillLevel}`
+  // Map English skill levels to localized keys based on current locale
+  const skillLevelMapping: Record<string, Record<string, string>> = {
+    'en': {
+      'First': 'First',
+      'Second': 'Second',
+      'Third': 'Third',
+      'Fourth': 'Fourth',
+      'Not applicable': 'Not applicable'
+    },
+    'ms': {
+      'First': 'Pertama',
+      'Second': 'Kedua',
+      'Third': 'Ketiga',
+      'Fourth': 'Keempat',
+      'Not applicable': 'Tidak berkenaan'
+    },
+    'zh-CN': {
+      'First': '第一',
+      'Second': '第二',
+      'Third': '第三',
+      'Fourth': '第四',
+      'Not applicable': '不适用'
+    }
+  }
+
+  // Get the localized key for the current skill level
+  const localizedKey = skillLevelMapping[locale.value]?.[skillLevel] || skillLevel
+  const translationKey = `skillLevelExplanations.${localizedKey}`
   const translation = t(translationKey)
 
   // If translation key doesn't exist, return the unavailable message
