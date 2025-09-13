@@ -226,6 +226,14 @@
     "interviewDesc": "Practice your interview skills with our Mock Interview AI",
     "newChat": "Start New Chat"
   },
+  "skillLevelExplanations": {
+    "First": "Low-skilled. Primary education.",
+    "Second": "Semi-skilled. Secondary or post-secondary education. Malaysian Skill Certificate (SKM) Level 1 and Level 2; or equivalent.",
+    "Third": "Skilled. Diploma; or Malaysian Skill Diploma (DKM) Level 4 / Malaysian Skill Certificate (SKM) Level 3; or equivalent.",
+    "Fourth": "Skilled. PHD/Master/Degree; or Malaysian Skill Advanced Diploma (DLKM) Level 5 and above; or equivalent.",
+    "Not applicable": "Education qualification is not a prerequisite.",
+    "unavailable": "Skill level information not available."
+  },
   "faq": {
     "title": "Frequently Asked Questions",
     "questions": [

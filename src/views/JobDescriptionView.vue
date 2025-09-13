@@ -47,14 +47,16 @@ function toggleSkillLevelHelper() {
 }
 
 function getSkillLevelExplanation(skillLevel: string) {
-  const explanations: Record<string, string> = {
-    'First': 'Low-skilled. Primary education.',
-    'Second': 'Semi-skilled. Secondary or post-secondary education. Malaysian Skill Certificate (SKM) Level 1 and Level 2; or equivalent.',
-    'Third': 'Skilled. Diploma; or Malaysian Skill Diploma (DKM) Level 4 / Malaysian Skill Certificate (SKM) Level 3; or equivalent.',
-    'Fourth': 'Skilled. PHD/Master/Degree; or Malaysian Skill Advanced Diploma (DLKM) Level 5 and above; or equivalent.',
-    'Not applicable': 'Education qualification is not a prerequisite.'
+  // Use i18n to get the appropriate translation based on the current locale
+  const translationKey = `skillLevelExplanations.${skillLevel}`
+  const translation = t(translationKey)
+
+  // If translation key doesn't exist, return the unavailable message
+  if (translation === translationKey) {
+    return t('skillLevelExplanations.unavailable')
   }
-  return explanations[skillLevel] || 'Skill level information not available.'
+
+  return translation
 }
 
 const industrySlug = computed(() => String(route.params.industry || 'industry'))
