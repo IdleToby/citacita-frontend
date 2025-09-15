@@ -285,7 +285,7 @@
   "learnMore": "Learn More",
   "target": "Target:",
   "confirmDialog": {
-    "title": "Open link in \"Citacita\"?",
+    "title": "Leave this page and go to the corresponding link?",
     "cancel": "Cancel", 
     "open": "Open"
   },

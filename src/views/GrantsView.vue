@@ -33,7 +33,7 @@ interface GrantItem {
   items?: string[]
 }
 
-// Get grants data from i18n translations - 仿照FAQ的方式
+// Get grants data from i18n translations
 const grantsData = computed<GrantItem[]>(() => {
   return tm('grantsPage.grants') as GrantItem[]
 })
