@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import RecordingModal from '@/components/RecordingModal.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,7 +22,6 @@ const getTabFromRoute = (path: string) => {
 
 const tab = ref(getTabFromRoute(route.path))
 
-// tab → route
 watch(
   tab,
   (newTab) => {
@@ -42,7 +42,6 @@ watch(
   { immediate: false },
 )
 
-// route → tab
 watch(route, (newRoute) => {
   tab.value = getTabFromRoute(newRoute.path)
 })
@@ -54,7 +53,6 @@ interface Message {
   htmlContent?: string
 }
 
-// Marked configuration for parsing Markdown and highlighting code
 marked.use({
   walkTokens(token) {
     if (token.type === 'code') {
@@ -67,7 +65,7 @@ marked.use({
 marked.setOptions({
   langPrefix: 'hljs language-',
   gfm: true,
-  breaks: true, // Render line breaks as <br>
+  breaks: true,
 } as any)
 
 const userMessage = ref<string>('')
@@ -77,11 +75,12 @@ const chatWindow = ref<HTMLDivElement | null>(null)
 let controller: AbortController | null = null
 const copiedMessageId = ref<number | null>(null)
 
-// --- State for voice recording ---
 const isRecording = ref<boolean>(false)
 const isTranscribing = ref<boolean>(false)
 let mediaRecorder: MediaRecorder | null = null
 let audioChunks: Blob[] = []
+const showRecordingModal = ref<boolean>(false)
+let mediaStream: MediaStream | null = null
 
 const copyToClipboard = (text: string, messageId: number) => {
   navigator.clipboard
@@ -210,24 +209,21 @@ const sendMessage = async () => {
   }
 }
 
-// --- Voice Recording & Direct Transcription Logic ---
-
 const handleStopRecording = async () => {
+  isRecording.value = false
   isTranscribing.value = true
   const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
-  audioChunks = [] // Clear chunks for the next recording
+  audioChunks = []
 
   try {
     const formData = new FormData()
     formData.append('audio', audioBlob, 'recording.webm')
 
-    // Send the audio file to the backend API.
     const response = await fetch('/api/speech-to-text', {
       method: 'POST',
       body: formData,
     })
 
-    // Check if the request was successful.
     if (!response.ok) {
       const errorData = await response.json().catch(() => null)
       const errorMessage =
@@ -235,10 +231,7 @@ const handleStopRecording = async () => {
       throw new Error(errorMessage)
     }
 
-    // The backend returns the transcription result directly as JSON.
     const result = await response.json()
-
-    // Extract text from the `combinedPhrases` array based on the new JSON structure.
     const transcribedText =
       result.combinedPhrases[0]?.text || '[Transcription complete, but no text found.]'
     userMessage.value = transcribedText
@@ -247,37 +240,46 @@ const handleStopRecording = async () => {
     userMessage.value = `[Error: ${error instanceof Error ? error.message : 'Transcription failed'}]`
   } finally {
     isTranscribing.value = false
-  }
-}
-
-const toggleRecording = async () => {
-  if (isRecording.value) {
-    mediaRecorder?.stop()
-    isRecording.value = false
-  } else {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      isRecording.value = true
-      audioChunks = []
-      mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunks.push(event.data)
-      }
-      mediaRecorder.onstop = handleStopRecording
-      mediaRecorder.start()
-    } catch (err) {
-      console.error('Error accessing microphone:', err)
-      alert(
-        'Microphone access was denied. Please allow microphone access in your browser settings.',
-      )
+    showRecordingModal.value = false
+    if (mediaStream) {
+      mediaStream.getTracks().forEach((track) => track.stop())
+      mediaStream = null
     }
   }
 }
 
+const handleStopRequest = () => {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop()
+  }
+}
+
+const startRecording = async () => {
+  if (isRecording.value || isTranscribing.value) return
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaStream = stream
+
+    isRecording.value = true
+    showRecordingModal.value = true
+    audioChunks = []
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data)
+    }
+    mediaRecorder.onstop = handleStopRecording
+    mediaRecorder.start()
+  } catch (err) {
+    console.error('Error accessing microphone:', err)
+    isRecording.value = false
+    showRecordingModal.value = false
+    alert('Microphone access was denied. Please allow microphone access in your browser settings.')
+  }
+}
+
 const inputPlaceholder = computed(() => {
-  if (isRecording.value) return 'Recording... Click the mic to stop.'
-  if (isTranscribing.value) return 'Uploading and transcribing audio...'
-  return 'type here to chat...'
+  return t('AIPage.inputPlaceholder')
 })
 
 const scrollToBottom = () => {
@@ -399,7 +401,7 @@ onBeforeUnmount(() => {
       </template>
 
       <div v-else class="flex h-full flex-col items-center justify-center text-gray-500">
-        <p class="text-base">Start a conversation!</p>
+        <p class="text-base">{{ t('AIPage.backgroundText') }}</p>
       </div>
 
       <div
@@ -427,23 +429,6 @@ onBeforeUnmount(() => {
       <div
         class="relative flex w-full items-center rounded-full bg-gray-100/80 px-4 py-2 shadow-inner"
       >
-<!--        <button type="button" class="text-gray-600 hover:text-blue-600 focus:outline-none mr-2 cursor-pointer">-->
-<!--          <svg-->
-<!--            xmlns="http://www.w3.org/2000/svg"-->
-<!--            class="h-5 w-5"-->
-<!--            fill="none"-->
-<!--            viewBox="0 0 24 24"-->
-<!--            stroke="currentColor"-->
-<!--            stroke-width="2"-->
-<!--          >-->
-<!--            <path-->
-<!--              stroke-linecap="round"-->
-<!--              stroke-linejoin="round"-->
-<!--              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"-->
-<!--            />-->
-<!--          </svg>-->
-<!--        </button>-->
-
         <input
           v-model="userMessage"
           :disabled="isLoading || isRecording || isTranscribing"
@@ -455,9 +440,9 @@ onBeforeUnmount(() => {
         />
 
         <button
-          @click="toggleRecording"
+          @click="startRecording"
           type="button"
-          :disabled="isLoading || isTranscribing"
+          :disabled="isLoading || isTranscribing || isRecording"
           class="text-gray-600 hover:text-blue-600 focus:outline-none ml-2 cursor-pointer disabled:cursor-not-allowed disabled:text-gray-400"
           :class="{ 'text-red-600 animate-pulse': isRecording }"
         >
@@ -495,11 +480,16 @@ onBeforeUnmount(() => {
         </svg>
       </button>
     </form>
+
+    <RecordingModal
+      v-if="showRecordingModal"
+      :is-transcribing="isTranscribing"
+      @stop="handleStopRequest"
+    />
   </div>
 </template>
 
 <style scoped>
-/* 覆盖 prose 插件的默认边距，使其在聊天气泡中更好看 */
 .prose :first-child {
   margin-top: 0;
 }
@@ -508,13 +498,11 @@ onBeforeUnmount(() => {
   margin-bottom: 0;
 }
 
-/* 移除 prose 插件给代码块两端加的引号 */
 .prose code::before,
 .prose code::after {
   content: none !important;
 }
 
-/* 调整 highlight.js 代码块的滚动条，如果代码很长 */
 .hljs {
   overflow-x: auto;
   padding: 0.75rem 1rem;
