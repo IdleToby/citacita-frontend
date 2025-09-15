@@ -1,156 +1,42 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 // 控制弹窗显示
 const showConfirmDialog = ref(false)
 const currentLink = ref('')
 const expandedCards = ref(new Set())
+const { t, tm } = useI18n()
 
-// 所有Grant信息数据 - 根据文档内容更新
-const grantsData = [
-  {
-    title: "Career Comeback Programme & Individual Tax Benefits (TalentCorp)",
-    link: "https://www.talentcorp.com.my/ccp",
-    details: {
-      target: "Women returning to workforce.",
-      items: [
-        "Support Services: Workshops, career guidance, and employer connections;",
-        "Personal Tax Exemption: 12-month personal income tax exemption for eligible women, valid until 31 December 2027."
-      ]
-    }
-  },
-  {
-    title: "Employer Tax Incentives for Hiring Women Returnees (Budget 2025)",
-    link: "https://www.investmalaysia.gov.my/media/k0dc3vme/budget-2025-tax-measures.pdf",
-    details: {
-      target: "Employers hiring women returning to work.",
-      items: [
-        "Eligibility Period: 1 January 2025 to 31 December 2027;",
-        "Tax Benefit: Additional 50% tax deduction on remuneration paid for first 12 months of employment;",
-        "Coverage: Salaries and wages for qualifying female employees."
-      ]
-    }
-  },
-  {
-    title: "Flexible Work Arrangement (FWA) Support & Incentives",
-    link: "https://www.talentcorp.com.my/resources/press-releases/launch-of-the-flexible-work-arrangement-fwa-guidelines/",
-    details: {
-      target: "Employers implementing family-friendly work arrangements that support women's work-life balance and return to workforce.",
-      items: [
-        "Legal Framework: Employment Act 1955 (Amendment) 2022, Sections 60P and 60Q;",
-        "Government Support: KESUMA, JTKSM, and TalentCorp provide implementation guidelines;",
-        "Tax Benefits: 50% tax deduction on FWA capacity building and software expenses (capped at RM500,000), valid 2025-2027."
-      ]
-    }
-  },
-  {
-    title: "Enhanced Family Care Support & Tax Relief",
-    link: "https://www.hasil.gov.my/en/individual/individual-life-cycle/how-to-declare-income/tax-reliefs/",
-    details: {
-      target: "Employees and employers supporting family care responsibilities.",
-      items: [
-        "For Employees:",
-        "a. Childcare Tax Relief: RM3,000 annual tax relief for childcare expenses (children ≤ 6 years);",
-        "b. Elderly Care Expansion: From 2025, tax exemption expanded to include elderly care allowances for parents/grandparents.",
-        "For Employers:",
-        "a. Allowance Deductions: Tax deductions for providing childcare/elderly care allowances to employees;",
-        "b. Caregiving Leave Incentive: 50% tax deduction for employers offering additional paid caregiving leave (up to 12 months), effective 2025-2027."
-      ]
-    }
-  },
-  {
-    title: "Women's Empowerment Corporate Initiative",
-    link: "https://asiapacific.unwomen.org/en/stories/press-release/2025/05/first-malaysia-womens-empowerment-principles-corporate-action-lab-to-advance-gender-equality-in-business",
-    details: {
-      target: "Companies promoting gender equality and women's workplace advancement.",
-      items: [
-        "Programme: UN Women, LeadWomen, and TalentCorp Corporate Action Lab with 11 participating companies as inaugural cohort;",
-        "Focus: Family-friendly workplace development, women's retention and advancement;",
-        "Goal: Achieve 60% female labour participation rate;",
-        "Timeline: 2025 initiative under Malaysia's ASEAN Chair theme."
-      ]
-    }
-  },
-  {
-    title: "MYFutureJobs Women initiative",
-    link: "https://myfuturejobs.gov.my/women/",
-    details: {
-      target: "An initiative by MYFutureJobs focused on empowering women in the targeted group such as single mothers, housewives and woman who is taking a temporary break from their career and are ready to get back to work.",
-      items: [
-        "Programme:",
-        "a. Re-skilling & Up-skilling Programmes;",
-        "b. MYMidCareer40;",
-        "c. MYNextChampion;",
-        "d. Career Fairs;",
-        "e. Social Protection."
-      ]
-    }
-  },
-  {
-    title: "MYFutureJobs Training and Job Placement",
-    link: "https://myfuturejobs.gov.my/training-programmes/",
-    details: {
-      target: "Offers re-skilling and up-skilling programmes to address skill gaps, boost employability, and prevent long-term unemployment.",
-      items: [
-        "Programme:",
-        "a. MICROSOFT OFFICE COURSES (WORD,EXCEL &POWERPOINT);",
-        "b. CERTIFICATE IN DIGITAL MARKETING FOR IR 4.0 (ONLINE);",
-        "c. FACEBOOK MARKETING COURSES & SALES PAGE DEVELOPMENT;",
-        "d. CERTIFICATE IN PROJECT MANAGEMENT (CIPM);",
-        "e. DIGITAL MARKETING FOR SME TRAINING."
-      ]
-    }
-  },
-  {
-    title: "TalentCorp For Professionals",
-    link: "https://www.talentcorp.com.my/our-initiatives/for-professionals/",
-    details: {
-      target: "Opportunities for you in Malaysia, whether you're a Malaysian at home or abroad, an expatriate already living and working here, or a woman looking to come back to work."
-    }
-  },
-  {
-    title: "Employment Insurance System for Insured Persons (IP) Who Have Loss Their Jobs (LINDUNG KERJAYA)",
-    link: "https://www.perkeso.gov.my/en/our-services/protection/employment-insurance.html",
-    details: {
-      target: "Provide income replacement for Insured Persons (IP) who have lost their jobs."
-    }
-  },
-  {
-    title: "Special Business Financing Scheme for Women (DanaNITA)",
-    link: "https://www.mara.gov.my/en/index/ent-menu/support-facilities/ent-business-finance/dananita/",
-    details: {
-      target: "a. To enhance women's participation in entrepreneurial activities, empower existing women entrepreneurs and increase household income;\nb. To provide special financing for Bumiputera women entrepreneurs to expand their businesses."
-    }
-  },
-  {
-    title: "PERANTIS",
-    link: "https://www.jpw.gov.my/index.php/ms/services-jpw/perantis",
-    details: {
-      target: "To support leadership in women through mentorship with a RM50,000 grant."
-    }
-  },
-  {
-    title: "iJPW",
-    link: "https://ijpw.jpw.gov.my/",
-    details: {
-      target: "List of Support by the Department of Women Empowerment Malaysia."
-    }
-  },
-  {
-    title: "Women in Business (BI WinBiz) -- Bank Islam",
-    link: "https://www.bankislam.com/business-banking/sme-banking/winbiz-financing/",
-    details: {
-      target: "Women in Business Financing Programme (WinBiz) is a financing product specially designed for Malaysian Women Entrepreneurs under the category of Small and Medium Enterprise (SMEs) to cater for their working capital and/or capital expenses."
-    }
-  },
-  {
-    title: "MADANI WANITA-i（BSN）",
-    link: "https://www.bsn.com.my/page/MadaniWanita-i",
-    details: {
-      target: "BSN Micro-i Madani Wanita is a micro financing facility offered to women entrepreneurs for those intending to expand their businesses."
-    }
-  }
+// Grant链接数据
+const grantLinks = [
+  "https://www.talentcorp.com.my/ccp",
+  "https://www.investmalaysia.gov.my/media/k0dc3vme/budget-2025-tax-measures.pdf",
+  "https://www.talentcorp.com.my/resources/press-releases/launch-of-the-flexible-work-arrangement-fwa-guidelines/",
+  "https://www.hasil.gov.my/en/individual/individual-life-cycle/how-to-declare-income/tax-reliefs/",
+  "https://asiapacific.unwomen.org/en/stories/press-release/2025/05/first-malaysia-womens-empowerment-principles-corporate-action-lab-to-advance-gender-equality-in-business",
+  "https://myfuturejobs.gov.my/women/",
+  "https://myfuturejobs.gov.my/training-programmes/",
+  "https://www.talentcorp.com.my/our-initiatives/for-professionals/",
+  "https://www.perkeso.gov.my/en/our-services/protection/employment-insurance.html",
+  "https://www.mara.gov.my/en/index/ent-menu/support-facilities/ent-business-finance/dananita/",
+  "https://www.jpw.gov.my/index.php/ms/services-jpw/perantis",
+  "https://ijpw.jpw.gov.my/",
+  "https://www.bankislam.com/business-banking/sme-banking/winbiz-financing/",
+  "https://www.bsn.com.my/page/MadaniWanita-i"
 ]
+
+// Grant data structure
+interface GrantItem {
+  title: string
+  target: string
+  items?: string[]
+}
+
+// Get grants data from i18n translations - 仿照FAQ的方式
+const grantsData = computed<GrantItem[]>(() => {
+  return tm('grantsPage.grants') as GrantItem[]
+})
 
 // 切换卡片展开状态
 const toggleCard = (index: number) => {
@@ -186,9 +72,9 @@ const cancelNavigation = () => {
   <div class="grants-page">
     <!-- 头部区域 - 包含标题和副标题 -->
     <div class="page-header">
-      <h1 class="grants-title">Grants</h1>
+      <h1 class="grants-title">{{ t('grantsPage.title') }}</h1>
       <p class="grants-subtitle">
-        Click to learn about available financial and educational support.
+        {{ t('grantsPage.subtitle') }}
       </p>
     </div>
 
@@ -229,9 +115,9 @@ const cancelNavigation = () => {
               <!-- Learn More按钮 -->
               <button
                 class="learn-more-btn"
-                @click="handleLearnMore(grant.link)"
+                @click="handleLearnMore(grantLinks[index])"
               >
-                Learn More
+                {{ t('grantsPage.learnMore') }}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                   <polyline points="15,3 21,3 21,9"></polyline>
@@ -245,14 +131,14 @@ const cancelNavigation = () => {
           <div v-if="expandedCards.has(index)" class="card-details">
             <div class="detail-content">
               <div class="target-section">
-                <span class="target-label">Target:</span>
-                <p class="target-text">{{ grant.details.target }}</p>
+                <span class="target-label">{{ t('grantsPage.target') }}</span>
+                <p class="target-text">{{ grant.target }}</p>
               </div>
 
               <!-- 其他详细信息 -->
-              <div v-if="grant.details.items" class="items-section">
+              <div v-if="grant.items && grant.items.length > 0" class="items-section">
                 <div
-                  v-for="(item, itemIndex) in grant.details.items"
+                  v-for="(item, itemIndex) in grant.items"
                   :key="itemIndex"
                   class="detail-item"
                 >
@@ -268,10 +154,10 @@ const cancelNavigation = () => {
     <!-- 确认跳转弹窗 -->
     <div v-if="showConfirmDialog" class="dialog-overlay">
       <div class="dialog-content">
-        <h3 class="dialog-title">Open link in "Citacita"?</h3>
+        <h3 class="dialog-title">{{ t('grantsPage.confirmDialog.title') }}</h3>
         <div class="dialog-actions">
-          <button class="dialog-btn cancel-btn" @click="cancelNavigation">Cancel</button>
-          <button class="dialog-btn open-btn" @click="confirmNavigation">Open</button>
+          <button class="dialog-btn cancel-btn" @click="cancelNavigation">{{ t('grantsPage.confirmDialog.cancel') }}</button>
+          <button class="dialog-btn open-btn" @click="confirmNavigation">{{ t('grantsPage.confirmDialog.open') }}</button>
         </div>
       </div>
     </div>

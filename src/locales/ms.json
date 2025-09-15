@@ -278,5 +278,118 @@
         "answer": "Ya. Kami mengikuti amalan AI etika untuk memastikan data anda kekal peribadi dan selamat. Alat AI ini tidak bertujuan menggantikan panduan manusia tetapi untuk memperluas sokongan — membantu anda berasa yakin, bersedia, dan berdaya dalam perjalanan kerjaya anda."
       }
     ]
-  }
+  },
+  "grantsPage": {
+  "title": "Geran",
+  "subtitle": "Klik untuk mengetahui tentang sokongan kewangan dan pendidikan yang tersedia.",
+  "learnMore": "Ketahui Lebih Lanjut",
+  "target": "Sasaran:",
+  "confirmDialog": {
+    "title": "Buka pautan dalam \"Citacita\"?",
+    "cancel": "Batal",
+    "open": "Buka"
+  },
+  "grants": [
+    {
+      "title": "Program Kembali Bekerja & Faedah Cukai Peribadi (TalentCorp)",
+      "target": "Wanita yang kembali ke tenaga kerja.",
+      "items": [
+        "Perkhidmatan Sokongan: Bengkel, bimbingan kerjaya, dan sambungan majikan;",
+        "Pengecualian Cukai Peribadi: Pengecualian cukai pendapatan peribadi 12 bulan untuk wanita yang layak, sah hingga 31 Disember 2027."
+      ]
+    },
+    {
+      "title": "Insentif Cukai Majikan untuk Mengambil Wanita yang Kembali Bekerja (Bajet 2025)",
+      "target": "Majikan yang mengambil wanita yang kembali bekerja.",
+      "items": [
+        "Tempoh Kelayakan: 1 Januari 2025 hingga 31 Disember 2027;",
+        "Faedah Cukai: Potongan cukai tambahan 50% ke atas imbuhan yang dibayar untuk 12 bulan pertama pekerjaan;",
+        "Perlindungan: Gaji dan upah untuk pekerja wanita yang layak."
+      ]
+    },
+    {
+      "title": "Sokongan & Insentif Pengaturan Kerja Fleksibel (FWA)",
+      "target": "Majikan yang melaksanakan pengaturan kerja mesra keluarga yang menyokong keseimbangan kerja-hidup wanita dan kembali ke tenaga kerja.",
+      "items": [
+        "Rangka Kerja Undang-undang: Akta Pekerjaan 1955 (Pindaan) 2022, Seksyen 60P dan 60Q;",
+        "Sokongan Kerajaan: KESUMA, JTKSM, dan TalentCorp menyediakan garis panduan pelaksanaan;",
+        "Faedah Cukai: Potongan cukai 50% ke atas perbelanjaan pembinaan kapasiti dan perisian FWA (dihadkan pada RM500,000), sah 2025-2027."
+      ]
+    },
+    {
+      "title": "Sokongan Penjagaan Keluarga Dipertingkat & Pelepasan Cukai",
+      "target": "Pekerja dan majikan yang menyokong tanggungjawab penjagaan keluarga.",
+      "items": [
+        "Untuk Pekerja:",
+        "a. Pelepasan Cukai Jagaan Kanak-kanak: Pelepasan cukai tahunan RM3,000 untuk perbelanjaan jagaan kanak-kanak (kanak-kanak ≤ 6 tahun);",
+        "b. Pengembangan Penjagaan Warga Emas: Dari 2025, pengecualian cukai diperluaskan untuk merangkumi elaun penjagaan warga emas untuk ibu bapa/datuk nenek.",
+        "Untuk Majikan:",
+        "a. Potongan Elaun: Potongan cukai untuk menyediakan elaun jagaan kanak-kanak/warga emas kepada pekerja;",
+        "b. Insentif Cuti Penjagaan: Potongan cukai 50% untuk majikan yang menawarkan cuti penjagaan bergaji tambahan (sehingga 12 bulan), berkuat kuasa 2025-2027."
+      ]
+    },
+    {
+      "title": "Inisiatif Korporat Pemerkasaan Wanita",
+      "target": "Syarikat yang mempromosikan kesaksamaan jantina dan kemajuan wanita di tempat kerja.",
+      "items": [
+        "Program: UN Women, LeadWomen, dan TalentCorp Corporate Action Lab dengan 11 syarikat penyertaan sebagai kohort sulung;",
+        "Fokus: Pembangunan tempat kerja mesra keluarga, pengekalan dan kemajuan wanita;",
+        "Matlamat: Mencapai kadar penyertaan buruh wanita 60%;",
+        "Garis Masa: Inisiatif 2025 di bawah tema Pengerusi ASEAN Malaysia."
+      ]
+    },
+    {
+      "title": "Inisiatif Wanita MYFutureJobs",
+      "target": "Inisiatif oleh MYFutureJobs yang memfokuskan kepada pemerkasaan wanita dalam kumpulan sasaran seperti ibu tunggal, suri rumah dan wanita yang mengambil rehat sementara dari kerjaya mereka dan bersedia untuk kembali bekerja.",
+      "items": [
+        "Program:",
+        "a. Program Kemahiran Semula & Peningkatan Kemahiran;",
+        "b. MYMidCareer40;",
+        "c. MYNextChampion;",
+        "d. Pameran Kerjaya;",
+        "e. Perlindungan Sosial."
+      ]
+    },
+    {
+      "title": "Latihan dan Penempatan Kerja MYFutureJobs",
+      "target": "Menawarkan program kemahiran semula dan peningkatan kemahiran untuk menangani jurang kemahiran, meningkatkan kebolehpasaran, dan mencegah pengangguran jangka panjang.",
+      "items": [
+        "Program:",
+        "a. KURSUS MICROSOFT OFFICE (WORD, EXCEL & POWERPOINT);",
+        "b. SIJIL DALAM PEMASARAN DIGITAL UNTUK IR 4.0 (DALAM TALIAN);",
+        "c. KURSUS PEMASARAN FACEBOOK & PEMBANGUNAN HALAMAN JUALAN;",
+        "d. SIJIL DALAM PENGURUSAN PROJEK (CIPM);",
+        "e. LATIHAN PEMASARAN DIGITAL UNTUK PKS."
+      ]
+    },
+    {
+      "title": "TalentCorp Untuk Profesional",
+      "target": "Peluang untuk anda di Malaysia, sama ada anda seorang Malaysia di dalam atau luar negara, ekspatriat yang sudah tinggal dan bekerja di sini, atau wanita yang ingin kembali bekerja."
+    },
+    {
+      "title": "Sistem Insurans Pekerjaan untuk Orang yang Diinsuranskan (IP) yang Kehilangan Pekerjaan (LINDUNG KERJAYA)",
+      "target": "Menyediakan penggantian pendapatan untuk Orang yang Diinsuranskan (IP) yang telah kehilangan pekerjaan mereka."
+    },
+    {
+      "title": "Skim Pembiayaan Perniagaan Khas untuk Wanita (DanaNITA)",
+      "target": "a. Untuk meningkatkan penyertaan wanita dalam aktiviti keusahawanan, memperkasakan usahawan wanita sedia ada dan meningkatkan pendapatan isi rumah;\nb. Untuk menyediakan pembiayaan khas untuk usahawan wanita Bumiputera untuk mengembangkan perniagaan mereka."
+    },
+    {
+      "title": "PERANTIS",
+      "target": "Untuk menyokong kepimpinan dalam wanita melalui bimbingan dengan geran RM50,000."
+    },
+    {
+      "title": "iJPW",
+      "target": "Senarai Sokongan oleh Jabatan Pembangunan Wanita Malaysia."
+    },
+    {
+      "title": "Wanita dalam Perniagaan (BI WinBiz) -- Bank Islam",
+      "target": "Program Pembiayaan Wanita dalam Perniagaan (WinBiz) adalah produk pembiayaan yang direka khas untuk Usahawan Wanita Malaysia di bawah kategori Perusahaan Kecil dan Sederhana (PKS) untuk memenuhi modal kerja dan/atau perbelanjaan modal mereka."
+    },
+    {
+      "title": "MADANI WANITA-i (BSN)",
+      "target": "BSN Micro-i Madani Wanita adalah kemudahan pembiayaan mikro yang ditawarkan kepada usahawan wanita bagi mereka yang berhasrat untuk mengembangkan perniagaan mereka."
+    }
+  ]
+}
 }

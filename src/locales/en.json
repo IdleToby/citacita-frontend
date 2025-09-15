@@ -278,5 +278,118 @@
         "answer": "Yes. We follow ethical AI practices to ensure your data remains private and secure. The AI tools are not meant to replace human guidance but to extend support—helping you feel confident, prepared, and empowered in your career journey."
       }
     ]
-  }
+  },
+  "grantsPage": {
+  "title": "Grants",
+  "subtitle": "Click to learn about available financial and educational support.",
+  "learnMore": "Learn More",
+  "target": "Target:",
+  "confirmDialog": {
+    "title": "Open link in \"Citacita\"?",
+    "cancel": "Cancel", 
+    "open": "Open"
+  },
+  "grants": [
+    {
+      "title": "Career Comeback Programme & Individual Tax Benefits (TalentCorp)",
+      "target": "Women returning to workforce.",
+      "items": [
+        "Support Services: Workshops, career guidance, and employer connections;",
+        "Personal Tax Exemption: 12-month personal income tax exemption for eligible women, valid until 31 December 2027."
+      ]
+    },
+    {
+      "title": "Employer Tax Incentives for Hiring Women Returnees (Budget 2025)",
+      "target": "Employers hiring women returning to work.",
+      "items": [
+        "Eligibility Period: 1 January 2025 to 31 December 2027;",
+        "Tax Benefit: Additional 50% tax deduction on remuneration paid for first 12 months of employment;",
+        "Coverage: Salaries and wages for qualifying female employees."
+      ]
+    },
+    {
+      "title": "Flexible Work Arrangement (FWA) Support & Incentives",
+      "target": "Employers implementing family-friendly work arrangements that support women's work-life balance and return to workforce.",
+      "items": [
+        "Legal Framework: Employment Act 1955 (Amendment) 2022, Sections 60P and 60Q;",
+        "Government Support: KESUMA, JTKSM, and TalentCorp provide implementation guidelines;",
+        "Tax Benefits: 50% tax deduction on FWA capacity building and software expenses (capped at RM500,000), valid 2025-2027."
+      ]
+    },
+    {
+      "title": "Enhanced Family Care Support & Tax Relief",
+      "target": "Employees and employers supporting family care responsibilities.",
+      "items": [
+        "For Employees:",
+        "a. Childcare Tax Relief: RM3,000 annual tax relief for childcare expenses (children ≤ 6 years);",
+        "b. Elderly Care Expansion: From 2025, tax exemption expanded to include elderly care allowances for parents/grandparents.",
+        "For Employers:",
+        "a. Allowance Deductions: Tax deductions for providing childcare/elderly care allowances to employees;",
+        "b. Caregiving Leave Incentive: 50% tax deduction for employers offering additional paid caregiving leave (up to 12 months), effective 2025-2027."
+      ]
+    },
+    {
+      "title": "Women's Empowerment Corporate Initiative",
+      "target": "Companies promoting gender equality and women's workplace advancement.",
+      "items": [
+        "Programme: UN Women, LeadWomen, and TalentCorp Corporate Action Lab with 11 participating companies as inaugural cohort;",
+        "Focus: Family-friendly workplace development, women's retention and advancement;",
+        "Goal: Achieve 60% female labour participation rate;",
+        "Timeline: 2025 initiative under Malaysia's ASEAN Chair theme."
+      ]
+    },
+    {
+      "title": "MYFutureJobs Women initiative",
+      "target": "An initiative by MYFutureJobs focused on empowering women in the targeted group such as single mothers, housewives and woman who is taking a temporary break from their career and are ready to get back to work.",
+      "items": [
+        "Programme:",
+        "a. Re-skilling & Up-skilling Programmes;",
+        "b. MYMidCareer40;",
+        "c. MYNextChampion;",
+        "d. Career Fairs;",
+        "e. Social Protection."
+      ]
+    },
+    {
+      "title": "MYFutureJobs Training and Job Placement",
+      "target": "Offers re-skilling and up-skilling programmes to address skill gaps, boost employability, and prevent long-term unemployment.",
+      "items": [
+        "Programme:",
+        "a. MICROSOFT OFFICE COURSES (WORD,EXCEL &POWERPOINT);",
+        "b. CERTIFICATE IN DIGITAL MARKETING FOR IR 4.0 (ONLINE);",
+        "c. FACEBOOK MARKETING COURSES & SALES PAGE DEVELOPMENT;",
+        "d. CERTIFICATE IN PROJECT MANAGEMENT (CIPM);",
+        "e. DIGITAL MARKETING FOR SME TRAINING."
+      ]
+    },
+    {
+      "title": "TalentCorp For Professionals",
+      "target": "Opportunities for you in Malaysia, whether you're a Malaysian at home or abroad, an expatriate already living and working here, or a woman looking to come back to work."
+    },
+    {
+      "title": "Employment Insurance System for Insured Persons (IP) Who Have Loss Their Jobs (LINDUNG KERJAYA)",
+      "target": "Provide income replacement for Insured Persons (IP) who have lost their jobs."
+    },
+    {
+      "title": "Special Business Financing Scheme for Women (DanaNITA)",
+      "target": "a. To enhance women's participation in entrepreneurial activities, empower existing women entrepreneurs and increase household income;\nb. To provide special financing for Bumiputera women entrepreneurs to expand their businesses."
+    },
+    {
+      "title": "PERANTIS",
+      "target": "To support leadership in women through mentorship with a RM50,000 grant."
+    },
+    {
+      "title": "iJPW",
+      "target": "List of Support by the Department of Women Empowerment Malaysia."
+    },
+    {
+      "title": "Women in Business (BI WinBiz) -- Bank Islam",
+      "target": "Women in Business Financing Programme (WinBiz) is a financing product specially designed for Malaysian Women Entrepreneurs under the category of Small and Medium Enterprise (SMEs) to cater for their working capital and/or capital expenses."
+    },
+    {
+      "title": "MADANI WANITA-i (BSN)",
+      "target": "BSN Micro-i Madani Wanita is a micro financing facility offered to women entrepreneurs for those intending to expand their businesses."
+    }
+  ]
+}
 }
