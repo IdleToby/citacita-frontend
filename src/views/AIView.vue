@@ -9,7 +9,7 @@ const router = useRouter()
 
 <template>
   <div
-    class="relative z-10 flex h-full w-full flex-col items-center justify-center space-y-20 text-center text-[#292D49] border-none bg-white/70 shadow-lg backdrop-blur-md px-[15%] py-4"
+    class="relative z-10 flex h-full w-full flex-col items-center justify-center space-y-20 text-center text-[#292D49] border-none bg-white/70 shadow-lg backdrop-blur-md px-[10%] py-4"
   >
     <div class="flex items-center justify-center flex-col space-y-12 px-[10%]">
       <img src="@/assets/citacita-b.png" alt="AI Support" class="h-20" />
@@ -22,7 +22,7 @@ const router = useRouter()
       </p>
     </div>
     <!--    cards-->
-    <div class="w-full flex items-stretch justify-between space-x-6 text-start">
+    <div class="w-full flex items-stretch justify-between space-x-5 text-start">
       <div
         class="flex bg-white rounded-lg shadow-md p-6 hover:scale-105 transition-transform cursor-pointer"
         @click="router.push('/ai/resume-checker')"

@@ -306,7 +306,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="relative z-10 flex h-full w-full flex-col border-none bg-white/70 shadow-lg backdrop-blur-md px-[20%] py-4"
+    class="relative z-10 flex h-full w-full flex-col border-none bg-white/70 shadow-lg backdrop-blur-md py-4"
   >
     <div class="absolute right-8 top-8">
       <Button
@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div ref="chatWindow" class="chat-window flex-1 space-y-4 overflow-y-auto p-4 relative">
+    <div ref="chatWindow" class="chat-window flex-1 space-y-4 overflow-y-auto p-4 relative px-[20%]">
       <template v-if="messages.length > 0">
         <div
           v-for="m in messages"
@@ -425,7 +425,7 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <form class="flex items-center gap-2 p-3" @submit.prevent="sendMessage">
+    <form class="flex items-center gap-2 p-3 px-[18%]" @submit.prevent="sendMessage">
       <div
         class="relative flex w-full items-center rounded-full bg-gray-100/80 px-4 py-2 shadow-inner"
       >
