@@ -70,7 +70,14 @@
     "searchPlaceholder": "搜索工作...",
     "jobQuiz": "职业测验",
     "noResultsFound": "未找到 \"{query}\" 的结果",
-    "tryDifferentSearch": "请尝试搜索不同的职位标题"
+    "tryDifferentSearch": "请尝试搜索不同的职位标题",
+    "pagination": {
+      "previous": "上一页",
+      "next": "下一页",
+      "goTo": "跳转到",
+      "page": "页",
+      "go": "前往"
+    }
   },
   "jobDescriptionPage": {
     "majorGroup": "主要类别",

@@ -70,7 +70,14 @@
     "searchPlaceholder": "Cari kerja...",
     "jobQuiz": "Kuiz kerjaya",
     "noResultsFound": "Tiada hasil ditemui untuk \"{query}\"",
-    "tryDifferentSearch": "Cuba cari tajuk kerja yang berbeza"
+    "tryDifferentSearch": "Cuba cari tajuk kerja yang berbeza",
+    "pagination": {
+      "previous": "Sebelumnya",
+      "next": "Seterusnya",
+      "goTo": "Pergi ke",
+      "page": "Halaman",
+      "go": "Pergi"
+    }
   },
   "jobDescriptionPage": {
     "majorGroup": "Kumpulan utama",

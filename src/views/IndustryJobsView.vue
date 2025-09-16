@@ -522,7 +522,7 @@ onUnmounted(() => {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
-              <span>Previous</span>
+              <span>{{ t('industryJobsPage.pagination.previous') }}</span>
             </button>
 
             <!-- Page Numbers with Firefly Effect -->
@@ -585,7 +585,7 @@ onUnmounted(() => {
                 'text-gray-800 cursor-not-allowed opacity-50': currentPage >= totalPages - 1
               }"
             >
-              <span>Next</span>
+              <span>{{ t('industryJobsPage.pagination.next') }}</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
@@ -593,21 +593,21 @@ onUnmounted(() => {
 
             <!-- Page Input Section -->
             <div class="flex items-center space-x-2 ml-4 pl-4 border-l border-purple-300/40">
-              <span class="text-white text-sm">Go to:</span>
+              <span class="text-white text-sm">{{ t('industryJobsPage.pagination.goTo') }}:</span>
               <input
                 v-model="pageInput"
                 @keypress="onPageInputKeyPress"
                 type="number"
                 :min="1"
                 :max="totalPages"
-                placeholder="Page"
+                :placeholder="t('industryJobsPage.pagination.page')"
                 class="w-16 px-2 py-1 text-xs rounded-lg bg-white/90 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
               />
               <button
                 @click="goToInputPage"
                 class="px-3 py-1 text-xs font-medium rounded-lg bg-purple-400/30 text-white hover:bg-purple-400/50 transition-colors duration-200"
               >
-                Go
+                {{ t('industryJobsPage.pagination.go') }}
               </button>
             </div>
           </div>

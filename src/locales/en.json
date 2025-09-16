@@ -70,7 +70,14 @@
     "searchPlaceholder": "Search jobs...",
     "jobQuiz": "Job Quiz",
     "noResultsFound": "No results found for \"{query}\"",
-    "tryDifferentSearch": "Try searching for a different job title"
+    "tryDifferentSearch": "Try searching for a different job title",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "goTo": "Go to",
+      "page": "Page",
+      "go": "Go"
+    }
   },
   "jobDescriptionPage": {
     "majorGroup": "Major group",
