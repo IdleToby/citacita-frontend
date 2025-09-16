@@ -508,7 +508,7 @@ onUnmounted(() => {
 
         <!-- Enhanced Pagination with Previous/Next (fixed at bottom, aligned with quiz button) -->
         <div v-if="totalPages > 1" class="fixed left-1/2 -translate-x-1/2 bottom-4 z-10">
-          <div class="bg-purple-200/30 backdrop-blur-sm rounded-full px-6 py-3 flex items-center space-x-4 border border-purple-200/20 shadow-md">
+          <div class="bg-purple-200/30 backdrop-blur-sm rounded-full px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 flex items-center gap-2 sm:gap-3 md:gap-4 border border-purple-200/20 shadow-md overflow-x-auto overflow-y-hidden whitespace-nowrap">
             <!-- Previous Button -->
             <button
               @click="goToPreviousPage"
@@ -592,8 +592,8 @@ onUnmounted(() => {
             </button>
 
             <!-- Page Input Section -->
-            <div class="flex items-center space-x-2 ml-4 pl-4 border-l border-purple-300/40">
-              <span class="text-white text-sm">{{ t('industryJobsPage.pagination.goTo') }}:</span>
+            <div class="flex items-center gap-2 sm:gap-2 md:gap-2 ml-2 sm:ml-3 md:ml-4 pl-2 sm:pl-3 md:pl-4 border-l border-purple-300/40">
+              <span class="text-white text-sm whitespace-nowrap">{{ t('industryJobsPage.pagination.goTo') }}:</span>
               <input
                 v-model="pageInput"
                 @keypress="onPageInputKeyPress"
@@ -601,7 +601,7 @@ onUnmounted(() => {
                 :min="1"
                 :max="totalPages"
                 :placeholder="t('industryJobsPage.pagination.page')"
-                class="w-16 px-2 py-1 text-xs rounded-lg bg-white/90 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                class="w-20 sm:w-24 px-2 py-1 text-xs rounded-lg bg-white/90 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
               />
               <button
                 @click="goToInputPage"
