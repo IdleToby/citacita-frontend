@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 const showConfirmDialog = ref(false)
 const currentLink = ref('')
 const expandedCards = ref(new Set())
+const selectedCategory = ref('all')
 const { t, tm } = useI18n()
 
 // Grant链接数据
@@ -26,6 +27,37 @@ const grantLinks = [
   "https://www.bsn.com.my/page/MadaniWanita-i"
 ]
 
+// Grant categories mapping
+const grantCategories = [
+  'career-return',      // 0: Career Comeback Programme
+  'career-return',      // 1: Employer Tax Incentives
+  'work-arrangement',   // 2: Flexible Work Arrangement
+  'family-support',     // 3: Enhanced Family Care Support
+  'leadership',         // 4: Women's Empowerment Corporate Initiative
+  'career-return',      // 5: MYFutureJobs Women initiative
+  'education',          // 6: MYFutureJobs Training and Job Placement
+  'education',          // 7: TalentCorp For Professionals
+  'employment-security', // 8: Employment Insurance System
+  'business',           // 9: Special Business Financing Scheme
+  'leadership',         // 10: PERANTIS
+  'comprehensive',      // 11: iJPW
+  'business',           // 12: Women in Business (BI WinBiz)
+  'business'            // 13: MADANI WANITA-i
+]
+
+// Category options - 使用国际化
+const categories = computed(() => [
+  { value: 'all', label: t('grantsPage.categories.all'), color: '#6B7280' },
+  { value: 'career-return', label: t('grantsPage.categories.careerReturn'), color: '#10B981' },
+  { value: 'education', label: t('grantsPage.categories.education'), color: '#3B82F6' },
+  { value: 'business', label: t('grantsPage.categories.business'), color: '#F59E0B' },
+  { value: 'family-support', label: t('grantsPage.categories.familySupport'), color: '#EF4444' },
+  { value: 'work-arrangement', label: t('grantsPage.categories.workArrangement'), color: '#8B5CF6' },
+  { value: 'leadership', label: t('grantsPage.categories.leadership'), color: '#EC4899' },
+  { value: 'employment-security', label: t('grantsPage.categories.employmentSecurity'), color: '#06B6D4' },
+  { value: 'comprehensive', label: t('grantsPage.categories.comprehensive'), color: '#84CC16' }
+])
+
 // Grant data structure
 interface GrantItem {
   title: string
@@ -37,6 +69,22 @@ interface GrantItem {
 const grantsData = computed<GrantItem[]>(() => {
   return tm('grantsPage.grants') as GrantItem[]
 })
+
+// Filtered grants based on selected category
+const filteredGrants = computed(() => {
+  if (selectedCategory.value === 'all') {
+    return grantsData.value.map((grant, index) => ({ grant, index, link: grantLinks[index] }))
+  }
+
+  return grantsData.value
+    .map((grant, index) => ({ grant, index, link: grantLinks[index] }))
+    .filter((_, index) => grantCategories[index] === selectedCategory.value)
+})
+
+// Get category info by value
+const getCategoryInfo = (value: string) => {
+  return categories.value.find(cat => cat.value === value) || categories.value[0]
+}
 
 // 切换卡片展开状态
 const toggleCard = (index: number) => {
@@ -66,34 +114,73 @@ const cancelNavigation = () => {
   showConfirmDialog.value = false
   currentLink.value = ''
 }
+
+// 重置展开状态当筛选改变时
+const handleCategoryChange = () => {
+  expandedCards.value.clear()
+}
 </script>
 
 <template>
   <div class="grants-page">
-    <!-- 头部区域 - 包含标题和副标题 -->
+    <!-- 头部区域 - 包含标题和副标题，以及右侧筛选器 -->
     <div class="page-header">
-      <h1 class="grants-title">{{ t('grantsPage.title') }}</h1>
-      <p class="grants-subtitle">
-        {{ t('grantsPage.subtitle') }}
-      </p>
+      <div class="header-content">
+        <!-- 左侧占位，保持标题居中 -->
+        <div class="header-spacer"></div>
+
+        <!-- 中央标题区域 -->
+        <div class="title-section">
+          <h1 class="grants-title">{{ t('grantsPage.title') }}</h1>
+          <p class="grants-subtitle">
+            {{ t('grantsPage.subtitle') }}
+          </p>
+        </div>
+
+        <!-- 右侧筛选器 -->
+        <div class="filter-section">
+          <div class="filter-container">
+            <select
+              v-model="selectedCategory"
+              @change="handleCategoryChange"
+              class="category-filter"
+            >
+              <option
+                v-for="category in categories"
+                :key="category.value"
+                :value="category.value"
+              >
+                {{ category.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 卡片滚动区域 -->
     <div class="cards-scroll-area">
       <div class="cards-wrapper">
-        <!-- 动态生成所有14个Grant卡片 -->
+        <!-- 动态生成筛选后的Grant卡片 -->
         <div
-          v-for="(grant, index) in grantsData"
+          v-for="({ grant, index, link }, displayIndex) in filteredGrants"
           :key="index"
           class="grant-card"
         >
           <!-- 卡片主体内容 -->
           <div class="card-content">
-            <div class="card-number">{{ index + 1 }}</div>
+            <div class="card-number">{{ displayIndex + 1 }}</div>
             <div class="card-text">
               <h3 class="card-title">{{ grant.title }}</h3>
             </div>
             <div class="card-buttons">
+              <!-- 分类标签 -->
+              <span
+                class="category-tag"
+                :style="{ backgroundColor: getCategoryInfo(grantCategories[index]).color }"
+              >
+                {{ getCategoryInfo(grantCategories[index]).label }}
+              </span>
               <!-- 展开按钮 -->
               <button
                 class="expand-btn"
@@ -115,7 +202,7 @@ const cancelNavigation = () => {
               <!-- Learn More按钮 -->
               <button
                 class="learn-more-btn"
-                @click="handleLearnMore(grantLinks[index])"
+                @click="handleLearnMore(link)"
               >
                 {{ t('grantsPage.learnMore') }}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -147,6 +234,11 @@ const cancelNavigation = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- 无结果提示 -->
+        <div v-if="filteredGrants.length === 0" class="no-results">
+          <p class="no-results-text">No grants found in this category.</p>
         </div>
       </div>
     </div>
@@ -185,9 +277,31 @@ const cancelNavigation = () => {
 /* 页面头部 */
 .page-header {
   flex-shrink: 0;
-  text-align: center;
   padding: 140px 20px 20px 20px;
   background: transparent;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 600px) 280px;
+  align-items: start;
+  gap: 20px;
+  width: 100%;
+}
+
+.header-spacer {
+  /* 左侧占位，保持标题居中 */
+}
+
+.title-section {
+  text-align: center;
+  justify-self: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .grants-title {
@@ -208,6 +322,52 @@ const cancelNavigation = () => {
   color: #FFFFFF;
   margin: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+/* 筛选器区域 - 右侧位置，无"Filter by Category"标签 */
+.filter-section {
+  justify-self: end;
+  margin-top: 20px;
+}
+
+.filter-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 280px;
+}
+
+.category-filter {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 13px;
+  padding: 8px 28px 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #2D3748;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  min-width: 0;
+  outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 14px;
+}
+
+.category-filter:focus {
+  background-color: rgba(74, 85, 104, 0.1);
 }
 
 /* 卡片滚动区域 */
@@ -307,6 +467,17 @@ const cancelNavigation = () => {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.category-tag {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
 }
 
 .expand-btn {
@@ -414,6 +585,23 @@ const cancelNavigation = () => {
   line-height: 1.5;
 }
 
+/* 无结果提示 */
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.no-results-text {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 18px;
+  color: #6B7280;
+  margin: 0;
+}
+
 /* 弹窗样式 */
 .dialog-overlay {
   position: fixed;
@@ -488,6 +676,20 @@ const cancelNavigation = () => {
     padding: 110px 15px 15px 15px;
   }
 
+  .header-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .header-spacer {
+    display: none;
+  }
+
+  .title-section {
+    text-align: center;
+  }
+
   .grants-title {
     font-size: 48px;
     margin: 0 0 10px 0;
@@ -495,6 +697,24 @@ const cancelNavigation = () => {
 
   .grants-subtitle {
     font-size: 18px;
+    white-space: normal;
+  }
+
+  .filter-section {
+    justify-self: center;
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .filter-container {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+  }
+
+  .category-filter {
+    padding: 8px 28px 8px 12px;
+    font-size: 13px;
   }
 
   .cards-scroll-area {
@@ -514,6 +734,11 @@ const cancelNavigation = () => {
 
   .card-title {
     font-size: 14px;
+  }
+
+  .card-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .expand-btn {

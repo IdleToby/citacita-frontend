@@ -302,6 +302,17 @@
       "cancel": "Cancel",
       "open": "Open"
     },
+    "categories": {
+  "all": "All Categories",
+  "careerReturn": "Career Return",
+  "education": "Education & Training",
+  "business": "Business & Entrepreneurship",
+  "familySupport": "Family Support",
+  "workArrangement": "Work Arrangement",
+  "leadership": "Leadership Development",
+  "employmentSecurity": "Employment Security",
+  "comprehensive": "Comprehensive Support"
+  },
     "grants": [
       {
         "title": "Career Comeback Programme & Individual Tax Benefits (TalentCorp)",

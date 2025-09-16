@@ -302,6 +302,17 @@
       "cancel": "取消",
       "open": "打开"
     },
+    "categories": {
+  "all": "所有类别",
+  "careerReturn": "职业回归",
+  "education": "教育与培训",
+  "business": "商业与创业",
+  "familySupport": "家庭支持",
+  "workArrangement": "工作安排",
+  "leadership": "领导力发展",
+  "employmentSecurity": "就业保障",
+  "comprehensive": "综合支持"
+  },
     "grants": [
       {
         "title": "职业回归计划和个人税收优惠 (TalentCorp)",

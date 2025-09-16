@@ -302,6 +302,17 @@
       "cancel": "Batal",
       "open": "Buka"
     },
+    "categories": {
+  "all": "Semua Kategori",
+  "careerReturn": "Kembali Bekerja",
+  "education": "Pendidikan & Latihan",
+  "business": "Perniagaan & Keusahawanan",
+  "familySupport": "Sokongan Keluarga",
+  "workArrangement": "Pengaturan Kerja",
+  "leadership": "Pembangunan Kepimpinan",
+  "employmentSecurity": "Keselamatan Pekerjaan",
+  "comprehensive": "Sokongan Menyeluruh"
+  },
     "grants": [
       {
         "title": "Program Kembali Bekerja & Faedah Cukai Peribadi (TalentCorp)",
