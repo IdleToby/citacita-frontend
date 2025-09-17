@@ -308,10 +308,10 @@ onBeforeUnmount(() => {
   <div
     class="relative z-10 flex h-full w-full flex-col border-none bg-white/70 shadow-lg backdrop-blur-md py-4"
   >
-    <div class="absolute right-8 top-8">
+    <div class="absolute right-8 top-8 z-20">
       <Button
         @click="handleStartNewChat"
-        class="bg-blue-600 text-white hover:bg-blue-700"
+        class="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
         :disabled="isLoading"
         v-show="messages.length > 0 || userMessage.trim() !== '' || isLoading"
       >
