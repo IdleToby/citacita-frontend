@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
 import { getJobListByLangAndMajorGroupCode } from '@/api'
 import TestQuiz from '@/views/TestQuiz.vue'
+import { pinyin } from 'pinyin-pro'
 
 type Job = {
   id: string
@@ -137,7 +138,13 @@ const filteredJobs = computed(() => {
 
   // Filter by selected letter
   if (selectedLetter.value) {
-    result = result.filter((j) => j.title.charAt(0).toUpperCase() === selectedLetter.value)
+    if (locale.value === 'zh-CN') {
+      // For Chinese, use pinyin initial
+      result = result.filter((j) => getPinyinInitial(j.title) === selectedLetter.value)
+    } else {
+      // For English/Malay, use first character
+      result = result.filter((j) => j.title.charAt(0).toUpperCase() === selectedLetter.value)
+    }
   }
 
   // Sort alphabetically by title
@@ -274,8 +281,32 @@ const paginationPages = computed((): Array<number | 'ellipsis'> => {
   return pages
 })
 
-// Alphabet filter functions
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+// Pinyin conversion function
+function getPinyinInitial(text: string): string {
+  if (!text) return ''
+  try {
+    const pinyinResult = pinyin(text, {
+      toneType: 'none',
+      type: 'array'
+    })
+    if (pinyinResult && pinyinResult.length > 0) {
+      return pinyinResult[0].charAt(0).toUpperCase()
+    }
+    return text.charAt(0).toUpperCase()
+  } catch (error) {
+    console.error('Error converting to pinyin:', error)
+    return text.charAt(0).toUpperCase()
+  }
+}
+
+// Dynamic alphabet based on locale
+const alphabet = computed(() => {
+  if (locale.value === 'zh-CN') {
+    // For Chinese, we use standard pinyin initials (common ones used in Chinese)
+    return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'W', 'X', 'Y', 'Z']
+  }
+  return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+})
 
 function selectLetter(letter: string) {
   if (selectedLetter.value === letter) {
