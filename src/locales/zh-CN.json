@@ -1,4 +1,12 @@
 {
+  "languageChanged": {
+    "title": "语言切换",
+    "message": "您已切换到简体中文。历史聊天记录仍为原语言，是否清空历史记录？",
+    "clearHistory": "清空历史记录",
+    "keepHistory": "保留历史记录",
+    "historyCleared": "聊天记录已清空。新的对话将使用简体中文",
+    "newMessagesOnly": "新的对话将使用简体中文"
+  },
   "nav": {
     "home": "首页",
     "about": "关于",

@@ -1,4 +1,12 @@
 {
+  "languageChanged": {
+    "title": "Language Changed",
+    "message": "You have switched to English. Historical chat records are still in the original language. Do you want to clear the chat history?",
+    "clearHistory": "Clear History",
+    "keepHistory": "Keep History",
+    "historyCleared": "Chat history cleared. New conversations will use English",
+    "newMessagesOnly": "New conversations will use English"
+  },
   "nav": {
     "home": "Home",
     "about": "About",

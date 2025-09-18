@@ -1,4 +1,12 @@
 {
+  "languageChanged": {
+    "title": "Bahasa Bertukar",
+    "message": "Anda telah bertukar kepada Malay. Rekod sembang sejarah masih dalam bahasa asal. Adakah anda mahu mengosongkan sejarah sembang?",
+    "clearHistory": "Kosongkan Sejarah",
+    "keepHistory": "Simpan Sejarah",
+    "historyCleared": "Sejarah sembang telah dikosongkan. Perbualan baru akan menggunakan Malay",
+    "newMessagesOnly": "Perbualan baru akan menggunakan Malay"
+  },
   "nav": {
     "home": "Laman Utama",
     "about": "Tentang Kami",

@@ -7,11 +7,18 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import RecordingModal from '@/components/RecordingModal.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
 
-const { t } = useI18n()
+const { t,locale } = useI18n()
+
+const confirmDialog = ref()
+const dialogTitle = ref('')
+const dialogMessage = ref('')
+const dialogConfirmText = ref('')
+const dialogCancelText = ref('')
 
 const getTabFromRoute = (path: string) => {
   if (path.includes('resume-checker')) return 'resume-checker'
@@ -163,6 +170,7 @@ const sendMessage = async () => {
       })),
     model: 'gpt-oss-120b',
     stream: true,
+    language: locale.value,
   }
 
   try {
@@ -208,6 +216,68 @@ const sendMessage = async () => {
     cleanupStream()
   }
 }
+
+
+const showConfirmDialog = async (message: string, title: string = 'CitaCita'): Promise<boolean> => {
+  if (confirmDialog.value) {
+    // 设置对话框内容
+    dialogTitle.value = title
+    dialogMessage.value = message
+    dialogConfirmText.value = t('languageChanged.clearHistory', 'Clear History')
+    dialogCancelText.value = t('languageChanged.keepHistory', 'Keep History')
+    
+    return await confirmDialog.value.show()
+  }
+  // 后备方案：如果组件不可用，使用原生对话框
+  return window.confirm("CitaCita: " + message)
+}
+
+const showMessage = (message: string, type: 'success' | 'info' = 'info') => {
+  // 创建一个漂亮的通知
+  const notification = document.createElement('div')
+  notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 transform transition-all duration-300 ${
+    type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+  } shadow-lg`
+  notification.textContent = message
+  notification.style.transform = 'translateX(400px)'
+  
+  document.body.appendChild(notification)
+  
+  // 滑入动画
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)'
+  }, 10)
+  
+  // 3秒后滑出并移除
+  setTimeout(() => {
+    notification.style.transform = 'translateX(400px)'
+    setTimeout(() => {
+      if (document.body.contains(notification)) {
+        document.body.removeChild(notification)
+      }
+    }, 300)
+  }, 3000)
+}
+
+// 监听语言变化
+watch(locale, async (newLanguage, oldLanguage) => {
+  if (newLanguage !== oldLanguage && messages.value.length > 0) {
+    console.log(`Language changed from ${oldLanguage} to ${newLanguage}`)
+    
+    // 使用自定义对话框询问用户
+    const shouldClearHistory = await showConfirmDialog(
+      t('languageChanged.message', 'You have switched to a new language. Historical chat records are still in the original language. Do you want to clear the chat history?'),
+      t('languageChanged.title', 'Language Changed')
+    )
+    
+    if (shouldClearHistory) {
+      messages.value = []
+      showMessage(t('languageChanged.historyCleared', 'Chat history cleared'), 'success')
+    } else {
+      showMessage(t('languageChanged.newMessagesOnly', 'New conversations will use the new language'), 'info')
+    }
+  }
+})
 
 const handleStopRecording = async () => {
   isRecording.value = false
@@ -487,6 +557,13 @@ onBeforeUnmount(() => {
       @stop="handleStopRequest"
     />
   </div>
+  <ConfirmDialog
+    ref="confirmDialog"
+    :title="dialogTitle"
+    :message="dialogMessage"
+    :confirm-text="dialogConfirmText"
+    :cancel-text="dialogCancelText"
+  />
 </template>
 
 <style scoped>
