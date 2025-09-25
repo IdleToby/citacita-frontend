@@ -41,7 +41,7 @@
           </span>
         </div>
         <!-- 可展开的描述 -->
-        <div 
+        <div
           v-if="hasDescription(option) && expandedDescriptions[currentQuestion + '-' + idx]"
           class="description-panel"
         >
@@ -153,7 +153,7 @@ function getMultilingualField(dataObj: any, baseFieldName: string, targetLang: s
 // 翻译关键词
 function translateKeyword(keyword: string, targetLang: string): string {
   if (targetLang === 'en') return keyword;
-  
+
   const translation = keywordTranslations[keyword.toLowerCase()];
   if (translation && translation[targetLang]) {
     return translation[targetLang];
@@ -181,7 +181,7 @@ const baseQuestions = computed(() => [
     type: "single_choice",
     options: [
       "First Level (Primary education)",
-      "Second Level (High school education)", 
+      "Second Level (High school education)",
       "Third Level (Bachelor's degree or equivalent)",
       "Fourth Level (Master's/PhD or advanced education)"
     ],
@@ -215,7 +215,7 @@ function generateRandomKeywordQuestions(majorGroupCode: string, numQuestions: nu
   for (let i = 0; i < numQuestions; i++) {
     // 过滤掉已使用的关键词
     const availableKeywords = keywords.filter(keyword => !usedKeywords.has(keyword));
-    
+
     if (availableKeywords.length < 4) {
       // 如果可用关键词不足4个，重置已使用的关键词
       usedKeywords.clear();
@@ -225,12 +225,12 @@ function generateRandomKeywordQuestions(majorGroupCode: string, numQuestions: nu
     // 随机选择4个不重复的关键词作为选项
     const shuffled = availableKeywords.sort(() => 0.5 - Math.random());
     const selectedKeywords = shuffled.slice(0, 4);
-    
+
     // 标记这些关键词为已使用
     selectedKeywords.forEach(keyword => usedKeywords.add(keyword));
 
     questions.push({
-      question: $t('quiz.questions.activities', { number: i + 1 }),
+      question: $t('quiz.questions.activities'),
       options: selectedKeywords
     });
   }
@@ -281,7 +281,7 @@ const questions = reactive([...baseQuestions.value]);
 watch(locale, () => {
   // 重新生成基础问题
   questions.splice(0, 2, ...baseQuestions.value);
-  
+
   // 如果已经选择了工作领域，重新生成关键词问题
   if (answers[1]) {
     const mgCode = Object.keys(majorGroupKeywords).find((key) => {
@@ -336,8 +336,7 @@ function getQuestionText(questionIndex: number) {
   } else if (questionIndex === 1) {
     return $t('quiz.questions.jobArea');
   } else {
-    const questionNumber = questionIndex - 1;
-    return $t('quiz.questions.activities', { number: questionNumber });
+    return $t('quiz.questions.activities');
   }
 }
 
@@ -363,7 +362,7 @@ function getOptionValue(option: any) {
     // 教育选项：强制返回完整英文
     const originalEducationOptions = [
       "First Level (Primary education)",
-      "Second Level (High school education)", 
+      "Second Level (High school education)",
       "Third Level (Bachelor's degree or equivalent)",
       "Fourth Level (Master's/PhD or advanced education)"
     ];
@@ -382,15 +381,15 @@ function getOptionText(option: any) {
     // 工作领域选项
     return $t(`quiz.jobAreas.${option.key}.title`);
   }
-  
+
   // 检查是否是教育等级
   const originalEducationOptions = [
     "First Level (Primary education)",
-    "Second Level (High school education)", 
+    "Second Level (High school education)",
     "Third Level (Bachelor's degree or equivalent)",
     "Fourth Level (Master's/PhD or advanced education)"
   ];
-  
+
   const index = originalEducationOptions.indexOf(option);
   if (index !== -1) {
     return $t(`quiz.educationLevels.${index}`);
@@ -399,7 +398,7 @@ function getOptionText(option: any) {
   if (typeof option === 'string') {
     return translateKeyword(option, locale.value);
   }
-  
+
   return option;
 }
 
@@ -430,7 +429,7 @@ function getEducationText(education: string) {
 
   const originalEducationOptions = [
     "First Level (Primary education)",
-    "Second Level (High school education)", 
+    "Second Level (High school education)",
     "Third Level (Bachelor's degree or equivalent)",
     "Fourth Level (Master's/PhD or advanced education)"
   ];
@@ -458,7 +457,7 @@ function getJobAreaText(jobArea: string) {
     'Elementary Occupations': 'elementary',
     'Armed Forces': 'armed'
   };
-  
+
   const key = (englishToKeyMap as any)[jobArea];
   if (key) {
     return $t(`quiz.jobAreas.${key}.title`);
@@ -603,12 +602,12 @@ function generateDetailedMatchReason(item: any) {
   // 个人兴趣匹配
   if (details.userChoiceMatch > 15) {
   const matchedCount = Math.round((details.userChoiceMatch / 25) * userKeywords.length);
-  
-  const translatedKeywords = userKeywords.slice(0, 3).map(keyword => 
+
+  const translatedKeywords = userKeywords.slice(0, 3).map(keyword =>
     translateKeyword(keyword, locale.value)
   );
   const displayKeywords = translatedKeywords.join(', ') + (userKeywords.length > 3 ? '...' : '');
-  
+
   reasons.push(`<div class="reason-item interests">
     <span class="reason-icon">❤️</span>
     <span class="reason-text"><strong>${$t('quiz.results.matchReasons.interestMatch', { count: matchedCount, interests: displayKeywords })}</strong></span>

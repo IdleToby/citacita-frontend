@@ -178,7 +178,7 @@
     "questions": {
       "education": "您的最高教育水平是什么？",
       "jobArea": "您对哪个一般工作领域感兴趣？",
-      "activities": "这些活动/技能中哪个最吸引您？（第 {number} 题）"
+      "activities": "这些活动/技能中哪个最吸引您? "
     },
     "educationLevels": [
       "第一级（小学教育）",

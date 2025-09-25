@@ -178,7 +178,7 @@
     "questions": {
       "education": "What is your highest education level?",
       "jobArea": "Which general job area are you interested in?",
-      "activities": "Which of these activities/skills interests you most? (Question {number})"
+      "activities": "Which of these activities/skills interests you most?"
     },
     "educationLevels": [
       "First Level (Primary education)",

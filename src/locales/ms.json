@@ -178,7 +178,7 @@
     "questions": {
       "education": "Apakah tahap pendidikan tertinggi anda?",
       "jobArea": "Bidang pekerjaan umum manakah yang anda minati?",
-      "activities": "Manakah antara aktiviti/kemahiran ini yang menarik minat anda? (Soalan {number})"
+      "activities": "Manakah antara aktiviti/kemahiran ini yang menarik minat anda?"
     },
     "educationLevels": [
       "Tahap Pertama (Pendidikan rendah)",

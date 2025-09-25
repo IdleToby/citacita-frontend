@@ -466,44 +466,10 @@ watch(locale, (newLocale, oldLocale) => {
   }
 })
 
-// Go back to IndustryJobsView or Quiz Results
+// Go back to previous page
 function goBack() {
-  // Check if user came from quiz results
-  if (route.query.fromQuiz === 'true') {
-    // Try to restore quiz results and show quiz modal
-    const stored = sessionStorage.getItem('jobQuizResults')
-    if (stored) {
-      try {
-        const quizState = JSON.parse(stored)
-        // Check if results are not too old (within 2 hours)
-        if (Date.now() - quizState.timestamp < 7200000) {
-          // Open quiz modal and restore results
-          showQuizModal.value = true
-          // Wait for next tick to ensure TestQuiz component is mounted, then restore state
-          nextTick(() => {
-            setTimeout(() => {
-              if (testQuizRef.value && testQuizRef.value.restoreQuizResults) {
-                testQuizRef.value.restoreQuizResults()
-              }
-            }, 100) // Small delay to ensure component is fully ready
-          })
-          return
-        }
-      } catch (error) {
-        console.error('Error restoring quiz results:', error)
-      }
-    }
-    // Fallback: if quiz results unavailable, go to jobs page
-    router.push({ name: 'jobs' })
-  } else {
-    // Normal navigation back to industry jobs view
-    const majorGroupCode = route.query.majorGroupCode || jobDetails.value.majorGroupCode
-    router.push({
-      name: 'industry-jobs',
-      params: { industry: industrySlug.value },
-      query: { majorGroupCode }
-    })
-  }
+  // Always go back to the previous page in browser history
+  router.go(-1)
 }
 
 // Close skill level helper when clicking outside
