@@ -429,6 +429,16 @@ onUnmounted(() => {
         </button>
       </div>
     </div>
+
+    <!-- Citabot Icon -->
+    <div class="fixed bottom-1 right-1 z-1">
+      <img
+        src="/images/citabot.png"
+        alt="Citabot"
+        class="w-50 h-50 cursor-pointer transition-transform duration-300 ease-out hover:scale-110"
+        @click="router.push('/ai')"
+      />
+    </div>
   </div>
   <!-- Modal弹窗 -->
   <div

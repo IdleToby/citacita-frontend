@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
 // 控制弹窗显示
 const showConfirmDialog = ref(false)
@@ -8,6 +9,7 @@ const currentLink = ref('')
 const expandedCards = ref(new Set())
 const selectedCategory = ref('all')
 const { t, tm } = useI18n()
+const router = useRouter()
 
 // Grant链接数据
 const grantLinks = [
@@ -241,6 +243,16 @@ const handleCategoryChange = () => {
           <p class="no-results-text">No grants found in this category.</p>
         </div>
       </div>
+    </div>
+
+    <!-- Citabot Icon -->
+    <div class="fixed bottom-1 right-1 z-1">
+      <img
+        src="/images/citabot.png"
+        alt="Citabot"
+        class="w-50 h-50 cursor-pointer transition-transform duration-300 ease-out hover:scale-110"
+        @click="router.push('/ai')"
+      />
     </div>
 
     <!-- 确认跳转弹窗 -->

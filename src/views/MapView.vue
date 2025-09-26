@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import L, { type LatLngExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { Check, ChevronsUpDown, Search } from 'lucide-vue-next'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -44,6 +45,7 @@ L.Icon.Default.mergeOptions({
 })
 
 const { t, locale } = useI18n()
+const router = useRouter()
 
 interface GeoapifyProperties {
   name?: string
@@ -594,6 +596,16 @@ watch(locale, (newLocale, oldLocale) => {
       </div>
 
       <div id="map-container" class="w-3/4 h-full z-10"></div>
+    </div>
+
+    <!-- Citabot Icon -->
+    <div class="fixed bottom-1 right-1 z-30">
+      <img
+        src="/images/citabot.png"
+        alt="Citabot"
+        class="w-50 h-50 cursor-pointer transition-transform duration-300 ease-out hover:scale-110"
+        @click="router.push('/ai')"
+      />
     </div>
 
     <Sheet v-model:open="isSheetOpen" class="z-50">
