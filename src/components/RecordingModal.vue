@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {useI18n} from 'vue-i18n'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
@@ -8,6 +9,32 @@ defineProps<{
 }>()
 
 const emit = defineEmits(['stop'])
+
+// 响应式变量，用于存储剩余的秒数
+const countdown = ref(30)
+// 用于存储 setInterval 的 ID，以便后续清除
+let timerId: number | undefined = undefined
+
+// 在组件挂载后执行
+onMounted(() => {
+  // 启动一个每秒执行一次的定时器
+  timerId = setInterval(() => {
+    countdown.value-- // 将倒计时减 1
+    // 如果倒计时结束
+    if (countdown.value <= 0) {
+      clearInterval(timerId) // 清除定时器
+      emit('stop') // 自动触发停止事件
+    }
+  }, 1000)
+})
+
+// 在组件卸载前执行
+onUnmounted(() => {
+  // 确保组件销毁时清除定时器，防止内存泄漏
+  if (timerId) {
+    clearInterval(timerId)
+  }
+})
 </script>
 
 <template>
@@ -42,7 +69,9 @@ const emit = defineEmits(['stop'])
         </svg>
       </div>
 
-      <p v-if="!isTranscribing" class="mt-4 font-semibold text-gray-700">{{ t('RecordingModal.recording') }}</p>
+      <p v-if="!isTranscribing" class="mt-4 font-semibold text-gray-700">
+        {{ t('RecordingModal.recording') }} ({{ countdown }}s)
+      </p>
       <p v-else class="mt-4 font-semibold text-gray-700">{{ t('RecordingModal.processing') }}</p>
 
       <button
@@ -60,7 +89,7 @@ const emit = defineEmits(['stop'])
 .recording-animation,
 .transcribing-animation {
   display: flex;
-  height: 40px; /* Prevents layout shift when switching animations */
+  height: 40px;
   align-items: center;
   justify-content: center;
 }

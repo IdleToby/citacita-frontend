@@ -311,16 +311,16 @@
       "open": "打开"
     },
     "categories": {
-  "all": "所有类别",
-  "careerReturn": "职业回归",
-  "education": "教育与培训",
-  "business": "商业与创业",
-  "familySupport": "家庭支持",
-  "workArrangement": "工作安排",
-  "leadership": "领导力发展",
-  "employmentSecurity": "就业保障",
-  "comprehensive": "综合支持"
-  },
+      "all": "所有类别",
+      "careerReturn": "职业回归",
+      "education": "教育与培训",
+      "business": "商业与创业",
+      "familySupport": "家庭支持",
+      "workArrangement": "工作安排",
+      "leadership": "领导力发展",
+      "employmentSecurity": "就业保障",
+      "comprehensive": "综合支持"
+    },
     "grants": [
       {
         "title": "职业回归计划和个人税收优惠 (TalentCorp)",
@@ -428,5 +428,51 @@
     "recording": "正在录音...",
     "processing": "正在处理音频...",
     "stop": "停止录音"
+  },
+  "mock": {
+    "welcome1": "你好！欢迎来到模拟面试。请输入您想面试的职位，然后点击“开始面试”按钮。",
+    "welcome2": "面试将包含10个问题，涵盖综合能力、行为问题和技术技能。您可以通过文字或语音进行回答。",
+    "startInterview": "开始面试",
+    "jobPlaceholder": "请输入职位，例如：软件工程师",
+    "evaluationGenerating": "感谢您的回答，面试已结束。正在为您生成专业的评估报告...",
+    "evaluationError": "抱歉，生成评估报告时出错，请稍后再试。",
+    "startError": "抱歉，开始面试时遇到问题，请稍后重试。",
+    "transcriptionSuccessNoText": "[转录完成，但未识别到文本]",
+    "transcriptionError": "[错误: {error}]",
+    "transcriptionFailed": "转录失败",
+    "micAccessDenied": "麦克风访问被拒绝，请允许访问。",
+    "inputPlaceholder": {
+      "finished": "面试已结束，正在生成评估报告...",
+      "notStarted": "请输入职位并点击“开始面试”",
+      "inProgress": "请在此输入或使用麦克风回答...",
+      "loading": "请等待面试官提出问题..."
+    },
+    "copyLabel": "复制消息",
+    "loadingModalText": "处理中，请稍候...",
+
+    "overall": "综合评估",
+    "strengths": "优点分析",
+    "improvements": "待改进领域",
+    "conclusion": "总结与建议",
+
+    "finalReport": {
+      "promptTitle": "您是一位专业的AI职业教练和面试分析师。您的任务是为候选人的模拟面试表现提供一份全面的评估报告。",
+      "jobRole": "本次面试的职位是",
+      "language": "本次面试使用的语言是",
+      "transcriptTitle": "面试记录",
+      "analysisTitle": "发音与流畅度分析数据",
+      "instruction": "请根据所提供的全部信息，生成一份详细、专业且富有建设性的反馈报告。报告必须使用与面试相同的语言，并应使用Markdown格式，包含以下几个部分：",
+      "instructionNoVoice": "请根据所提供的面试记录，生成一份详细、专业且富有建设性的反馈报告。报告必须使用与面试相同的语言，并应使用Markdown格式，包含以下几个部分：",
+      "strength1": "**(优点1):** 详细说明一个具体优点，如果可能，请引用记录中的回答。",
+      "strength2": "**(优点2):** 详细说明另一个关键优点。",
+      "improvement1": "**(待改进领域1):** 指出一个具体的改进领域（例如，STAR方法的使用、技术深度、简洁性）。从他们的回答中提供一个清晰的例子，并建议他们如何能更好地回答。",
+      "improvement2": "**(待改进领域2):** 根据发音和流畅度数据，评论他们的沟通清晰度。如果存在问题（例如，流畅度得分低、发音错误），请提供可行的改进建议。如果他们的发言清晰，则应肯定这一点。",
+      "improvement2_noVoice": "**(待改进领域2):** 评论候选人书面回答的清晰度和结构。在简洁性、结构（例如，使用STAR方法）或语言专业性方面提出改进建议。",
+      "conclusionText": "最后，用鼓励性的话语作结，并为候选人提供1-2个关键的核心建议，以便他们在真实面试前重点关注。",
+      "overall": "综合评估",
+      "strengths": "优点分析",
+      "improvements": "待改进领域",
+      "conclusion": "总结与建议"
+    }
   }
 }

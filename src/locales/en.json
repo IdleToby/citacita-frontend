@@ -428,5 +428,51 @@
     "recording": "Recording...",
     "processing": "Processing audio...",
     "stop": "Stop Recording"
+  },
+  "mock": {
+    "welcome1": "Hello! Welcome to the Mock Interview. Please enter the job position you want to apply for and click 'Start Interview'.",
+    "welcome2": "The interview will include 10 questions covering general abilities and behavioral questions. You can answer via text or voice.",
+    "startInterview": "Start Interview",
+    "jobPlaceholder": "Enter position, e.g., Software Engineer",
+    "evaluationGenerating": "Thank you for your answers. The interview is complete. Generating your professional evaluation report...",
+    "evaluationError": "Sorry, an error occurred while generating the evaluation report. Please try again later.",
+    "startError": "Sorry, there was a problem starting the interview. Please try again later.",
+    "transcriptionSuccessNoText": "[Transcription complete, but no text was recognized]",
+    "transcriptionError": "[Error: {error}]",
+    "transcriptionFailed": "Transcription failed",
+    "micAccessDenied": "Microphone access was denied. Please allow access.",
+    "inputPlaceholder": {
+      "finished": "Interview finished, generating report...",
+      "notStarted": "Enter a position and click 'Start Interview'",
+      "inProgress": "Please type your answer here or use the microphone...",
+      "loading": "Please wait for the interviewer's question..."
+    },
+    "copyLabel": "Copy message",
+    "loadingModalText": "Processing, please wait...",
+
+    "overall": "Overall Evaluation",
+    "strengths": "Strengths",
+    "improvements": "Areas for Improvement",
+    "conclusion": "Conclusion & Recommendations",
+
+    "finalReport": {
+      "promptTitle": "You are an expert AI career coach and interview analyst. Your task is to provide a comprehensive evaluation of a candidate's mock interview performance.",
+      "jobRole": "The interview was for the role of",
+      "language": "The interview was conducted in",
+      "transcriptTitle": "INTERVIEW TRANSCRIPT",
+      "analysisTitle": "PRONUNCIATION & FLUENCY ANALYSIS DATA",
+      "instruction": "Based on all the provided information, please generate a detailed, professional, and constructive feedback report. The report must be in the same language as the interview and should be structured with the following sections using Markdown formatting:",
+      "instructionNoVoice": "Based on the provided interview transcript, please generate a detailed, professional, and constructive feedback report. The report must be in the same language as the interview and should be structured with the following sections using Markdown formatting:",
+      "strength1": "**(Strength 1):** Detail a specific strength, referencing an answer from the transcript if possible.",
+      "strength2": "**(Strength 2):** Detail another key strength.",
+      "improvement1": "**(Improvement 1):** Identify a specific area for improvement (e.g., STAR method usage, technical depth, conciseness). Provide a clear example from their answers and suggest how they could have responded better.",
+      "improvement2": "**(Improvement 2):** Based on the pronunciation and fluency data, comment on their communication clarity. If there are issues (e.g., low fluency score, pronunciation errors), offer actionable advice for improvement. If their speech is clear, acknowledge it as a strength.",
+      "improvement2_noVoice": "**(Improvement 2):** Comment on the clarity and structure of the candidate's written answers. Suggest improvements in conciseness, structure (e.g., using the STAR method), or professionalism in language.",
+      "conclusionText": "Conclude with final encouraging words and 1-2 key takeaway recommendations for the candidate to focus on before their real interview.",
+      "overall": "Overall Evaluation",
+      "strengths": "Strengths",
+      "improvements": "Areas for Improvement",
+      "conclusion": "Conclusion & Recommendations"
+    }
   }
 }

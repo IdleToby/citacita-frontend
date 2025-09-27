@@ -311,16 +311,16 @@
       "open": "Buka"
     },
     "categories": {
-  "all": "Semua Kategori",
-  "careerReturn": "Kembali Bekerja",
-  "education": "Pendidikan & Latihan",
-  "business": "Perniagaan & Keusahawanan",
-  "familySupport": "Sokongan Keluarga",
-  "workArrangement": "Pengaturan Kerja",
-  "leadership": "Pembangunan Kepimpinan",
-  "employmentSecurity": "Keselamatan Pekerjaan",
-  "comprehensive": "Sokongan Menyeluruh"
-  },
+      "all": "Semua Kategori",
+      "careerReturn": "Kembali Bekerja",
+      "education": "Pendidikan & Latihan",
+      "business": "Perniagaan & Keusahawanan",
+      "familySupport": "Sokongan Keluarga",
+      "workArrangement": "Pengaturan Kerja",
+      "leadership": "Pembangunan Kepimpinan",
+      "employmentSecurity": "Keselamatan Pekerjaan",
+      "comprehensive": "Sokongan Menyeluruh"
+    },
     "grants": [
       {
         "title": "Program Kembali Bekerja & Faedah Cukai Peribadi (TalentCorp)",
@@ -428,5 +428,51 @@
     "recording": "Sedang merakam...",
     "processing": "Sedang memproses audio...",
     "stop": "Hentikan Rakaman"
+  },
+  "mock": {
+    "welcome1": "Helo! Selamat datang ke Sesi Temu Duga Olok-olok. Sila masukkan jawatan yang ingin anda pohon dan klik 'Mula Temu Duga'.",
+    "welcome2": "Sesi temu duga ini akan merangkumi 10 soalan yang meliputi kebolehan umum, soalan tingkah laku, dan kemahiran teknikal. Anda boleh menjawab melalui teks atau suara.",
+    "startInterview": "Mula Temu Duga",
+    "jobPlaceholder": "Masukkan jawatan, cth., Jurutera Perisian",
+    "evaluationGenerating": "Terima kasih atas jawapan anda. Sesi temu duga telah tamat. Laporan penilaian profesional anda sedang dijana...",
+    "evaluationError": "Maaf, berlaku ralat semasa menjana laporan penilaian. Sila cuba sebentar lagi.",
+    "startError": "Maaf, berlaku masalah semasa memulakan sesi temu duga. Sila cuba sebentar lagi.",
+    "transcriptionSuccessNoText": "[Transkripsi selesai, tetapi tiada teks dikesan]",
+    "transcriptionError": "[Ralat: {error}]",
+    "transcriptionFailed": "Transkripsi gagal",
+    "micAccessDenied": "Akses mikrofon ditolak. Sila benarkan akses.",
+    "inputPlaceholder": {
+      "finished": "Temu duga selesai, laporan sedang dijana...",
+      "notStarted": "Masukkan jawatan dan klik 'Mula Temu Duga'",
+      "inProgress": "Sila taip jawapan anda di sini atau gunakan mikrofon...",
+      "loading": "Sila tunggu soalan daripada penemu duga..."
+    },
+    "copyLabel": "Salin mesej",
+    "loadingModalText": "Sedang diproses, sila tunggu...",
+
+    "overall": "Penilaian Keseluruhan",
+    "strengths": "Kekuatan",
+    "improvements": "Aspek Penambahbaikan",
+    "conclusion": "Kesimpulan & Cadangan",
+
+    "finalReport": {
+      "promptTitle": "Anda ialah seorang jurulatih kerjaya dan penganalisis temu duga AI yang pakar. Tugas anda adalah untuk menyediakan penilaian yang komprehensif tentang prestasi temu duga olok-olok calon.",
+      "jobRole": "Temu duga ini adalah untuk jawatan",
+      "language": "Temu duga ini dijalankan dalam",
+      "transcriptTitle": "TRANSKRIP TEMU DUGA",
+      "analysisTitle": "DATA ANALISIS SEBUTAN & KELANCARAN",
+      "instruction": "Berdasarkan semua maklumat yang diberikan, sila jana laporan maklum balas yang terperinci, profesional, dan membina. Laporan mestilah dalam bahasa yang sama dengan sesi temu duga dan perlu distrukturkan dengan bahagian-bahagian berikut menggunakan pemformatan Markdown:",
+      "instructionNoVoice": "Berdasarkan transkrip temu duga yang diberikan, sila jana laporan maklum balas yang terperinci, profesional, dan membina. Laporan mestilah dalam bahasa yang sama dengan sesi temu duga dan perlu distrukturkan dengan bahagian-bahagian berikut menggunakan pemformatan Markdown:",
+      "strength1": "**(Kekuatan 1):** Perincikan kekuatan tertentu, rujuk jawapan daripada transkrip jika boleh.",
+      "strength2": "**(Kekuatan 2):** Perincikan satu lagi kekuatan utama.",
+      "improvement1": "**(Aspek Penambahbaikan 1):** Kenal pasti bidang khusus untuk penambahbaikan (cth., penggunaan kaedah STAR, kedalaman teknikal, keringkasan). Berikan contoh yang jelas daripada jawapan mereka dan cadangkan cara mereka boleh memberikan respons yang lebih baik.",
+      "improvement2": "**(Aspek Penambahbaikan 2):** Berdasarkan data sebutan dan kelancaran, ulas tentang kejelasan komunikasi mereka. Jika terdapat isu (cth., skor kelancaran rendah, kesilapan sebutan), tawarkan nasihat yang boleh diambil tindakan untuk penambahbaikan. Jika pertuturan mereka jelas, akui ia sebagai satu kekuatan.",
+      "improvement2_noVoice": "**(Aspek Penambahbaikan 2):** Ulas tentang kejelasan dan struktur jawapan bertulis calon. Cadangkan penambahbaikan dari segi keringkasan, struktur (cth., menggunakan kaedah STAR), atau profesionalisme dalam bahasa.",
+      "conclusionText": "Akhiri dengan kata-kata semangat dan 1-2 cadangan utama untuk calon fokuskan sebelum temu duga sebenar mereka.",
+      "overall": "Penilaian Keseluruhan",
+      "strengths": "Kekuatan",
+      "improvements": "Aspek Penambahbaikan",
+      "conclusion": "Kesimpulan & Cadangan"
+    }
   }
 }

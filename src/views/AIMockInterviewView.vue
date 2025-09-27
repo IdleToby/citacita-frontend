@@ -8,6 +8,7 @@ import { useRoute, useRouter } from 'vue-router'
 import RecordingModal from '@/components/RecordingModal.vue'
 import toWav from 'audiobuffer-to-wav'
 import { useI18n } from 'vue-i18n'
+import MyToast from '@/components/MyToast.vue'
 
 const { t, locale } = useI18n()
 
@@ -37,7 +38,15 @@ interface Message {
   content: string
   htmlContent?: string
   showStartButton?: boolean
-  showJobInput?: boolean // 新增：用于显示职位输入框
+  showJobInput?: boolean
+}
+
+// 新增：用于存储面试分析数据的接口
+interface AnswerAnalysis {
+  question: string
+  answer: string
+  // 假设API返回的对象包含流畅度、完整度等信息
+  pronunciationResult: { type: 'text' } | Record<string, any>
 }
 
 marked.use({
@@ -60,6 +69,8 @@ const messages = ref<Message[]>([])
 const isLoading = ref<boolean>(false)
 const chatWindow = ref<HTMLDivElement | null>(null)
 const copiedMessageId = ref<number | null>(null)
+// 新增：存储每次回答的分析结果
+const userAnswersAnalysis = ref<AnswerAnalysis[]>([])
 
 // --- 录音状态 (MediaRecorder + WAV) ---
 const isRecording = ref(false)
@@ -110,21 +121,118 @@ type InterviewState = 'not-started' | 'in-progress' | 'finished'
 const interviewState = ref<InterviewState>('not-started')
 const currentQuestionIndex = ref(0)
 const mockQuestions = ref([''])
+
+// 生成最终面试评估的函数
+const generateFinalEvaluation = async () => {
+  isLoading.value = true
+  const evaluationMessage: Message = {
+    id: Date.now(),
+    role: 'assistant',
+    content: t('mock.evaluationGenerating'),
+    htmlContent: marked(t('mock.evaluationGenerating')) as string,
+  }
+  messages.value.push(evaluationMessage)
+
+  const hasVoiceInput = userAnswersAnalysis.value.some(
+    (item) => item.pronunciationResult.type !== 'text',
+  )
+
+  // Format conversation history and analysis data
+  const transcript = messages.value
+    .map((m) => `${m.role === 'user' ? 'Candidate' : 'Interviewer'}: ${m.content}`)
+    .join('\n')
+
+  const analysisData = hasVoiceInput
+    ? userAnswersAnalysis.value
+        .map(
+          (item, index) =>
+            `Question ${index + 1}: "${item.question}"\nAnswer: "${
+              item.answer
+            }"\nPronunciation Analysis: ${JSON.stringify(item.pronunciationResult, null, 2)}`,
+        )
+        .join('\n\n')
+    : ''
+
+  // --- CHANGE: Use i18n and conditional logic for prompt ---
+  const finalPrompt = `
+${t('mock.finalReport.promptTitle')}
+${t('mock.finalReport.jobRole')}: **${userText.value}**.
+${t('mock.finalReport.language')}: **${
+    locale.value === 'zh-CN' ? 'Chinese' : locale.value === 'ms' ? 'Bahasa Melayu' : 'English'
+  }**.
+
+${hasVoiceInput ? `Below is the full interview transcript and the pronunciation analysis data for each answer.` : `Below is the full interview transcript.`}
+
+---
+**${t('mock.finalReport.transcriptTitle')}:**
+${transcript}
+---
+${
+  hasVoiceInput
+    ? `**${t('mock.finalReport.analysisTitle')}:**
+${analysisData}
+---`
+    : ''
+}
+
+${hasVoiceInput ? t('mock.finalReport.instruction') : t('mock.finalReport.instructionNoVoice')}
+
+### ${t('mock.finalReport.overall')}
+${t('mock.overall')}
+
+### ${t('mock.finalReport.strengths')}
+- ${t('mock.finalReport.strength1')}
+- ${t('mock.finalReport.strength2')}
+
+### ${t('mock.finalReport.improvements')}
+- ${t('mock.finalReport.improvement1')}
+- ${hasVoiceInput ? t('mock.finalReport.improvement2') : t('mock.finalReport.improvement2_noVoice')}
+
+### ${t('mock.finalReport.conclusion')}
+${t('mock.finalReport.conclusionText')}
+`
+
+  const payload = {
+    messages: [
+      {
+        role: 'user',
+        content: finalPrompt,
+      },
+    ],
+    model: 'gpt-oss-120b',
+    stream: false,
+  }
+
+  try {
+    const response = await fetch('/api/generate-questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const evaluationText = await response.text()
+    messages.value.push({
+      id: Date.now() + 1,
+      role: 'assistant',
+      content: evaluationText,
+      htmlContent: marked(evaluationText) as string,
+    })
+  } catch (error) {
+    console.error('Failed to generate final evaluation:', error)
+    messages.value.push({
+      id: Date.now() + 1,
+      role: 'assistant',
+      content: t('mock.evaluationError'),
+      htmlContent: marked(t('mock.evaluationError')) as string,
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const askNextQuestion = () => {
   if (currentQuestionIndex.value >= mockQuestions.value.length) {
     interviewState.value = 'finished'
-    isLoading.value = true
-    const finalText = '感谢您的回答，本次模拟面试到此结束。祝您面试顺利！'
-    setTimeout(() => {
-      messages.value.push({
-        id: Date.now(),
-        role: 'assistant',
-        content: finalText,
-        htmlContent: marked(finalText) as string,
-      })
-      isLoading.value = false
-      playAudioStream(finalText)
-    }, 1000)
+    generateFinalEvaluation()
     return
   }
   const question = mockQuestions.value[currentQuestionIndex.value]
@@ -147,32 +255,45 @@ const askNextQuestion = () => {
     }, 50)
   }, 1200)
 }
-const sendMessage = () => {
+
+const sendMessage = (
+  pronunciationData: AnswerAnalysis['pronunciationResult'] = { type: 'text' },
+) => {
   const messageText = userMessage.value.trim()
   if (!messageText || isLoading.value || interviewState.value !== 'in-progress') return
   stopCurrentAudio()
+
   messages.value.push({ id: Date.now(), role: 'user', content: messageText })
+
+  // 存储问题、答案和分析数据
+  const lastQuestion = mockQuestions.value[currentQuestionIndex.value - 1]
+  userAnswersAnalysis.value.push({
+    question: lastQuestion,
+    answer: messageText,
+    pronunciationResult: pronunciationData,
+  })
+
   userMessage.value = ''
   askNextQuestion()
 }
 
-const userText = ref('') // 修改：默认为空，由用户输入
+const userText = ref('')
 
 const handleInterviewAction = async () => {
-  if (!userText.value.trim()) return // 防止空职位开始面试
+  if (!userText.value.trim()) return
   stopCurrentAudio()
+  isLoading.value = true // 开始加载
+
   const payload = {
     messages: [
       {
         role: 'assistant',
         content:
-          'You are an expert AI assistant specializing in generating professional job interview question scripts. Your primary function is to create a structured, realistic interview flow based on a given job role and language. You must adhere to the following rules: 1. Generate exactly the number of questions requested. 2. The output must be a valid JSON array of strings. 3. Do not include any introductory text, closing remarks, emojis, or markdown. Your entire response should be only the JSON array. 4. The questions must be in the language specified in the user prompt.',
+          'You are an expert AI assistant specializing in generating professional job interview question scripts. Your primary function is to create a structured, realistic interview flow tailored to the given job role and language. You must strictly follow these rules: 1. Generate exactly 10 questions. 2. Output must be a valid JSON array of strings. 3. Do not include any introductory text, explanations, remarks, emojis, or markdown. 4. All questions must be in the language specified by the user prompt. 5. Questions must reflect a natural, professional interview progression.',
       },
       {
         role: 'user',
-        content: `Please generate 1 professional interview questions in ${
-          locale.value === 'zh-CN' ? 'Chinese' : locale.value === 'ms' ? 'Bahasa Melayu' : 'English'
-        } for the role of '${userText.value}'. The questions should simulate a real interview and progress logically: 1. Start with a general self-introduction or icebreaker. 2-3. Include behavioral questions relevant to the role's common challenges. 4-6. Ask specific technical or skill-based questions directly related to the responsibilities of a '${userText.value}'. 7. Conclude with a question that allows the candidate to ask about the company or role.`,
+        content: `Please generate 10 professional interview questions in ${locale.value === 'zh-CN' ? 'Chinese' : locale.value === 'ms' ? 'Bahasa Melayu' : 'English'} for the role of '${userText.value}'. The questions should simulate a real, comprehensive interview and progress logically as follows: 1-2. General icebreaker and motivation questions. 3-6. Behavioral and situational questions focusing on past experiences and problem-solving. 7-8. Role-specific or technical questions assessing core competencies. 9. Career goals or future aspirations. 10. A closing question inviting the candidate to ask their own questions.`,
       },
     ]
       .filter((m) => !(m.role === 'assistant' && m.content === ''))
@@ -185,42 +306,49 @@ const handleInterviewAction = async () => {
     language: locale.value,
   }
 
-  mockQuestions.value = await (
-    await fetch('/api/generate-questions', {
+  try {
+    const response = await fetch('/api/generate-questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-  ).json()
-  console.log('mockQuestions', mockQuestions.value)
-  messages.value = []
-  userMessage.value = ''
-  currentQuestionIndex.value = 0
-  isLoading.value = false
-  interviewState.value = 'in-progress'
-  askNextQuestion()
+    if (!response.ok) throw new Error('Failed to fetch questions')
+
+    mockQuestions.value = await response.json()
+    console.log('mockQuestions', mockQuestions.value)
+
+    messages.value = []
+    userMessage.value = ''
+    currentQuestionIndex.value = 0
+    interviewState.value = 'in-progress'
+    askNextQuestion()
+  } catch (error) {
+    console.error('Error starting interview:', error)
+    isLoading.value = false
+    messages.value.push({
+      id: Date.now(),
+      role: 'assistant',
+      content: t('mock.startError'),
+      htmlContent: marked(t('mock.startError')) as string,
+    })
+  }
 }
+
 const displayWelcomeMessage = () => {
   messages.value = [
     {
       id: Date.now(),
       role: 'assistant',
-      content: '你好！欢迎来到模拟面试。请输入您想面试的职位，然后点击“开始面试”按钮。',
-      htmlContent: marked(
-        '你好！欢迎来到模拟面试。请输入您想面试的职位，然后点击“开始面试”按钮。',
-      ) as string,
+      content: t('mock.welcome1'),
+      htmlContent: marked(t('mock.welcome1')) as string,
       showStartButton: true,
       showJobInput: true,
     },
-    // 新增：介绍面试流程的消息
     {
       id: Date.now() + 1,
       role: 'assistant',
-      content:
-        '面试将包含7个问题，涵盖综合能力、行为问题和技术技能。您可以通过文字或语音进行回答。',
-      htmlContent: marked(
-        '面试将包含7个问题，涵盖综合能力、行为问题和技术技能。您可以通过文字或语音进行回答。',
-      ) as string,
+      content: t('mock.welcome2'),
+      htmlContent: marked(t('mock.welcome2')) as string,
     },
   ]
 }
@@ -229,9 +357,12 @@ onMounted(() => {
 })
 watch(tab, (newTab, oldTab) => {
   if (newTab === 'mock-interview' && newTab !== oldTab) {
-    interviewState.value = 'not-started'
-    displayWelcomeMessage()
+    handleStartNewChat()
   }
+})
+
+watch(locale, () => {
+  if (tab.value === 'mock-interview') handleStartNewChat()
 })
 
 // --- WAV 录音逻辑 ---
@@ -265,12 +396,50 @@ const startRecording = async () => {
           body: formData,
         })
         if (!response.ok) throw new Error(`服务器错误: ${response.status}`)
-        const result = await response.json()
-        const transcribedText = result.DisplayText || '[转录完成，但未识别到文本]'
+
+        // The full JSON object returned from the API
+        const fullResult = await response.json()
+
+        // First, safely get the detailed results object.
+        // The data is inside the first element of the "NBest" array.
+        const bestResult = fullResult.NBest && fullResult.NBest[0]
+
+        // If for some reason the detailed result doesn't exist, handle it gracefully.
+        if (!bestResult) {
+          console.error('Pronunciation analysis failed: NBest array is empty or missing.')
+          // Use the transcribed text if available, otherwise show an error.
+          userMessage.value = fullResult.DisplayText || t('mock.transcriptionFailed')
+          if (userMessage.value.trim()) {
+            sendMessage({ type: 'text' }) // Send as a plain text message
+          }
+          return // Exit the function
+        }
+
+        // Now, create the pronunciationData object using the CORRECT paths
+        const pronunciationData = {
+          DisplayText: fullResult.DisplayText, // This top-level property is correct
+          FluencyScore: bestResult.FluencyScore, // Correct path
+          CompletenessScore: bestResult.CompletenessScore, // Correct path
+          PronScore: bestResult.PronScore, // Correct path
+          type: 'voice', // (Recommended) Add this for clearer logic
+        }
+
+        // Clean up any properties that might be undefined (this is still good practice)
+        Object.keys(pronunciationData).forEach((key) => {
+          if (pronunciationData[key as keyof typeof pronunciationData] === undefined) {
+            delete pronunciationData[key as keyof typeof pronunciationData]
+          }
+        })
+
+        const transcribedText = fullResult.DisplayText || t('mock.transcriptionFailed')
         userMessage.value = transcribedText
+
+        if (userMessage.value.trim()) {
+          sendMessage(pronunciationData) // Pass the CORRECTLY populated object
+        }
       } catch (err) {
         console.error('转录失败:', err)
-        userMessage.value = `[错误: ${err instanceof Error ? err.message : '转录失败'}]`
+        userMessage.value = `[${t('mock.transcriptionError', { error: err instanceof Error ? err.message : t('mock.transcriptionFailed') })}]`
       } finally {
         isTranscribing.value = false
         showRecordingModal.value = false
@@ -282,7 +451,7 @@ const startRecording = async () => {
     mediaRecorder.start()
   } catch (err) {
     console.error('麦克风访问错误:', err)
-    alert('麦克风访问被拒绝，请允许访问。')
+    alert(t('mock.micAccessDenied'))
     isRecording.value = false
     showRecordingModal.value = false
   }
@@ -294,10 +463,10 @@ const handleStopRequest = () => {
 }
 
 const inputPlaceholder = computed(() => {
-  if (interviewState.value === 'finished') return '面试已结束'
-  if (interviewState.value === 'not-started') return '请点击“开始面试”按钮'
-  if (isLoading.value) return '请等待面试官提出问题...'
-  return '请在此输入或使用麦克风回答...'
+  if (interviewState.value === 'finished') return t('mock.inputPlaceholder.finished')
+  if (interviewState.value === 'not-started') return t('mock.inputPlaceholder.notStarted')
+  if (isLoading.value) return t('mock.inputPlaceholder.loading')
+  return t('mock.inputPlaceholder.inProgress')
 })
 const scrollToBottom = () => {
   nextTick(() => {
@@ -315,12 +484,21 @@ const copyToClipboard = (text: string, messageId: number) => {
     setTimeout(() => (copiedMessageId.value = null), 2000)
   })
 }
+
+const handleTextSubmit = () => {
+  sendMessage({ type: 'text' })
+}
+
 const handleStartNewChat = () => {
   stopCurrentAudio()
   interviewState.value = 'not-started'
   userMessage.value = ''
-  userText.value = '' // 新增：重置职位输入
+  userText.value = ''
   messages.value = []
+  userAnswersAnalysis.value = []
+  mockQuestions.value = ['']
+  currentQuestionIndex.value = 0
+  isLoading.value = false
   displayWelcomeMessage()
 }
 </script>
@@ -329,6 +507,7 @@ const handleStartNewChat = () => {
   <div
     class="relative z-10 flex h-full w-full flex-col border-none bg-white/70 shadow-lg backdrop-blur-md py-4"
   >
+    <MyToast :showToast="isLoading" :toastMessage="t('mock.loadingModalText')" />
     <div class="absolute right-8 top-8 z-20">
       <Button
         v-if="interviewState !== 'not-started'"
@@ -374,7 +553,7 @@ const handleStartNewChat = () => {
               v-if="m.role === 'assistant' && m.content"
               @click="copyToClipboard(m.content, m.id)"
               class="absolute top-1 right-1 p-1 rounded-md bg-gray-500/20 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none hover:bg-gray-500/40"
-              aria-label="复制消息"
+              :aria-label="t('mock.copyLabel')"
             >
               <svg
                 v-if="copiedMessageId === m.id"
@@ -425,7 +604,7 @@ const handleStartNewChat = () => {
             <input
               v-model="userText"
               type="text"
-              placeholder="请输入职位，例如：软件工程师"
+              :placeholder="t('mock.jobPlaceholder')"
               class="flex-1 border-none bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-500"
               autocomplete="off"
             />
@@ -433,15 +612,18 @@ const handleStartNewChat = () => {
 
           <Button
             @click="handleInterviewAction"
-            :disabled="!userText.trim()"
+            :disabled="!userText.trim() || isLoading"
             class="bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            开始面试
+            {{ t('mock.startInterview') }}
           </Button>
         </div>
       </div>
 
-      <div v-if="isLoading" class="flex justify-start">
+      <div
+        v-if="isLoading && interviewState !== 'finished' && !messages.some((m) => m.content === '')"
+        class="flex justify-start"
+      >
         <div
           class="message-bubble group relative max-w-[80%] rounded-xl px-3 py-2 shadow-sm bg-gray-200/70 text-gray-900 rounded-bl-none"
         >
@@ -463,7 +645,7 @@ const handleStartNewChat = () => {
       </div>
     </div>
 
-    <form class="flex items-center gap-2 p-3 px-[18%]" @submit.prevent="sendMessage">
+    <form class="flex items-center gap-2 p-3 px-[18%]" @submit.prevent="handleTextSubmit">
       <div
         class="relative flex w-full items-center rounded-full bg-gray-100/80 px-4 py-2 shadow-inner"
       >
@@ -474,7 +656,7 @@ const handleStartNewChat = () => {
           :placeholder="inputPlaceholder"
           class="flex-1 border-none bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-500 disabled:cursor-not-allowed"
           autocomplete="off"
-          @keydown.enter.prevent="sendMessage"
+          @keydown.enter.prevent="handleTextSubmit"
         />
         <button
           @click="startRecording"
