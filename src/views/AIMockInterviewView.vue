@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRoute, useRouter } from 'vue-router'
 import RecordingModal from '@/components/RecordingModal.vue'
 import toWav from 'audiobuffer-to-wav'
-import {useI18n} from 'vue-i18n'
+import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
 
@@ -37,6 +37,7 @@ interface Message {
   content: string
   htmlContent?: string
   showStartButton?: boolean
+  showJobInput?: boolean // 新增：用于显示职位输入框
 }
 
 marked.use({
@@ -108,15 +109,9 @@ const playAudioStream = async (text: string) => {
 type InterviewState = 'not-started' | 'in-progress' | 'finished'
 const interviewState = ref<InterviewState>('not-started')
 const currentQuestionIndex = ref(0)
-const mockQuestions = [
-  '你好，请先做一个简单的自我介绍吧。',
-  '你为什么对我们公司感兴趣？',
-  '谈谈你过去项目中遇到的最大挑战，以及你是如何解决的。',
-  '你未来的职业规划是什么？',
-  '最后，请问你有什么问题想问我们吗？',
-]
+const mockQuestions = ref([''])
 const askNextQuestion = () => {
-  if (currentQuestionIndex.value >= mockQuestions.length) {
+  if (currentQuestionIndex.value >= mockQuestions.value.length) {
     interviewState.value = 'finished'
     isLoading.value = true
     const finalText = '感谢您的回答，本次模拟面试到此结束。祝您面试顺利！'
@@ -132,7 +127,7 @@ const askNextQuestion = () => {
     }, 1000)
     return
   }
-  const question = mockQuestions[currentQuestionIndex.value]
+  const question = mockQuestions.value[currentQuestionIndex.value]
   isLoading.value = true
   setTimeout(() => {
     const newMessage: Message = { id: Date.now(), role: 'assistant', content: '' }
@@ -160,8 +155,44 @@ const sendMessage = () => {
   userMessage.value = ''
   askNextQuestion()
 }
-const handleInterviewAction = () => {
+
+const userText = ref('') // 修改：默认为空，由用户输入
+
+const handleInterviewAction = async () => {
+  if (!userText.value.trim()) return // 防止空职位开始面试
   stopCurrentAudio()
+  const payload = {
+    messages: [
+      {
+        role: 'assistant',
+        content:
+          'You are an expert AI assistant specializing in generating professional job interview question scripts. Your primary function is to create a structured, realistic interview flow based on a given job role and language. You must adhere to the following rules: 1. Generate exactly the number of questions requested. 2. The output must be a valid JSON array of strings. 3. Do not include any introductory text, closing remarks, emojis, or markdown. Your entire response should be only the JSON array. 4. The questions must be in the language specified in the user prompt.',
+      },
+      {
+        role: 'user',
+        content: `Please generate 1 professional interview questions in ${
+          locale.value === 'zh-CN' ? 'Chinese' : locale.value === 'ms' ? 'Bahasa Melayu' : 'English'
+        } for the role of '${userText.value}'. The questions should simulate a real interview and progress logically: 1. Start with a general self-introduction or icebreaker. 2-3. Include behavioral questions relevant to the role's common challenges. 4-6. Ask specific technical or skill-based questions directly related to the responsibilities of a '${userText.value}'. 7. Conclude with a question that allows the candidate to ask about the company or role.`,
+      },
+    ]
+      .filter((m) => !(m.role === 'assistant' && m.content === ''))
+      .map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    model: 'gpt-oss-120b',
+    stream: false,
+    language: locale.value,
+  }
+
+  mockQuestions.value = await (
+    await fetch('/api/generate-questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+  ).json()
+  console.log('mockQuestions', mockQuestions.value)
   messages.value = []
   userMessage.value = ''
   currentQuestionIndex.value = 0
@@ -174,9 +205,22 @@ const displayWelcomeMessage = () => {
     {
       id: Date.now(),
       role: 'assistant',
-      content: '你好！欢迎来到模拟面试。准备好后，请点击下方的“开始面试”按钮。',
-      htmlContent: marked('你好！欢迎来到模拟面试。准备好后，请点击下方的“开始面试”按钮。') as string,
+      content: '你好！欢迎来到模拟面试。请输入您想面试的职位，然后点击“开始面试”按钮。',
+      htmlContent: marked(
+        '你好！欢迎来到模拟面试。请输入您想面试的职位，然后点击“开始面试”按钮。',
+      ) as string,
       showStartButton: true,
+      showJobInput: true,
+    },
+    // 新增：介绍面试流程的消息
+    {
+      id: Date.now() + 1,
+      role: 'assistant',
+      content:
+        '面试将包含7个问题，涵盖综合能力、行为问题和技术技能。您可以通过文字或语音进行回答。',
+      htmlContent: marked(
+        '面试将包含7个问题，涵盖综合能力、行为问题和技术技能。您可以通过文字或语音进行回答。',
+      ) as string,
     },
   ]
 }
@@ -216,7 +260,10 @@ const startRecording = async () => {
         const formData = new FormData()
         formData.append('audio', wavBlob, 'recording.wav')
         formData.append('language', locale.value)
-        const response = await fetch('/api/pronunciation-evaluation', { method: 'POST', body: formData })
+        const response = await fetch('/api/pronunciation-evaluation', {
+          method: 'POST',
+          body: formData,
+        })
         if (!response.ok) throw new Error(`服务器错误: ${response.status}`)
         const result = await response.json()
         const transcribedText = result.DisplayText || '[转录完成，但未识别到文本]'
@@ -268,9 +315,15 @@ const copyToClipboard = (text: string, messageId: number) => {
     setTimeout(() => (copiedMessageId.value = null), 2000)
   })
 }
+const handleStartNewChat = () => {
+  stopCurrentAudio()
+  interviewState.value = 'not-started'
+  userMessage.value = ''
+  userText.value = '' // 新增：重置职位输入
+  messages.value = []
+  displayWelcomeMessage()
+}
 </script>
-
-
 
 <template>
   <div
@@ -279,7 +332,7 @@ const copyToClipboard = (text: string, messageId: number) => {
     <div class="absolute right-8 top-8 z-20">
       <Button
         v-if="interviewState !== 'not-started'"
-        @click="handleInterviewAction"
+        @click="handleStartNewChat"
         class="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
         :disabled="isRecording || isTranscribing"
       >
@@ -292,11 +345,11 @@ const copyToClipboard = (text: string, messageId: number) => {
         <Tabs v-model="tab" class="w-250">
           <TabsList class="grid w-full grid-cols-3 h-12">
             <TabsTrigger class="h-10 text-lg" value="resume-checker"
-            >{{ t('AIPage.checker') }}
+              >{{ t('AIPage.checker') }}
             </TabsTrigger>
             <TabsTrigger class="h-10 text-lg" value="guide">{{ t('AIPage.guide') }}</TabsTrigger>
             <TabsTrigger class="h-10 text-lg" value="mock-interview"
-            >{{ t('AIPage.interview') }}
+              >{{ t('AIPage.interview') }}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -363,9 +416,26 @@ const copyToClipboard = (text: string, messageId: number) => {
 
         <div
           v-if="m.showStartButton && interviewState === 'not-started'"
-          class="mt-4 flex w-full justify-start"
+          class="mt-4 flex w-full flex-col items-start gap-3"
         >
-          <Button @click="handleInterviewAction" class="bg-blue-600 text-white hover:bg-blue-700">
+          <div
+            v-if="m.showJobInput"
+            class="relative flex w-full max-w-sm items-center rounded-lg bg-gray-100/80 px-4 py-2 shadow-inner"
+          >
+            <input
+              v-model="userText"
+              type="text"
+              placeholder="请输入职位，例如：软件工程师"
+              class="flex-1 border-none bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-500"
+              autocomplete="off"
+            />
+          </div>
+
+          <Button
+            @click="handleInterviewAction"
+            :disabled="!userText.trim()"
+            class="bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+          >
             开始面试
           </Button>
         </div>
