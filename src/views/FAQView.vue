@@ -72,9 +72,10 @@
     <!-- Citabot Icon -->
     <div class="fixed bottom-1 right-1 z-1">
       <img
-        src="/images/citabot.png"
+        :src="citabotImage"
         alt="Citabot"
-        class="w-50 h-50 cursor-pointer transition-transform duration-300 ease-out hover:scale-110"
+        class="w-50 h-50 cursor-pointer transition-transform duration-300 ease-out hover:scale-110 object-contain"
+        style="width: 200px; height: 200px; max-width: 200px; max-height: 200px;"
         @click="router.push('/ai')"
       />
     </div>
@@ -86,8 +87,21 @@ import { reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-const { t, tm } = useI18n()
+const { t, tm, locale } = useI18n()
 const router = useRouter()
+
+// Dynamic citabot image based on locale
+const citabotImage = computed(() => {
+  switch (locale.value) {
+    case 'ms':
+      return '/images/citabot-ms.png'
+    case 'zh-CN':
+      return '/images/citabot-zh.png'
+    case 'en':
+    default:
+      return '/images/citabot.png'
+  }
+})
 
 // FAQ data structure
 interface FAQItem {
