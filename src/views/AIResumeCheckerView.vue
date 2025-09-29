@@ -343,20 +343,22 @@ const formatAnalysisDetails = (analysis: any) => {
 
 **简历结构分析:**
 - 联系信息: ${analysis.structure.hasContactInfo ? '✅ 完整' : '❌ 缺失'}
-- 个人简介: ${analysis.structure.hasSummary ? '✅ 包含' : '❌ 缺失'}  
+- 个人简介: ${analysis.structure.hasSummary ? '✅ 包含' : '❌ 缺失'}
 - 工作经历: ${analysis.structure.hasExperience ? '✅ 包含' : '❌ 缺失'}
 - 教育背景: ${analysis.structure.hasEducation ? '✅ 包含' : '❌ 缺失'}
 - 技能展示: ${analysis.structure.hasSkills ? '✅ 包含' : '❌ 缺失'}
 - 成就奖项: ${analysis.structure.hasAchievements ? '✅ 包含' : '❌ 缺失'}
+- 项目经历: ${analysis.structure.hasProjects ? '✅ 包含' : '❌ 缺失'}
+- 语言能力: ${analysis.structure.hasLanguages ? '✅ 包含' : '❌ 缺失'}
 
-**完整度:** ${Math.round(analysis.structure.completeness * 100)}%
-**字数统计:** ${analysis.structure.wordCount} 字
+**完整度详情:**
+${analysis.structure.completenessDetails ? analysis.structure.completenessDetails.join('\n') : `${Math.round(analysis.structure.completeness * 100)}%`}
 
 **关键信息:**
 - 邮箱地址: ${analysis.keyInfo.emails.length} 个
 - 电话号码: ${analysis.keyInfo.phones.length} 个
 - 技能关键词: ${analysis.keyInfo.skills.length} 个
-- 工作经验: ${analysis.keyInfo.yearsOfExperience} 年
+- 工作经验: ${analysis.keyInfo.workExperienceType || `${analysis.keyInfo.yearsOfExperience} 年`}
 - 教育水平: ${analysis.keyInfo.educationLevel}
 
 ### 🎯 改进建议
@@ -368,20 +370,22 @@ ${analysis.suggestions.map((s: any, i: number) => `${i + 1}. **${s.priority === 
 
 **Resume Structure Analysis:**
 - Contact Info: ${analysis.structure.hasContactInfo ? '✅ Complete' : '❌ Missing'}
-- Summary: ${analysis.structure.hasSummary ? '✅ Included' : '❌ Missing'}  
+- Summary: ${analysis.structure.hasSummary ? '✅ Included' : '❌ Missing'}
 - Experience: ${analysis.structure.hasExperience ? '✅ Included' : '❌ Missing'}
 - Education: ${analysis.structure.hasEducation ? '✅ Included' : '❌ Missing'}
 - Skills: ${analysis.structure.hasSkills ? '✅ Included' : '❌ Missing'}
 - Achievements: ${analysis.structure.hasAchievements ? '✅ Included' : '❌ Missing'}
+- Projects: ${analysis.structure.hasProjects ? '✅ Included' : '❌ Missing'}
+- Languages: ${analysis.structure.hasLanguages ? '✅ Included' : '❌ Missing'}
 
-**Completeness:** ${Math.round(analysis.structure.completeness * 100)}%
-**Word Count:** ${analysis.structure.wordCount} words
+**Completeness Details:**
+${analysis.structure.completenessDetails ? analysis.structure.completenessDetails.join('\n') : `${Math.round(analysis.structure.completeness * 100)}%`}
 
 **Key Information:**
 - Email addresses: ${analysis.keyInfo.emails.length}
 - Phone numbers: ${analysis.keyInfo.phones.length}
 - Skill keywords: ${analysis.keyInfo.skills.length}
-- Years of experience: ${analysis.keyInfo.yearsOfExperience}
+- Work experience: ${analysis.keyInfo.workExperienceType || `${analysis.keyInfo.yearsOfExperience} years`}
 - Education level: ${analysis.keyInfo.educationLevel}
 
 ### 🎯 Improvement Suggestions
@@ -393,20 +397,22 @@ ${analysis.suggestions.map((s: any, i: number) => `${i + 1}. **${s.priority === 
 
 **Analisis Struktur Resume:**
 - Maklumat Hubungan: ${analysis.structure.hasContactInfo ? '✅ Lengkap' : '❌ Hilang'}
-- Ringkasan: ${analysis.structure.hasSummary ? '✅ Disertakan' : '❌ Hilang'}  
+- Ringkasan: ${analysis.structure.hasSummary ? '✅ Disertakan' : '❌ Hilang'}
 - Pengalaman: ${analysis.structure.hasExperience ? '✅ Disertakan' : '❌ Hilang'}
 - Pendidikan: ${analysis.structure.hasEducation ? '✅ Disertakan' : '❌ Hilang'}
 - Kemahiran: ${analysis.structure.hasSkills ? '✅ Disertakan' : '❌ Hilang'}
 - Pencapaian: ${analysis.structure.hasAchievements ? '✅ Disertakan' : '❌ Hilang'}
+- Projek: ${analysis.structure.hasProjects ? '✅ Disertakan' : '❌ Hilang'}
+- Bahasa: ${analysis.structure.hasLanguages ? '✅ Disertakan' : '❌ Hilang'}
 
-**Kelengkapan:** ${Math.round(analysis.structure.completeness * 100)}%
-**Jumlah Perkataan:** ${analysis.structure.wordCount} perkataan
+**Butiran Kelengkapan:**
+${analysis.structure.completenessDetails ? analysis.structure.completenessDetails.join('\n') : `${Math.round(analysis.structure.completeness * 100)}%`}
 
 **Maklumat Utama:**
 - Alamat email: ${analysis.keyInfo.emails.length}
 - Nombor telefon: ${analysis.keyInfo.phones.length}
 - Kata kunci kemahiran: ${analysis.keyInfo.skills.length}
-- Tahun pengalaman: ${analysis.keyInfo.yearsOfExperience}
+- Pengalaman kerja: ${analysis.keyInfo.workExperienceType || `${analysis.keyInfo.yearsOfExperience} tahun`}
 - Tahap pendidikan: ${analysis.keyInfo.educationLevel}
 
 ### 🎯 Cadangan Penambahbaikan
@@ -498,7 +504,7 @@ const sendMessage = async () => {
     const fullMessages = [
       {
         role: 'system',
-        content: systemMessages[locale.value as keyof typeof systemMessages] || systemMessages['en']
+        content: systemMessages[locale.value] || systemMessages['en']
       },
       ...messages.value
         .filter(m => m.role !== 'assistant' || m.content.trim() !== '')
@@ -525,6 +531,12 @@ const sendMessage = async () => {
       }
     }
 
+    console.log('🚀 发送resume chat请求:', {
+      messagesCount: payload.messages.length,
+      language: payload.language,
+      resumeFile: uploadedFileName.value
+    })
+
     // 使用简历专用的API端点
     const response = await fetch('/api/resume-chat', {
       method: 'POST',
@@ -532,55 +544,104 @@ const sendMessage = async () => {
       body: JSON.stringify(payload)
     })
 
+    console.log('📡 Resume chat响应:', {
+      status: response.status,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries())
+    })
+
     if (!response.ok) {
       throw new Error(`Resume chat failed: ${response.status}`)
     }
 
-    // 处理流式响应
+    // 🔥 修复：使用与你的AI chat相同的流式响应处理
     const reader = response.body?.getReader()
-    const decoder = new TextDecoder()
+    if (!reader) throw new Error('Response body is not readable.')
     
-    const newMessage: Message = { 
+    const decoder = new TextDecoder('utf-8')
+    let buffer = '' // 🔥 添加缓冲区处理
+    
+    const newMessage = { 
       id: Date.now(), 
       role: 'assistant', 
       content: '' 
     }
     messages.value.push(newMessage)
 
-    while (reader) {
+    while (true) {
       const { done, value } = await reader.read()
-      if (done) break
+      if (done) {
+        console.log('✅ 流读取完成，最终内容长度:', newMessage.content.length)
+        break
+      }
       
-      const chunk = decoder.decode(value)
-      const lines = chunk.split('\n')
+      // 🔥 使用缓冲区处理，避免截断问题
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || '' // 保留最后不完整的行
       
       for (const line of lines) {
-        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+        if (line.startsWith('data:')) {
+          const data = line.slice(5).trim() 
+          if (data === '[DONE]') {
+            console.log('🏁 收到结束标记')
+            break
+          }
+          
           try {
-            const data = JSON.parse(line.slice(6))
-            const content = data.choices?.[0]?.delta?.content
+            const parsed = JSON.parse(data)
+            
+            // 🔥 增强：同时检查multiple字段，与你的AI chat逻辑保持一致
+            let content = ''
+            if (parsed?.choices && Array.isArray(parsed.choices) && parsed.choices.length > 0) {
+              const choice = parsed.choices[0]
+              if (choice?.delta) {
+                // 优先使用content，如果为空则使用reasoning_content
+                content = choice.delta.content || ''
+              } else if (choice?.message?.content) {
+                content = choice.message.content
+              } else if (typeof choice?.text === 'string') {
+                content = choice.text
+              }
+            }
+            
             if (content) {
               newMessage.content += content
+              console.log('✅ 添加内容:', content.substring(0, 20) + (content.length > 20 ? '...' : ''))
             }
-          } catch (e) {
-            // 忽略解析错误
+            
+          } catch (parseError) {
+            console.warn('⚠️ 解析SSE数据失败:', line, parseError)
+            // 🔥 容错：如果JSON解析失败，尝试作为纯文本处理
+            if (data && data.length > 0 && !data.startsWith('{')) {
+              newMessage.content += data
+            }
           }
         }
       }
     }
     
-    newMessage.htmlContent = marked(newMessage.content) as string
+    // 🔥 确保更新HTML内容
+    if (newMessage.content) {
+      newMessage.htmlContent = marked(newMessage.content)
+      console.log('✅ 消息构建完成，内容长度:', newMessage.content.length)
+    } else {
+      console.warn('⚠️ 没有收到任何内容')
+      newMessage.content = '抱歉，没有收到回复内容，请重试。'
+      newMessage.htmlContent = marked(newMessage.content)
+    }
     
   } catch (error) {
-    console.error('Resume chat failed:', error)
+    console.error('❌ Resume chat failed:', error)
     messages.value.push({
       id: Date.now(),
       role: 'assistant',
       content: getErrorText(),
-      htmlContent: marked(getErrorText()) as string,
+      htmlContent: marked(getErrorText()),
     })
   } finally {
     isLoading.value = false
+    console.log('🏁 sendMessage 执行完成')
   }
 }
 
