@@ -138,6 +138,17 @@ const handleCategoryChange = () => {
 
 <template>
   <div class="grants-page">
+    <!-- Background with blur effect -->
+    <div
+      class="fixed inset-0 -z-10"
+      :style="{
+        backgroundImage: 'url(/images/grants.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        filter: 'blur(8px) brightness(0.3)'
+      }"
+    ></div>
     <!-- 头部区域 - 包含标题和副标题，以及右侧筛选器 -->
     <div class="page-header">
       <div class="header-content">
@@ -292,7 +303,7 @@ const handleCategoryChange = () => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
   overflow: hidden;
   display: flex;

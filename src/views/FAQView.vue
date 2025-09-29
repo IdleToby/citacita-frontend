@@ -5,7 +5,7 @@
     <div
       class="fixed inset-0 -z-10"
       :style="{
-        backgroundImage: 'url(/images/homepage-jobs-for-me.png)',
+        backgroundImage: 'url(/images/faq.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

@@ -437,7 +437,18 @@ watch(locale, (newLocale, oldLocale) => {
 </script>
 
 <template>
-  <div class="bg-black/70 h-full flex flex-col space-y-4 pt-4 pb-2">
+  <div class="relative bg-black/70 h-full flex flex-col space-y-4 pt-4 pb-2">
+    <!-- Background with blur effect -->
+    <div
+      class="fixed inset-0 -z-10"
+      :style="{
+        backgroundImage: 'url(/images/map.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        filter: 'blur(8px) brightness(0.3)'
+      }"
+    ></div>
     <div class="text-center text-white text-4xl font-bold">{{ t('mapPage.title') }}</div>
     <div class="text-center text-white text-2xl">
       {{ t('mapPage.subtitle') }}
