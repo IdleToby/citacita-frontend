@@ -159,7 +159,7 @@
       "education": "Pendidikan",
       "field": "Bidang",
       "keyInterests": "{count} Minat Utama Dipilih",
-      "topMatches": "Berikut adalah padanan kerjaya teratas anda:",
+      "topMatches": "Berikut ialah padanan kerjaya yang paling sesuai untuk anda:",
       "matchScore": "Skor Padanan: {score}%",
       "whyMatches": "Mengapa kerjaya ini sesuai dengan anda:",
       "matchReasons": {

@@ -159,7 +159,7 @@
       "education": "教育背景",
       "field": "专业领域",
       "keyInterests": "已选择 {count} 个关键兴趣",
-      "topMatches": "以下是您的顶级职业匹配：",
+      "topMatches": "以下是最适合您的职业匹配:",
       "matchScore": "匹配分数：{score}%",
       "whyMatches": "为什么这个职业适合您：",
       "matchReasons": {

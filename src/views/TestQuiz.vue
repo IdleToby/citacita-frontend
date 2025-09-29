@@ -88,7 +88,7 @@
               class="recommendation-item">
             <div class="rank-title">
               <strong class="clickable-title" @click="goToJob(unit)">#{{ index + 1 }}:
-                {{ unit.unit_group_code }} - {{ translateJobTitleFromData(unit.unit_group_code, locale) }} </strong>
+                {{ translateJobTitleFromData(unit.unit_group_code, locale) }} </strong>
             </div>
             <div class="match-info">
               <span class="match-score">{{ $t('quiz.results.matchScore', { score: unit.score }) }}</span>
@@ -163,7 +163,7 @@ function translateKeyword(keyword: string, targetLang: string): string {
 
 // 从unitData中查找并翻译职业标题
 function translateJobTitleFromData(unitGroupCode: string, targetLang: string): string {
-  const unit = unitData.find(u => u.unit_group_code === unitGroupCode);
+  const unit = unitData.find((u: any) => u.unit_group_code === unitGroupCode);
   if (unit) {
     return getMultilingualField(unit, 'unit_group_title', targetLang);
   }
@@ -344,7 +344,7 @@ function getOptionValue(option: any) {
   if (typeof option === 'object') {
     if (option.key) {
       // 工作领域用英文原值
-      const keyToEnglishMap = {
+      const keyToEnglishMap: Record<string, string> = {
         'managers': 'Managers',
         'professionals': 'Professionals',
         'technicians': 'Technicians and Associate Professionals',
@@ -652,13 +652,22 @@ const recommendedUnits = computed(() => {
   }
 
   // 返回前5个推荐职业，包含详细信息
-  return allScores.value.slice(0, 5).map(item => ({
+  const results = allScores.value.slice(0, 5).map(item => ({
     unit_group_code: item.unit_group_code,
     unit_group_title: item.unit_title,
     score: item.score,
     detailedReason: generateDetailedMatchReason(item),
-    details: item.details
+    details: item.details,
+    major_group_code: item.major_group_code,
+    major_group_title: item.major_group
   }));
+
+  // Auto-save quiz results when computed (no user action required)
+  nextTick(() => {
+    saveQuizResults();
+  });
+
+  return results;
 });
 
 // 在 setup 函数中
@@ -679,13 +688,7 @@ function goToJob(unit: any) {
     .replace(/[^a-z0-9-]/g, '');
 
   // Store quiz results and answers for restoration later
-  const quizState = {
-    results: recommendedUnits.value,
-    answers: [...answers],
-    currentQuestion: currentQuestion.value,
-    timestamp: Date.now()
-  };
-  sessionStorage.setItem('jobQuizResults', JSON.stringify(quizState));
+  saveQuizResults();
 
   // Navigate to job description with fromQuiz flag
   router.push(
@@ -700,6 +703,17 @@ function goToJob(unit: any) {
   )
 
   emit('quiz-completed')
+}
+
+// Function to save quiz results to sessionStorage
+function saveQuizResults() {
+  const quizState = {
+    results: recommendedUnits.value,
+    answers: [...answers],
+    currentQuestion: currentQuestion.value,
+    timestamp: Date.now()
+  };
+  sessionStorage.setItem('jobQuizResults', JSON.stringify(quizState));
 }
 
 // ----------------------
@@ -727,9 +741,13 @@ function restart() {
   Object.keys(expandedDescriptions).forEach(key => {
     delete expandedDescriptions[key];
   });
+  // Clear saved quiz results from sessionStorage
+  sessionStorage.removeItem('jobQuizResults');
 }
 
 function finishQuiz() {
+  // Save quiz results before closing
+  saveQuizResults()
   emit('quiz-completed')
 }
 
@@ -739,8 +757,8 @@ function restoreQuizResults() {
   if (stored) {
     try {
       const quizState = JSON.parse(stored);
-      // Check if results are not too old (within 2 hours)
-      if (Date.now() - quizState.timestamp < 7200000) {
+      // Check if results are not too old (within 15 minutes)
+      if (Date.now() - quizState.timestamp < 900000) {
         // Restore answers
         answers.length = 0;
         answers.push(...quizState.answers);

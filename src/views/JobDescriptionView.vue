@@ -38,8 +38,8 @@ function goToQuiz() {
         if (stored) {
           try {
             const quizState = JSON.parse(stored)
-            // Check if results are not too old (within 2 hours)
-            if (Date.now() - quizState.timestamp < 7200000) {
+            // Check if results are not too old (within 15 minutes)
+            if (Date.now() - quizState.timestamp < 900000) {
               testQuizRef.value.restoreQuizResults()
             }
           } catch (error) {

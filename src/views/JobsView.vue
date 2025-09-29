@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { getSkillLevelByLang, getJobListByLangAndMajorGroupCode } from '@/api'
 import { Input } from '@/components/ui/input'
 import TestQuiz from '@/views/TestQuiz.vue'
+import unitData from '@/data/unit_group_data.json'
 
 type Industry = {
   id: string
@@ -24,6 +25,41 @@ type Job = {
 const router = useRouter()
 const { locale, t } = useI18n()
 const loading = ref(false)
+
+// Helper function to get field suffix for multilingual data
+function getFieldSuffix(lang: string): string {
+  switch(lang) {
+    case 'ms': return '_malay';
+    case 'zh-CN': return '_chinese';
+    case 'en':
+    default: return '';
+  }
+}
+
+// Get multilingual field value from data object
+function getMultilingualField(dataObj: any, baseFieldName: string, targetLang: string): string {
+  const suffix = getFieldSuffix(targetLang);
+  const fieldName = baseFieldName + suffix;
+  return dataObj[fieldName] || dataObj[baseFieldName] || '';
+}
+
+// Translate job title from unitData based on unit group code and language
+function translateJobTitleFromData(unitGroupCode: string, targetLang: string): string {
+  const unit = unitData.find((u: any) => u.unit_group_code === unitGroupCode);
+  if (unit) {
+    return getMultilingualField(unit, 'unit_group_title', targetLang);
+  }
+  return '';
+}
+
+// Translate major group title from unitData
+function translateMajorGroupTitleFromData(unitGroupCode: string, targetLang: string): string {
+  const unit = unitData.find((u: any) => u.unit_group_code === unitGroupCode);
+  if (unit) {
+    return getMultilingualField(unit, 'major_group_title', targetLang);
+  }
+  return '';
+}
 
 // Dynamic citabot image based on locale
 const citabotImage = computed(() => {
@@ -56,7 +92,7 @@ function getMajorGroupImageName(majorGroupCode: string) {
     '6': 'Skilled Agricultural, Forestry, Livestock and Fishery Workers',
     '7': 'Craft and Related Trades Workers',
     '8': 'Plant and Machine Operations and Assembler',
-    '9': 'Elementary Occupations'
+    '9': 'Elementary Occupations',
   }
   return imageNames[majorGroupCode] || 'default'
 }
@@ -69,6 +105,8 @@ const searchQuery = ref('')
 const showQuizModal = ref(false)
 const testQuizRef = ref<any>(null)
 const searchContainerRef = ref<HTMLElement | null>(null)
+const savedQuizResults = ref<any[]>([])
+const hasSeenQuiz = ref(false)
 
 function goToQuiz() {
   showQuizModal.value = true
@@ -80,8 +118,8 @@ function goToQuiz() {
         if (stored) {
           try {
             const quizState = JSON.parse(stored)
-            // Check if results are not too old (within 2 hours)
-            if (Date.now() - quizState.timestamp < 7200000) {
+            // Check if results are not too old (within 15 minutes)
+            if (Date.now() - quizState.timestamp < 900000) {
               testQuizRef.value.restoreQuizResults()
             }
           } catch (error) {
@@ -95,6 +133,58 @@ function goToQuiz() {
 
 function closeQuizModal() {
   showQuizModal.value = false
+  // Load saved quiz results after closing modal
+  loadSavedQuizResults()
+}
+
+// Load saved quiz results from sessionStorage
+function loadSavedQuizResults() {
+  const stored = sessionStorage.getItem('jobQuizResults')
+  if (stored) {
+    try {
+      const quizState = JSON.parse(stored)
+      // Check if results are not too old (within 15 minutes)
+      if (Date.now() - quizState.timestamp < 900000) {
+        savedQuizResults.value = quizState.results || []
+      } else {
+        // Clear old results
+        sessionStorage.removeItem('jobQuizResults')
+        savedQuizResults.value = []
+      }
+    } catch (error) {
+      console.error('Error loading quiz results:', error)
+      savedQuizResults.value = []
+    }
+  }
+}
+
+// Navigate to job description from quiz result
+function goToJobFromResult(unit: any) {
+  const majorGroupCode = unit.details?.unit_data?.major_group_code || unit.major_group_code || ''
+  const majorGroupTitle = unit.details?.unit_data?.major_group_title || unit.major_group_title || ''
+
+  let slug = majorGroupTitle
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+
+  if (!slug || slug.length < 2) {
+    slug = `industry-${majorGroupCode}`
+  }
+
+  router.push({
+    name: 'job-description',
+    params: { industry: slug, jobId: unit.unit_group_code },
+    query: { unitGroupCode: unit.unit_group_code }
+  })
+}
+
+// Clear quiz results and restart
+function restartQuiz() {
+  sessionStorage.removeItem('jobQuizResults')
+  savedQuizResults.value = []
+  goToQuiz()
 }
 
 // Fetch industries from API
@@ -104,12 +194,20 @@ async function fetchIndustries() {
   try {
     const response = await getSkillLevelByLang(locale.value)
     if (response.data.code === 200) {
-      industries.value = response.data.data.map((item: any) => ({
+      const mappedIndustries = response.data.data.map((item: any) => ({
         id: item.majorGroupCode,
         name: item.majorGroupTitle,
         educationLevel: item.educationLevel,
         skillLevel: item.skillLevel
       }))
+
+      // Sort industries to place Armed Forces (id: '0') at the end
+      industries.value = mappedIndustries.sort((a: Industry, b: Industry) => {
+        if (a.id === '0') return 1  // Move Armed Forces to the end
+        if (b.id === '0') return -1 // Keep Armed Forces at the end
+        return parseInt(a.id) - parseInt(b.id) // Sort others numerically
+      })
+
       // After fetching industries, fetch all jobs
       await fetchAllJobs()
     } else {
@@ -270,6 +368,23 @@ onMounted(() => {
   fetchIndustries()
   // Add click outside listener for autocomplete
   document.addEventListener('click', handleClickOutside)
+
+  // Load saved quiz results
+  loadSavedQuizResults()
+
+  // Check if user has seen the quiz before
+  hasSeenQuiz.value = localStorage.getItem('hasSeenQuiz') === 'true'
+
+  // Auto-show quiz modal if:
+  // 1. First visit (never seen quiz before), OR
+  // 2. Not first visit but no saved quiz results found
+  if (!hasSeenQuiz.value || savedQuizResults.value.length === 0) {
+    // Small delay to ensure page is loaded
+    setTimeout(() => {
+      showQuizModal.value = true
+      localStorage.setItem('hasSeenQuiz', 'true')
+    }, 500)
+  }
 })
 
 onUnmounted(() => {
@@ -320,31 +435,6 @@ onUnmounted(() => {
         >
           {{ t('common.goBack') }}
         </span>
-      </button>
-    </div>
-
-    <!-- Job Quiz Button -->
-    <div class="fixed left-4 bottom-4 z-10">
-      <button
-        class="quiz-button group px-2 py-4 bg-gradient-to-b from-[#FFA500] to-[#FF6B00] text-white shadow-lg rounded-2xl text-sm font-bold hover:shadow-xl transition-all duration-200 flex flex-col items-center gap-3 min-w-[100px] relative overflow-hidden"
-        aria-label="Job quiz"
-        title="Job quiz"
-        @click="goToQuiz"
-      >
-        <!-- Icon -->
-        <div>
-          <img
-            src="/icon.png"
-            alt="Quiz icon"
-            class="w-14 h-14 object-contain"
-          />
-        </div>
-
-        <!-- Text -->
-        <div class="text-center leading-tight">
-          <div class="text-lg font-bold">{{ t('jobDescriptionPage.jobQuiz').split(' ')[0] }}</div>
-          <div class="text-lg font-bold">{{ t('jobDescriptionPage.jobQuiz').split(' ')[1] }}</div>
-        </div>
       </button>
     </div>
 
@@ -417,8 +507,53 @@ onUnmounted(() => {
         <p class="text-sm text-white/80 mt-2 drop-shadow-sm">{{ t('jobsPage.tryDifferentSearch') }}</p>
       </div>
 
-      <!-- Industries grid (show when no search) -->
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <!-- Main content area when not searching -->
+      <template v-else>
+        <!-- Saved Quiz Results Section -->
+        <div v-if="savedQuizResults.length > 0" class="mb-5">
+          <div class="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-lg font-bold text-gray-800">{{ t('quiz.results.topMatches') }}</h3>
+              <button
+                @click="restartQuiz"
+                class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium text-xs"
+              >
+                {{ t('quiz.buttons.restart') || 'Restart Quiz' }}
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div
+                v-for="(result, index) in savedQuizResults.slice(0, 5)"
+                :key="result.unit_group_code"
+                @click="goToJobFromResult(result)"
+                class="cursor-pointer bg-gradient-to-b from-white to-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all hover:scale-105 relative overflow-hidden"
+              >
+                <!-- Rank Badge -->
+                <div class="absolute top-1.5 right-1.5 w-6 h-6 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                  {{ index + 1 }}
+                </div>
+
+                <div class="pr-8">
+                  <h4 class="font-semibold text-gray-800 text-xs mb-1.5 line-clamp-2">
+                    {{ translateJobTitleFromData(result.unit_group_code, locale) || result.unit_group_title }}
+                  </h4>
+                  <div class="text-xs text-gray-600 mb-1.5">
+                    {{ translateMajorGroupTitleFromData(result.unit_group_code, locale) || result.details?.unit_data?.major_group_title || '' }}
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <span class="text-xs font-medium text-green-600">
+                      {{ t('quiz.results.matchScore', { score: result.score }) || `Match: ${result.score}%` }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Industries grid (always show when not searching) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <button
           v-for="industry in industries"
           :key="industry.id"
@@ -441,6 +576,7 @@ onUnmounted(() => {
           </div>
         </button>
       </div>
+      </template>
     </div>
 
     <!-- Citabot Icon -->
@@ -481,19 +617,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@keyframes wiggle {
-  0%, 100% {
-    transform: rotate(0deg) translate(0px, 0px);
-  }
-  25% {
-    transform: rotate(-2deg) translate(-1px, 0px);
-  }
-  75% {
-    transform: rotate(2deg) translate(1px, 0px);
-  }
-}
-
-.quiz-button:hover {
-  animation: wiggle 0.6s ease-in-out infinite;
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
 }
 </style>
