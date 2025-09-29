@@ -538,12 +538,12 @@ onUnmounted(() => {
       </div>
 
       <!-- Jobs grid -->
-      <div v-else class="space-y-8 h-[calc(100%-120px)] overflow-auto pr-1">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div v-else class="space-y-8 h-[calc(100%-120px)] overflow-y-auto overflow-x-hidden pr-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-3">
           <button
             v-for="job in paginatedJobs"
             :key="job.id"
-            class="group aspect-square rounded-xl border border-input bg-white hover:shadow-md transition p-4 flex items-center justify-center text-center"
+            class="group aspect-square rounded-xl border border-input bg-white hover:shadow-md transition-all hover:scale-105 p-4 flex items-center justify-center text-center"
             @click="goToJob(job.id)"
           >
             <span class="text-lg font-medium text-gray-800 group-hover:text-primary">{{ job.title }}</span>
