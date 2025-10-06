@@ -56,7 +56,7 @@
         "buttonText": "Dapatkan Bantuan"
       }
     },
-    "supportText": "Cita-cita ada di sini untuk menyokong anda!"
+    "supportText": "Membantu wanita di Malaysia kembali ke tenaga kerja!"
   },
   "common": {
     "goBack": "Kembali"
@@ -474,5 +474,40 @@
       "improvements": "Aspek Penambahbaikan",
       "conclusion": "Kesimpulan & Cadangan"
     }
+  },
+  "tour": {
+  "startButton": "🎯 Mulakan Lawatan",
+  "step1": {
+    "title": "Menu Navigasi",
+    "description": "Akses lima halaman utama: Cari Kerja (cari kerja mengikut industri atau ambil kuiz kerjaya), Peta (cari kemudahan penjagaan kanak-kanak di bandar Malaysia), Alat AI (akses sumber kerjaya dikuasakan AI), Bantuan (terokai peluang pembiayaan), dan Soalan Lazim (cari jawapan kepada soalan biasa)."
+  },
+  "step2": {
+    "title": "Penukar Bahasa",
+    "description": "Tukar antara bahasa Inggeris, Cina (简体中文), dan Melayu untuk menggunakan laman web dalam bahasa pilihan anda."
+  },
+  "step3": {
+    "title": "Butang Navigasi Latar",
+    "description": "Klik butang anak panah kuning ini untuk menukar antara latar yang berbeza, atau hanya tatal dengan roda tetikus anda untuk menavigasi melalui 6 senario."
+  },
+  "step4": {
+    "title": "Kad Maklumat Latar",
+    "description": "Kad bulat ini memaparkan maklumat unik untuk setiap latar, menerangkan ciri dan peluang yang berbeza yang tersedia di platform kami."
+  },
+  "step5": {
+    "title": "Butang Tindakan",
+    "description": "Klik butang ini untuk menavigasi terus ke halaman ciri yang berkaitan untuk latar semasa."
+  },
+  "step6": {
+    "title": "Penunjuk Latar Kelip-Kelip",
+    "description": "Penunjuk kelip-kelip ini mewakili 6 latar berbeza. Klik mana-mana bulatan penunjuk untuk melompat terus ke latar tersebut tanpa perlu menatal atau mengklik butang navigasi berulang kali."
+  },
+  "step7": {
+    "title": "Pembantu AI Citabot",
+    "description": "Klik butang terapung Citabot ini untuk mengakses halaman Alat AI di mana anda boleh bersembang dengan pembantu AI kami untuk panduan dan sokongan kerjaya yang diperibadikan."
+  },
+  "step8": {
+    "title": "Butang Panduan Lawatan",
+    "description": "Klik butang ini pada bila-bila masa untuk memulakan semula lawatan dan mengkaji semula semua ciri. Ia sentiasa ada apabila anda memerlukannya!"
   }
+}
 }

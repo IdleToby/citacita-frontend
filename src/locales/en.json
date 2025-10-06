@@ -56,7 +56,7 @@
         "buttonText": "Get Help"
       }
     },
-    "supportText": "Citacita is here to support you!"
+    "supportText": "Helping women in Malaysia return to the workforce!"
   },
   "common": {
     "goBack": "Go back"
@@ -474,5 +474,40 @@
       "improvements": "Areas for Improvement",
       "conclusion": "Conclusion & Recommendations"
     }
+  },
+  "tour": {
+  "startButton": "🎯 Take a Tour",
+  "step1": {
+    "title": "Navigation Menu",
+    "description": "Access five main pages: Jobs for Me (find jobs by industry or take a job quiz), Map (find childcare facilities in Malaysian cities), AI Tools (access AI-powered career resources), Grants (discover funding opportunities), and FAQ (find answers to common questions)."
+  },
+  "step2": {
+    "title": "Language Switcher",
+    "description": "Switch between English, Chinese (简体中文), and Malay (Bahasa Melayu) languages to use the website in your preferred language."
+  },
+  "step3": {
+    "title": "Scene Navigation Buttons",
+    "description": "Click these yellow arrow buttons to switch between different scenes, or simply scroll with your mouse wheel to navigate through the 6 scenarios."
+  },
+  "step4": {
+    "title": "Scene Information Card",
+    "description": "This circular card displays unique information for each scene, describing different features and opportunities available on our platform."
+  },
+  "step5": {
+    "title": "Action Button",
+    "description": "Click this button to navigate directly to the corresponding feature page for the current scene."
+  },
+  "step6": {
+    "title": "Firefly Scene Indicators",
+    "description": "These firefly indicators represent 6 different scenes. Click any indicator circle to jump directly to that scene without needing to scroll or click navigation buttons repeatedly."
+  },
+  "step7": {
+    "title": "Citabot AI Assistant",
+    "description": "Click this floating Citabot button to access AI Tools page where you can chat with our AI assistant for personalized career guidance and support."
+  },
+   "step8": {
+    "title": "Tour Guide Button",
+    "description": "Click this button anytime to restart the tour and review all features. It's always here when you need a refresher!"
   }
+}
 }

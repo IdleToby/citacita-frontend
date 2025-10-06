@@ -1,5 +1,4 @@
 <!-- src/views/HomeView.vue -->
-<!-- 转动3D月亮,6个角度切换6个不同背景以及对应提示词,learn more按钮跳转对应页面 -->
 <template>
   <div
     ref="mainContainerRef"
@@ -18,19 +17,20 @@
     <div class="absolute top-0 left-0 z-10 w-full h-full pointer-events-none">
       <div
         ref="textContainerRef"
+        data-tour-step="4"
         class="absolute p-8 rounded-full bg-white/10 backdrop-blur-md pointer-events-auto shadow-xl border border-white/20 transition-transform duration-300 ease-out"
         style="will-change: transform; top: 0; left: 0; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;"
       >
         <transition name="fade" mode="out-in">
           <div :key="currentIndex" class="text-white text-center max-w-xs flex flex-col items-center justify-center gap-2">
-            <!-- 框内文本显示 -->
             <p class="text-2xl md:text-2xl font-normal text-white text-center drop-shadow-2xl whitespace-pre-line leading-relaxed tracking-wide" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px rgba(255, 223, 100, 0.8), 0 0 30px rgba(255, 223, 100, 0.4), 0 0 45px rgba(255, 223, 100, 0.2); filter: drop-shadow(0 0 10px rgba(255, 223, 100, 0.6));">
               {{ t(`homePage.cards.${contentData[currentIndex].key}.description`) }}
             </p>
-            <!-- 按钮移到圆形框内 -->
             <button
-              class="px-4 py-2 bg-white/30 text-xl font-semibold backdrop-blur-sm text-white rounded-full hover:bg-white/50 transition-colors shadow-md border border-white/30"
+              data-tour-step="5"
+              class="px-5 py-2.5 bg-white/40 text-xl font-bold backdrop-blur-sm text-white rounded-full hover:bg-white/55 transition-all duration-300 shadow-lg border border-white/50 hover:scale-105"
               @click="handleButtonClick"
+              style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"
             >
               {{ t(`homePage.cards.${contentData[currentIndex].key}.buttonText`) }}
             </button>
@@ -39,8 +39,15 @@
       </div>
     </div>
 
-    <!-- 页面指示器（萤火虫效果） -->
-    <div class="absolute bottom-30 left-1/2 -translate-x-1/2 z-20">
+    <!-- 固定文字 -->
+    <div class="absolute top-32 left-1/2 -translate-x-1/2 z-20 w-full px-4">
+      <p class="text-white text-2xl md:text-5xl font-bold text-center drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+        {{ t('homePage.supportText') }}
+      </p>
+    </div>
+
+    <!-- 页面指示器 -->
+    <div data-tour-step="6" class="absolute bottom-12 left-1/2 -translate-x-1/2 z-20">
       <div class="flex space-x-3">
         <button
           v-for="(item, index) in contentData"
@@ -52,7 +59,6 @@
             'w-6 h-6': index === currentIndex
           }"
         >
-          <!-- 外圈光晕效果 -->
           <div
             class="absolute inset-0 rounded-full transition-all duration-700"
             :class="{
@@ -60,8 +66,6 @@
               'bg-yellow-300/40 animate-ping': index === currentIndex
             }"
           ></div>
-
-          <!-- 内圈萤火虫 -->
           <div
             class="relative w-full h-full rounded-full transition-all duration-500 border"
             :class="{
@@ -69,7 +73,6 @@
               'bg-yellow-200 border-yellow-100 shadow-lg shadow-yellow-200/50': index === currentIndex
             }"
           >
-            <!-- 萤火虫闪烁效果 -->
             <div
               v-if="index === currentIndex"
               class="absolute inset-0 rounded-full bg-yellow-100 animate-pulse opacity-60"
@@ -79,41 +82,56 @@
       </div>
     </div>
 
-    <!-- 固定文字 Citacita is here to support you!-->
-    <div class="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 w-full">
-      <p class="text-white text-2xl md:text-5xl font-bold text-center drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
-        {{ t('homePage.supportText') }}
-      </p>
-    </div>
-
-
-
     <!-- 切换按钮 -->
     <button
       @click="prev"
-      class="absolute left-5 md:left-10 top-1/2 -translate-y-1/2 z-20 text-white text-4xl p-2 rounded-full hover:bg-white/10 transition-colors"
+      data-tour-step="3"
+      class="absolute left-5 md:left-10 top-1/2 -translate-y-1/2 z-20 group"
     >
-      ❮
-    </button>
-    <button
-      @click="next"
-      class="absolute right-5 md:right-10 top-1/2 -translate-y-1/2 z-20 text-white text-4xl p-2 rounded-full hover:bg-white/10 transition-colors"
-    >
-      ❯
+      <div class="absolute inset-0 rounded-full bg-yellow-300/40 animate-ping"></div>
+      <div class="absolute inset-0 rounded-full bg-yellow-300/20 animate-pulse"></div>
+      <div class="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center bg-yellow-400/90 hover:bg-yellow-300 text-gray-800 text-3xl md:text-4xl font-bold rounded-full shadow-xl transition-all duration-300 group-hover:scale-110 border-2 border-yellow-200">
+        <div class="absolute inset-1 rounded-full bg-yellow-100 animate-pulse opacity-40"></div>
+        <span class="relative z-10">❮</span>
+      </div>
     </button>
 
-    <!-- Citabot Icon -->
-    <div class="fixed bottom-1 right-1 z-1">
+    <button
+      @click="next"
+      data-tour-step="3"
+      class="absolute right-5 md:right-10 top-1/2 -translate-y-1/2 z-20 group"
+    >
+      <div class="absolute inset-0 rounded-full bg-yellow-300/40 animate-ping"></div>
+      <div class="absolute inset-0 rounded-full bg-yellow-300/20 animate-pulse"></div>
+      <div class="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center bg-yellow-400/90 hover:bg-yellow-300 text-gray-800 text-3xl md:text-4xl font-bold rounded-full shadow-xl transition-all duration-300 group-hover:scale-110 border-2 border-yellow-200">
+        <div class="absolute inset-1 rounded-full bg-yellow-100 animate-pulse opacity-40"></div>
+        <span class="relative z-10">❯</span>
+      </div>
+    </button>
+
+    <!-- 导览按钮 - 左下角 -->
+    <div data-tour-step="8" class="fixed bottom-1 left-1 z-30">
+      <img
+        :src="tourButtonImage"
+        alt="Take a Tour"
+        class="cursor-pointer transition-transform duration-300 ease-out hover:scale-110"
+        style="width: 200px; height: 200px; object-fit: contain;"
+        :class="{ 'animate-bounce': !hasSeenTour }"
+        @click="startTour()"
+      />
+    </div>
+
+    <!-- Citabot Icon - 右下角 -->
+    <div data-tour-step="7" class="fixed bottom-1 right-1 z-30">
       <img
         :src="citabotImage"
         alt="Citabot"
-        class="w-50 h-50 cursor-pointer transition-transform duration-300 ease-out hover:scale-110 object-contain"
-        style="width: 200px; height: 200px; max-width: 200px; max-height: 200px;"
+        class="cursor-pointer transition-transform duration-300 ease-out hover:scale-110"
+        style="width: 200px; height: 200px; object-fit: contain;"
         @click="router.push('/ai')"
       />
     </div>
 
-    <!-- 隐藏的图片预加载 -->
     <div class="hidden">
       <img
         v-for="(item, index) in contentData"
@@ -126,48 +144,54 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, type Ref, watch, computed } from 'vue'
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
+import { driver } from 'driver.js'
+import 'driver.js/dist/driver.css'
+import type { Driver } from 'driver.js'
 import {
-  Scene,
-  PerspectiveCamera,
-  WebGLRenderer,
-  Mesh,
-  MeshStandardMaterial,
-  MeshBasicMaterial,
-  SphereGeometry,
-  Object3D,
-  Vector3,
-  DirectionalLight,
-  AmbientLight,
-  TorusGeometry,
-  TextureLoader
+  Scene, PerspectiveCamera, WebGLRenderer, Mesh, MeshStandardMaterial,
+  MeshBasicMaterial, SphereGeometry, Object3D, Vector3, DirectionalLight,
+  AmbientLight, TorusGeometry, TextureLoader
 } from 'three'
 import { gsap } from 'gsap'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-const router = useRouter()
 
+const router = useRouter()
 const { t, locale } = useI18n()
 
-// Dynamic citabot image based on locale
+type PopoverPosition = 'top' | 'right' | 'bottom' | 'left' | 'top-center' | 'top-left' | 'top-right' | 'right-center' | 'right-top' | 'right-bottom' | 'bottom-center' | 'bottom-left' | 'bottom-right' | 'left-center' | 'left-top' | 'left-bottom' | 'mid-center'
+
+interface TourStep {
+  element: string
+  popover: {
+    title: string
+    description: string
+    position: PopoverPosition
+  }
+}
+
 const citabotImage = computed(() => {
   switch (locale.value) {
-    case 'ms':
-      return '/images/citabot-ms.png'
-    case 'zh-CN':
-      return '/images/citabot-zh.png'
-    case 'en':
-    default:
-      return '/images/citabot.png'
+    case 'ms': return '/images/citabot-ms.png'
+    case 'zh-CN': return '/images/citabot-zh.png'
+    default: return '/images/citabot.png'
   }
 })
 
-/** ============== 可调参数（调整月亮大小和文字圆位置） ============== */
-const BUBBLE_DISTANCE = 1.4   // 距离月亮中心，更靠近月亮
-const BUBBLE_HEIGHT   = 0.1   // 垂直偏移，稍微降低
-const PROJ_X_SCALE    = 0.6   // 屏幕投影X缩放，稍微增大以补偿月亮缩小
-const PROJ_Y_SCALE    = 0.6   // 屏幕投影Y缩放，稍微增大以补偿月亮缩小
-const MOON_SIZE       = 1.3   // 月亮半径，从1.0调大到1.3
+const tourButtonImage = computed(() => {
+  switch (locale.value) {
+    case 'ms': return '/images/citacita-ms.png'
+    case 'zh-CN': return '/images/citatour-zh.png'
+    default: return '/images/citatour.png'
+  }
+})
+
+const BUBBLE_DISTANCE = 1.4
+const BUBBLE_HEIGHT = 0.1
+const PROJ_X_SCALE = 0.6
+const PROJ_Y_SCALE = 0.6
+const MOON_SIZE = 1.3
 
 interface ContentItem {
   key: string
@@ -177,53 +201,18 @@ interface ContentItem {
   backgroundImage: string
 }
 
-const mainContainerRef: Ref<HTMLDivElement | null> = ref(null)
-const canvasRef: Ref<HTMLCanvasElement | null> = ref(null)
-const textContainerRef: Ref<HTMLDivElement | null> = ref(null)
+const mainContainerRef = ref<HTMLDivElement | null>(null)
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+const textContainerRef = ref<HTMLDivElement | null>(null)
+const hasSeenTour = ref(false)
 
 const contentData = ref<ContentItem[]>([
-  {
-    key: 'jobs1',
-    targetRotationY: 0,
-    color: '#312e81',
-    path: '/jobs',
-    backgroundImage: '/images/homepage-jobs-for-me.png',
-  },
-  {
-    key: 'map',
-    targetRotationY: Math.PI / 3,
-    color: '#1e293b',
-    path: '/map',
-    backgroundImage: '/images/map.png',
-  },
-  {
-    key: 'jobs2',
-    targetRotationY: (2 * Math.PI) / 3,
-    color: '#dc2626',
-    path: '/jobs',
-    backgroundImage: '/images/jobs-for-me.png',
-  },
-  {
-    key: 'aiTools',
-    targetRotationY: Math.PI,
-    color: '#064e3b',
-    path: '/ai',
-    backgroundImage: '/images/ai-tools.png',
-  },
-  {
-    key: 'grants',
-    targetRotationY: (4 * Math.PI) / 3,
-    color: '#7c3aed',
-    path: '/grants',
-    backgroundImage: '/images/grants.png',
-  },
-  {
-    key: 'faq',
-    targetRotationY: (5 * Math.PI) / 3,
-    color: '#059669',
-    path: '/faq',
-    backgroundImage: '/images/faq.png',
-  },
+  { key: 'jobs2', targetRotationY: 0, color: '#312e81', path: '/jobs', backgroundImage: '/images/map.png' },
+  { key: 'map', targetRotationY: Math.PI / 3, color: '#1e293b', path: '/map', backgroundImage: '/images/homepage-jobs-for-me.png' },
+  { key: 'jobs1', targetRotationY: (2 * Math.PI) / 3, color: '#dc2626', path: '/jobs', backgroundImage: '/images/jobs-for-me.png' },
+  { key: 'aiTools', targetRotationY: Math.PI, color: '#064e3b', path: '/ai', backgroundImage: '/images/ai-tools.png' },
+  { key: 'grants', targetRotationY: (4 * Math.PI) / 3, color: '#7c3aed', path: '/grants', backgroundImage: '/images/grants.png' },
+  { key: 'faq', targetRotationY: (5 * Math.PI) / 3, color: '#059669', path: '/faq', backgroundImage: '/images/faq.png' },
 ])
 
 const currentIndex = ref(0)
@@ -238,14 +227,150 @@ let textAnchor: Object3D
 let satellitePivot: Object3D
 let animationFrameId: number
 let isAnimating = false
+let driverInstance: Driver | null = null
 const anchorPositionVector = new Vector3()
 
-/** 图片预加载回调 */
 const onImageLoad = (index: number) => {
   loadedImages.value.add(index)
 }
 
-/** 计算并更新文字圆的位置（智能避让导航栏和底部UI） */
+const switchLanguage = (lang: string) => {
+  locale.value = lang
+  if (driverInstance && driverInstance.isActive?.()) {
+    const currentStep = driverInstance.getActiveIndex?.()
+    if (typeof currentStep === 'number') {
+      driverInstance.destroy()
+      driverInstance = null
+      setTimeout(() => {
+        startTour(currentStep)
+      }, 100)
+    }
+  }
+}
+
+const createLanguageSwitcher = () => {
+  const languages = [
+    { code: 'en', label: 'EN', flag: '🇬🇧' },
+    { code: 'zh-CN', label: '中文', flag: '🇨🇳' },
+    { code: 'ms', label: 'MS', flag: '🇲🇾' }
+  ]
+
+  return `
+    <div class="driver-language-switcher" style="display: flex; gap: 8px; margin-top: 12px; justify-content: center;">
+      ${languages.map(lang => `
+        <button
+          onclick="window.__switchTourLanguage('${lang.code}')"
+          class="driver-lang-btn ${locale.value === lang.code ? 'active' : ''}"
+          style="
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid ${locale.value === lang.code ? '#fbbf24' : '#e5e7eb'};
+            background: ${locale.value === lang.code ? '#fef3c7' : 'white'};
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          "
+          onmouseover="this.style.transform='scale(1.1)'; this.style.borderColor='#fbbf24';"
+          onmouseout="this.style.transform='scale(1)'; this.style.borderColor='${locale.value === lang.code ? '#fbbf24' : '#e5e7eb'}';"
+          title="${lang.label}"
+        >
+          ${lang.flag}
+        </button>
+      `).join('')}
+    </div>
+  `
+}
+
+const startTour = (startStep?: number) => {
+  (window as any).__switchTourLanguage = switchLanguage
+
+  if (!driverInstance) {
+    const steps: TourStep[] = [
+      {
+        element: '[data-tour-step="1"]',
+        popover: {
+          title: t('tour.step1.title') || 'Navigation Menu',
+          description: (t('tour.step1.description') || 'Access five main pages.') + createLanguageSwitcher(),
+          position: 'bottom'
+        }
+      },
+      {
+        element: '[data-tour-step="2"]',
+        popover: {
+          title: t('tour.step2.title') || 'Language Switcher',
+          description: (t('tour.step2.description') || 'Switch between languages.') + createLanguageSwitcher(),
+          position: 'bottom'
+        }
+      },
+      {
+        element: '[data-tour-step="3"]',
+        popover: {
+          title: t('tour.step3.title') || 'Scene Navigation',
+          description: (t('tour.step3.description') || 'Click or scroll to switch scenes.') + createLanguageSwitcher(),
+          position: 'right'
+        }
+      },
+      {
+        element: '[data-tour-step="4"]',
+        popover: {
+          title: t('tour.step4.title') || 'Scene Information',
+          description: (t('tour.step4.description') || 'View scene details here.') + createLanguageSwitcher(),
+          position: 'right'
+        }
+      },
+      {
+        element: '[data-tour-step="5"]',
+        popover: {
+          title: t('tour.step5.title') || 'Action Button',
+          description: (t('tour.step5.description') || 'Navigate to feature page.') + createLanguageSwitcher(),
+          position: 'top'
+        }
+      },
+      {
+        element: '[data-tour-step="6"]',
+        popover: {
+          title: t('tour.step6.title') || 'Scene Indicators',
+          description: (t('tour.step6.description') || 'Jump to any scene directly.') + createLanguageSwitcher(),
+          position: 'top'
+        }
+      },
+      {
+        element: '[data-tour-step="7"]',
+        popover: {
+          title: t('tour.step7.title') || 'Citabot Assistant',
+          description: (t('tour.step7.description') || 'Chat with AI assistant.') + createLanguageSwitcher(),
+          position: 'left'
+        }
+      },
+      {
+        element: '[data-tour-step="8"]',
+        popover: {
+          title: t('tour.step8.title') || 'Tour Button',
+          description: (t('tour.step8.description') || 'Click this button anytime to restart the tour.') + createLanguageSwitcher(),
+          position: 'right'
+        }
+      }
+    ]
+
+    driverInstance = driver({
+      showProgress: true,
+      steps: steps,
+      onDestroyed: () => {
+        hasSeenTour.value = true
+        localStorage.setItem('homepage_tour_seen', 'true')
+        delete (window as any).__switchTourLanguage
+      }
+    })
+  }
+
+  driverInstance.drive(startStep ?? 0)
+}
+
 const updateTextPosition = () => {
   if (!textContainerRef.value || !mainContainerRef.value) return
   textAnchor.getWorldPosition(anchorPositionVector)
@@ -257,13 +382,10 @@ const updateTextPosition = () => {
   const x = (anchorPositionVector.x * PROJ_X_SCALE + 0.5) * width
   const y = (-anchorPositionVector.y * PROJ_Y_SCALE + 0.5) * height
 
-  // 避让区域设置
   const NAV_HEIGHT = 80
   const NAV_MARGIN = 20
   const SAFE_TOP = NAV_HEIGHT + NAV_MARGIN
-
-  // 底部UI避让 - 萤火虫指示器现在在 bottom-40 (160px)，按钮在 bottom-10 (40px)
-  const SAFE_BOTTOM = 200  // 从底部算起的安全区域
+  const SAFE_BOTTOM = 160
 
   const cardTop = y - boxHeight / 2
   const cardBottom = y + boxHeight / 2
@@ -271,7 +393,6 @@ const updateTextPosition = () => {
   let finalX = x
   let finalY = y
 
-  // 避让顶部导航栏
   if (cardTop < SAFE_TOP) {
     const overlap = SAFE_TOP - cardTop
     if (overlap < boxHeight * 0.6) {
@@ -287,12 +408,10 @@ const updateTextPosition = () => {
     }
   }
 
-  // 避让底部UI元素
   if (cardBottom > height - SAFE_BOTTOM) {
     const bottomOverlap = cardBottom - (height - SAFE_BOTTOM)
     finalY = height - SAFE_BOTTOM - boxHeight / 2
 
-    // 如果向上推移后与顶部冲突，则向侧边推移
     if (finalY - boxHeight / 2 < SAFE_TOP) {
       finalY = Math.max(SAFE_TOP + boxHeight / 2, height / 2)
       if (x < width / 2) {
@@ -303,7 +422,6 @@ const updateTextPosition = () => {
     }
   }
 
-  // 确保最终位置在屏幕范围内
   const clampedX = Math.max(boxWidth / 2 + 10, Math.min(finalX, width - boxWidth / 2 - 10))
   const clampedY = Math.max(boxHeight / 2 + 10, Math.min(finalY, height - boxHeight / 2 - 10))
 
@@ -312,18 +430,20 @@ const updateTextPosition = () => {
 }
 
 onMounted(() => {
+  const tourSeen = localStorage.getItem('homepage_tour_seen')
+  hasSeenTour.value = tourSeen === 'true'
+
   if (!canvasRef.value || !mainContainerRef.value) return
   const { clientWidth, clientHeight } = mainContainerRef.value
 
   scene = new Scene()
   camera = new PerspectiveCamera(75, clientWidth / clientHeight, 0.1, 1000)
-  camera.position.set(0, -0.2, 3.5)
+  camera.position.set(0, 0.4, 3.5)
   renderer = new WebGLRenderer({ canvas: canvasRef.value, antialias: true, alpha: true })
   renderer.setSize(clientWidth, clientHeight)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
   const textureLoader = new TextureLoader()
-
   const geometry = new SphereGeometry(MOON_SIZE, 64, 64)
   const material = new MeshStandardMaterial({
     metalness: 0.0,
@@ -333,21 +453,14 @@ onMounted(() => {
   })
   mainShape = new Mesh(geometry, material)
 
-  const possiblePaths = [
-    '/images/moon.png',
-    'images/moon.png',
-    './images/moon.png',
-    '/public/images/moon.png'
-  ]
-
+  const possiblePaths = ['/images/moon.png', 'images/moon.png', './images/moon.png', '/public/images/moon.png']
   const tryLoadTexture = (pathIndex = 0) => {
     if (pathIndex >= possiblePaths.length) {
       console.error('❌ 无法加载月亮纹理')
       return
     }
-    const currentPath = possiblePaths[pathIndex]
     textureLoader.load(
-      currentPath,
+      possiblePaths[pathIndex],
       (texture) => {
         material.map = texture
         material.color.setHex(0xffffff)
@@ -364,18 +477,14 @@ onMounted(() => {
   mainShape.rotation.x = 0.3
   mainShape.rotation.z = 0.1
 
-  const orbitPathRadius = 1.6  // 缩小轨道半径，从2.0改为1.6
+  const orbitPathRadius = 1.6
   const orbitGroup = new Object3D()
   orbitGroup.rotation.z = Math.PI / 16
   orbitGroup.rotation.x = Math.PI / 32
   mainShape.add(orbitGroup)
 
-  const orbitGeometry = new TorusGeometry(orbitPathRadius, 0.003, 8, 100)  // 缩小轨道线粗细
-  const orbitMaterial = new MeshBasicMaterial({
-    color: 0x4fc3f7,
-    transparent: true,
-    opacity: 0.3,  // 降低透明度，让轨道更微妙
-  })
+  const orbitGeometry = new TorusGeometry(orbitPathRadius, 0.003, 8, 100)
+  const orbitMaterial = new MeshBasicMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.3 })
   const orbit = new Mesh(orbitGeometry, orbitMaterial)
   orbit.rotation.x = Math.PI / 2
   orbitGroup.add(orbit)
@@ -383,17 +492,12 @@ onMounted(() => {
   satellitePivot = new Object3D()
   orbitGroup.add(satellitePivot)
 
-  const orbiterGeometry = new SphereGeometry(0.04, 16, 16)  // 缩小卫星大小
-  const orbiterMaterial = new MeshBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.7  // 降低卫星透明度
-  })
+  const orbiterGeometry = new SphereGeometry(0.04, 16, 16)
+  const orbiterMaterial = new MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 })
   const orbiter = new Mesh(orbiterGeometry, orbiterMaterial)
   orbiter.position.x = orbitPathRadius
   satellitePivot.add(orbiter)
 
-  /** 用新参数设置锚点：更靠近月亮、更自然 */
   textAnchor = new Object3D()
   textAnchor.position.set(BUBBLE_DISTANCE, BUBBLE_HEIGHT, 0)
   mainShape.add(textAnchor)
@@ -413,7 +517,6 @@ onMounted(() => {
 
   const animate = () => {
     satellitePivot.rotation.y += 0.002
-    // 修改这里：将垂直旋转（rotation.x）改为水平旋转（rotation.y）
     mainShape.rotation.y += 0.001
     renderer.render(scene, camera)
     animationFrameId = requestAnimationFrame(animate)
@@ -422,6 +525,12 @@ onMounted(() => {
 
   window.addEventListener('wheel', handleMouseWheel)
   window.addEventListener('resize', handleResize)
+
+  if (!hasSeenTour.value) {
+    setTimeout(() => {
+      startTour()
+    }, 1000)
+  }
 })
 
 onUnmounted(() => {
@@ -430,9 +539,12 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
   renderer.dispose()
   scene.clear()
+  if (driverInstance) {
+    driverInstance.destroy()
+  }
+  delete (window as any).__switchTourLanguage
 })
 
-/** 跳转到指定页面 */
 const goToPage = (index: number) => {
   if (index === currentIndex.value || isAnimating) return
   currentIndex.value = index
@@ -451,8 +563,7 @@ const next = () => {
 
 const prev = () => {
   if (isAnimating) return
-  currentIndex.value =
-    (currentIndex.value - 1 + contentData.value.length) % contentData.value.length
+  currentIndex.value = (currentIndex.value - 1 + contentData.value.length) % contentData.value.length
 }
 
 watch(currentIndex, (newIndex) => {
@@ -466,29 +577,20 @@ watch(currentIndex, (newIndex) => {
 
   const tl = gsap.timeline({ onComplete: () => { isAnimating = false } })
 
-  tl.to(
-    currentBgColor,
-    {
+  tl.to(currentBgColor, {
       value: targetItem.color,
       duration: 1.2,
       ease: 'power2.inOut',
       onUpdate: () => {
-        currentBgColor.value =
-          (gsap.getProperty(currentBgColor, 'value') as string) || targetItem.color
+        currentBgColor.value = (gsap.getProperty(currentBgColor, 'value') as string) || targetItem.color
       },
-    },
-    0,
-  )
-  .to(
-    mainShape.rotation,
-    {
+    }, 0)
+    .to(mainShape.rotation, {
       y: currentRotation + diff,
       duration: 1.2,
       ease: 'power2.inOut',
       onUpdate: updateTextPosition,
-    },
-    0,
-  )
+    }, 0)
 })
 
 const handleResize = () => {
@@ -508,12 +610,58 @@ const handleButtonClick = () => {
 </script>
 
 <style>
-.fade-enter-active,
-.fade-leave-active {
+.fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.fade-enter-from,
-.fade-leave-to {
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+
+:deep(.driver-popover) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+:deep(.driver-popover-title) {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+:deep(.driver-popover-description) {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+:deep(.driver-popover-next-btn) {
+  background: #fbbf24 !important;
+  color: #1f2937 !important;
+  border-radius: 9999px;
+  font-weight: bold;
+  padding: 0.5rem 1.5rem;
+}
+
+:deep(.driver-popover-next-btn):hover {
+  background: #f59e0b !important;
+}
+
+:deep(.driver-overlay) {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+:deep(.driver-active-element) {
+  outline: 3px solid #fbbf24 !important;
+  outline-offset: 4px;
+}
+
+:deep(.driver-language-switcher) {
+  pointer-events: auto !important;
+}
+
+:deep(.driver-lang-btn) {
+  pointer-events: auto !important;
 }
 </style>

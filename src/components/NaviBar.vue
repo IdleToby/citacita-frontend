@@ -65,8 +65,8 @@ const hideTooltip = () => {
 
     <div class="flex-1"></div>
 
-    <!-- Navigation Items -->
-    <div class="flex items-center gap-2">
+    <!-- Navigation Items - 添加 data-tour-step="1" -->
+    <div data-tour-step="1" class="flex items-center gap-2">
       <div
         v-for="item in navigationItems"
         :key="item.path"
@@ -106,8 +106,8 @@ const hideTooltip = () => {
       </div>
     </div>
 
-    <!-- Language Switcher -->
-    <div class="ml-12 mr-6">
+    <!-- Language Switcher - 添加 data-tour-step="2" -->
+    <div data-tour-step="2" class="ml-12 mr-6">
       <LanguageSwitcher />
     </div>
   </div>

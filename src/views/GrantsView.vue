@@ -193,8 +193,8 @@ const handleCategoryChange = () => {
           :key="index"
           class="grant-card"
         >
-          <!-- 卡片主体内容 -->
-          <div class="card-content">
+          <!-- 卡片主体内容 - 整行可点击 -->
+          <div class="card-content" @click="toggleCard(index)">
             <div class="card-number">{{ displayIndex + 1 }}</div>
             <div class="card-text">
               <h3 class="card-title">{{ grant.title }}</h3>
@@ -210,7 +210,7 @@ const handleCategoryChange = () => {
               <!-- 展开按钮 -->
               <button
                 class="expand-btn"
-                @click="toggleCard(index)"
+                @click.stop="toggleCard(index)"
               >
                 <svg
                   :class="{ 'rotate-180': expandedCards.has(index) }"
@@ -228,7 +228,7 @@ const handleCategoryChange = () => {
               <!-- Learn More按钮 -->
               <button
                 class="learn-more-btn"
-                @click="handleLearnMore(link)"
+                @click.stop="handleLearnMore(link)"
               >
                 {{ t('grantsPage.learnMore') }}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -468,6 +468,12 @@ const handleCategoryChange = () => {
   align-items: center;
   padding: 20px;
   gap: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.card-content:hover {
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
 .card-number {
@@ -529,6 +535,7 @@ const handleCategoryChange = () => {
   cursor: pointer;
   transition: all 0.3s ease;
   color: #4A5568;
+  flex-shrink: 0;
 }
 
 .expand-btn:hover {
