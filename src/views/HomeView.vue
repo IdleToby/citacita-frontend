@@ -207,8 +207,8 @@ const textContainerRef = ref<HTMLDivElement | null>(null)
 const hasSeenTour = ref(false)
 
 const contentData = ref<ContentItem[]>([
-  { key: 'jobs2', targetRotationY: 0, color: '#312e81', path: '/jobs', backgroundImage: '/images/map.png' },
-  { key: 'map', targetRotationY: Math.PI / 3, color: '#1e293b', path: '/map', backgroundImage: '/images/homepage-jobs-for-me.png' },
+  { key: 'jobs2', targetRotationY: 0, color: '#312e81', path: '/jobs', backgroundImage: '/images/homepage-jobs-for-me.png' },
+  { key: 'map', targetRotationY: Math.PI / 3, color: '#1e293b', path: '/map', backgroundImage: '/images/map.png' },
   { key: 'jobs1', targetRotationY: (2 * Math.PI) / 3, color: '#dc2626', path: '/jobs', backgroundImage: '/images/jobs-for-me.png' },
   { key: 'aiTools', targetRotationY: Math.PI, color: '#064e3b', path: '/ai', backgroundImage: '/images/ai-tools.png' },
   { key: 'grants', targetRotationY: (4 * Math.PI) / 3, color: '#7c3aed', path: '/grants', backgroundImage: '/images/grants.png' },
